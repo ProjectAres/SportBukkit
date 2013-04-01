@@ -4,35 +4,29 @@ Date: Thu, 2 Aug 2012 17:00:13 -0700
 Subject: [PATCH] Update the POM to distinguish SportBukkit from CraftBukkit.
 
 ---
- pom.xml |   10 +++++-----
- 1 files changed, 5 insertions(+), 5 deletions(-)
+ pom.xml | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/pom.xml b/pom.xml
-index e061ce6..03f33a9 100644
+index ce239ff..d144b7c 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -1,6 +1,6 @@
- <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-   <modelVersion>4.0.0</modelVersion>
+@@ -4,2 +4,2 @@
 -  <groupId>org.bukkit</groupId>
 -  <artifactId>craftbukkit</artifactId>
 +  <groupId>tc.oc</groupId>
 +  <artifactId>sportbukkit</artifactId>
-   <packaging>jar</packaging>
-@@ -8,4 +8,4 @@
+@@ -8 +8 @@
 -  <name>CraftBukkit</name>
 +  <name>SportBukkit</name>
-   <url>http://www.bukkit.org</url>
-
-   <properties>
-@@ -49,5 +49,5 @@
-
-   <dependencies>
-     <dependency>
+@@ -54,2 +54,2 @@
 -      <groupId>org.bukkit</groupId>
 -      <artifactId>bukkit</artifactId>
 +      <groupId>tc.oc</groupId>
 +      <artifactId>sportbukkit-api</artifactId>
---
-1.7.8.msysgit.0
+@@ -159 +159 @@
+-          <outputPrefix>git-Bukkit-</outputPrefix>
++          <outputPrefix>git-SportBukkit-</outputPrefix>
+-- 
+1.8.2
+
