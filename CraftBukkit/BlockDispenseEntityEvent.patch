@@ -1,18 +1,18 @@
-From fcb3d2007b1ae626b2928406d21499e15436b559 Mon Sep 17 00:00:00 2001
+From 8825508aea5ed6205acf5431179c350684b861c0 Mon Sep 17 00:00:00 2001
 From: YukonAppleGeek <yukonvinecki@gmail.com>
-Date: Mon, 8 Apr 2013 20:14:33 -0700
+Date: Fri, 12 Apr 2013 21:34:01 -0700
 Subject: [PATCH] Add BlockDispenseEntityEvent
 
 ---
  src/main/java/net/minecraft/server/DispenseBehaviorBoat.java   |    7 ++++---
  .../java/net/minecraft/server/DispenseBehaviorFireball.java    |    8 +++++---
  .../java/net/minecraft/server/DispenseBehaviorFireworks.java   |    8 +++++---
- src/main/java/net/minecraft/server/DispenseBehaviorItem.java   |    5 +++--
+ src/main/java/net/minecraft/server/DispenseBehaviorItem.java   |    4 ++--
  .../java/net/minecraft/server/DispenseBehaviorMinecart.java    |    8 +++++---
  .../java/net/minecraft/server/DispenseBehaviorMonsterEgg.java  |    7 ++++---
  .../java/net/minecraft/server/DispenseBehaviorProjectile.java  |    4 ++--
  src/main/java/net/minecraft/server/DispenseBehaviorTNT.java    |    8 +++++---
- 8 files changed, 33 insertions(+), 22 deletions(-)
+ 8 files changed, 32 insertions(+), 22 deletions(-)
 
 diff --git a/src/main/java/net/minecraft/server/DispenseBehaviorBoat.java b/src/main/java/net/minecraft/server/DispenseBehaviorBoat.java
 index 8e3a861..2ecd623 100644
@@ -116,25 +116,24 @@ index 6141b44..40a64da 100644
          isourceblock.k().addEntity(entityfireworks);
          // itemstack.a(1); // Handled during event processing
 diff --git a/src/main/java/net/minecraft/server/DispenseBehaviorItem.java b/src/main/java/net/minecraft/server/DispenseBehaviorItem.java
-index c3a9f36..1a7e1c0 100644
+index c3a9f36..b96499d 100644
 --- a/src/main/java/net/minecraft/server/DispenseBehaviorItem.java
 +++ b/src/main/java/net/minecraft/server/DispenseBehaviorItem.java
-@@ -2,7 +2,8 @@ package net.minecraft.server;
+@@ -2,7 +2,7 @@ package net.minecraft.server;
  
  // CraftBukkit start
  import org.bukkit.craftbukkit.inventory.CraftItemStack;
 -import org.bukkit.event.block.BlockDispenseEvent;
-+import org.bukkit.entity.Entity;
 +import org.bukkit.event.block.BlockDispenseEntityEvent;
  // CraftBukkit end
  
  public class DispenseBehaviorItem implements IDispenseBehavior {
-@@ -52,7 +53,7 @@ public class DispenseBehaviorItem implements IDispenseBehavior {
+@@ -52,7 +52,7 @@ public class DispenseBehaviorItem implements IDispenseBehavior {
          org.bukkit.block.Block block = world.getWorld().getBlockAt(isourceblock.getBlockX(), isourceblock.getBlockY(), isourceblock.getBlockZ());
          CraftItemStack craftItem = CraftItemStack.asCraftMirror(itemstack);
  
 -        BlockDispenseEvent event = new BlockDispenseEvent(block, craftItem.clone(), new org.bukkit.util.Vector(entityitem.motX, entityitem.motY, entityitem.motZ));
-+        BlockDispenseEntityEvent event = new BlockDispenseEntityEvent(block, craftItem.clone(), new org.bukkit.util.Vector(entityitem.motX, entityitem.motY, entityitem.motZ), (Entity) entityitem);
++        BlockDispenseEntityEvent event = new BlockDispenseEntityEvent(block, craftItem.clone(), new org.bukkit.util.Vector(entityitem.motX, entityitem.motY, entityitem.motZ), entityitem.getBukkitEntity());
          if (!BlockDispenser.eventFired) {
              world.getServer().getPluginManager().callEvent(event);
          }
