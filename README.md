@@ -1,4 +1,4 @@
-SportBukkit [![Build Status](https://travis-ci.org/ProjectAres/SportBukkit.png?branch=master)](https://travis-ci.org/ProjectAres/SportBukkit)
+SportBukkit [![Build Status](https://travis-ci.org/OvercastNetwork/SportBukkit.png?branch=master)](https://travis-ci.org/OvercastNetwork/SportBukkit)
 ===========
 
 CraftBukkit modifications needed for PGM
