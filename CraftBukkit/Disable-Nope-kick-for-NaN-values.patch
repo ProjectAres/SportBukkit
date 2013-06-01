@@ -15,10 +15,9 @@ index 5d10382..45b1fe0 100644
              }
  
              if (Double.isNaN(packet10flying.x) || Double.isNaN(packet10flying.y) || Double.isNaN(packet10flying.z) || Double.isNaN(packet10flying.stance)) {
--                player.teleport(player.getWorld().getSpawnLocation(), PlayerTeleportEvent.TeleportCause.UNKNOWN);
+                 player.teleport(player.getWorld().getSpawnLocation(), PlayerTeleportEvent.TeleportCause.UNKNOWN);
 -                System.err.println(player.getName() + " was caught trying to crash the server with an invalid position.");
 -                player.kickPlayer("Nope!");
-+                // player.teleport(player.getWorld().getSpawnLocation(), PlayerTeleportEvent.TeleportCause.UNKNOWN);
 +                // System.err.println(player.getName() + " was caught trying to crash the server with an invalid position.");
 +                // player.kickPlayer("Nope!");
                  return;
