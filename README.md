@@ -1,7 +1,9 @@
 SportBukkit [![Build Status](https://travis-ci.org/ProjectAres/SportBukkit.png?branch=master)](https://travis-ci.org/ProjectAres/SportBukkit)
 ===========
 
-CraftBukkit modifications needed for PGM
+SportBukkit is a performance orientated extension of Spigot, it adds a unique variety of patches to the server. Each patch has a function of either increasing performance of adding additional API's for use with PGM and various other plugins.
+
+SportBukkit provides all the needed API's used in PGM.
 
 Setup:
 ```
