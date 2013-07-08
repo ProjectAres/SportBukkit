@@ -22,7 +22,7 @@ index 6f5f779..e478054 100644
              if (packet254getinfo.d()) {
                  // CraftBukkit
 -                s = pingEvent.getMotd() + "\u00A7" + playerlist.getPlayerCount() + "\u00A7" + pingEvent.getMaxPlayers();
-+                s = ChatColor.stripColor(pingEvent.getMotd() + "\u00A7" + pingEvent.getNumPlayers() + "\u00A7" + pingEvent.getMaxPlayers());
++                s = pingEvent.getMotd() + "\u00A7" + pingEvent.getNumPlayers() + "\u00A7" + pingEvent.getMaxPlayers();
              } else {
                  // CraftBukkit start - Don't create a list from an array
 -                Object[] list = new Object[] { 1, 73, this.server.getVersion(), pingEvent.getMotd(), playerlist.getPlayerCount(), pingEvent.getMaxPlayers() };
