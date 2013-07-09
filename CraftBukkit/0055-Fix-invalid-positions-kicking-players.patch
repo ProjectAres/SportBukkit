@@ -1,42 +1,27 @@
-From 797b37f313c39cc47bbc12679c480f48aad033a8 Mon Sep 17 00:00:00 2001
-From: mrapple <tony@oc.tc>
-Date: Tue, 9 Jul 2013 17:06:59 -0500
-Subject: [PATCH] Fix invalid positions kicking players
+From 191fb450f853d8fe536e84c99c217669f1e40cf6 Mon Sep 17 00:00:00 2001
+From: Joshua Baldwin <wiikdworld@googlemail.com>
+Date: Tue, 9 Jul 2013 23:17:36 +0100
+Subject: [PATCH] Possible fix for Nope kick message
 
+---
+ src/main/java/net/minecraft/server/PlayerConnection.java | 3 +++
+ 1 file changed, 3 insertions(+)
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 1854f2b..6ab5173 100644
+index ff685d5..545b35c 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
-@@ -218,6 +218,14 @@ public class PlayerConnection extends Connection {
-             double delta = Math.pow(this.lastPosX - to.getX(), 2) + Math.pow(this.lastPosY - to.getY(), 2) + Math.pow(this.lastPosZ - to.getZ(), 2);
-             float deltaAngle = Math.abs(this.lastYaw - to.getYaw()) + Math.abs(this.lastPitch - to.getPitch());
- 
-+            if (Double.isNaN(packet10flying.x) || Double.isNaN(packet10flying.y) || Double.isNaN(packet10flying.z) || Double.isNaN(packet10flying.stance)) {
-+                player.teleport(from, PlayerTeleportEvent.TeleportCause.UNKNOWN);
-+
-+                System.err.println(player.getName() + " somehow got to an invalid position, so we teleported them from " + to + " to " + from);
-+                System.err.println("Debug: " + Double.isNaN(packet10flying.x) + " " + Double.isNaN(packet10flying.y) + " " + Double.isNaN(packet10flying.z) + " " + Double.isNaN(packet10flying.stance));
-+                return;
-+            }
-+
-             if ((delta > 1f / 256 || deltaAngle > 10f) && (this.checkMovement && !this.player.dead)) {
-                 this.lastPosX = to.getX();
-                 this.lastPosY = to.getY();
-@@ -253,13 +261,6 @@ public class PlayerConnection extends Connection {
-                 }
+@@ -254,7 +254,10 @@ public class PlayerConnection extends Connection {
+             if (Double.isNaN(packet10flying.x) || Double.isNaN(packet10flying.y) || Double.isNaN(packet10flying.z) || Double.isNaN(packet10flying.stance)) {
+                 player.teleport(player.getWorld().getSpawnLocation(), PlayerTeleportEvent.TeleportCause.UNKNOWN);
+                 System.err.println(player.getName() + " was caught trying to crash the server with an invalid position.");
++                this.player.playerConnection.sendPacket(new Packet13PlayerLookMove(from.getX(), from.getY() + 1.6200000047683716D, from.getY(), from.getZ(), from.getYaw(), from.getPitch(), false));
++                /* Depreceated
+                 player.kickPlayer("Nope!");
++                */
+                 return;
              }
  
--            if (Double.isNaN(packet10flying.x) || Double.isNaN(packet10flying.y) || Double.isNaN(packet10flying.z) || Double.isNaN(packet10flying.stance)) {
--                player.teleport(player.getWorld().getSpawnLocation(), PlayerTeleportEvent.TeleportCause.UNKNOWN);
--                System.err.println(player.getName() + " was caught trying to crash the server with an invalid position.");
--                player.kickPlayer("Nope!");
--                return;
--            }
--
-             if (this.checkMovement && !this.player.dead) {
-                 // CraftBukkit end
-                 double d1;
 -- 
-1.7.9.6 (Apple Git-31.1)
+1.7.12.4 (Apple Git-37)
 
