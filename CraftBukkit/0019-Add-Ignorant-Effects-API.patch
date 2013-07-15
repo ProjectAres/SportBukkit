@@ -1,4 +1,4 @@
-From 1ad0f9316935821c119296a74f4e076540634366 Mon Sep 17 00:00:00 2001
+From 599a1c3c9984b8c92a0b8d66bdfe6e5536c5cea3 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Thu, 16 May 2013 20:20:34 -0500
 Subject: [PATCH] Add Ignorant Effects API
@@ -28,10 +28,10 @@ index f5935f7..9d726b9 100644
  
          WatchableObject watchableobject;
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 68ce1ef..c9c3b0b 100644
+index 23fd4b2..d798835 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
-@@ -775,12 +775,18 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -779,12 +779,18 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
  
      protected void a(MobEffect mobeffect) {
          super.a(mobeffect);
@@ -287,5 +287,5 @@ index 977adff..1e5a83f 100644
 +    }
  }
 -- 
-1.7.9.6 (Apple Git-31.1)
+1.8.3.msysgit.0
 
