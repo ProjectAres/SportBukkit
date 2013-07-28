@@ -19,6 +19,7 @@ function cleanupPatches {
             git checkout -- $patch >/dev/null
         fi
     done
+    cd ..
 }
 
 function rebuildPatches {
