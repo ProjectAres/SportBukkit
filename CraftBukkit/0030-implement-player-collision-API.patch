@@ -1,4 +1,4 @@
-From 2f571a82b3d2dbb84f1ba56e11efb833c7be3020 Mon Sep 17 00:00:00 2001
+From b56147bf735abbbb975a8bd971e1d86d1dbb1d2f Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Thu, 2 Aug 2012 17:54:44 -0700
 Subject: [PATCH] Implement player collision API
@@ -9,14 +9,14 @@ index f10a991..3721c3b 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -411,7 +411,7 @@ public abstract class EntityHuman extends EntityLiving implements ICommandListen
-
+ 
              List list = this.world.getEntities(this, axisalignedbb);
-
+ 
 -            if (list != null) {
 +            if (this.M() && list != null) { // CraftBukkit
                  for (int i = 0; i < list.size(); ++i) {
                      Entity entity = (Entity) list.get(i);
-
+ 
 diff --git a/src/main/java/net/minecraft/server/EntityLiving.java b/src/main/java/net/minecraft/server/EntityLiving.java
 index 16a16cf..2b190e9 100644
 --- a/src/main/java/net/minecraft/server/EntityLiving.java
@@ -24,12 +24,12 @@ index 16a16cf..2b190e9 100644
 @@ -1456,7 +1456,7 @@ public abstract class EntityLiving extends Entity {
      protected void bj() {
          List list = this.world.getEntities(this, this.boundingBox.grow(0.20000000298023224D, 0.0D, 0.20000000298023224D));
-
+ 
 -        if (list != null && !list.isEmpty()) {
 +        if (this.M() && list != null && !list.isEmpty()) { // CraftBukkit
              for (int i = 0; i < list.size(); ++i) {
                  Entity entity = (Entity) list.get(i);
-
+ 
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
 index d6764ff..119e3f3 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
@@ -46,7 +46,7 @@ index d6764ff..119e3f3 100644
 @@ -149,6 +151,18 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
          this.height = 0.0F;
      }
-
+ 
 +    // CraftBukkit start
 +    @Override
 +    public boolean L() {
@@ -69,7 +69,7 @@ index 124a175..4a003b6 100644
 @@ -958,6 +958,15 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
          getHandle().updateAbilities();
      }
-
+ 
 +    public void setCollidesWithEntities(boolean yes) {
 +        getHandle().collidesWithEntities = yes;
 +        getHandle().m = yes;
@@ -82,6 +82,6 @@ index 124a175..4a003b6 100644
      public boolean getAllowFlight() {
          return getHandle().abilities.canFly;
      }
---
+-- 
 1.7.12.4 (Apple Git-37)
 
