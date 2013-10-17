@@ -1,4 +1,4 @@
-From 2f0de9db81821bfa55b385aa952db270872b14e4 Mon Sep 17 00:00:00 2001
+From 53b6a263b936658149e1d55d0a7c3e7e68ae639e Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Sat, 28 Sep 2013 17:05:35 -0500
 Subject: [PATCH] Multi-protocol support framework
@@ -26,18 +26,22 @@ index 3936588..d98c4fb 100644
  
      public int A() {
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index 21d5ad4..bbeefdf 100644
+index 21d5ad4..996cb49 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
-@@ -51,6 +51,7 @@ public class NetworkManager implements INetworkManager {
+@@ -51,6 +51,11 @@ public class NetworkManager implements INetworkManager {
      private SecretKey A;
      private PrivateKey B;
      private int lowPriorityQueueDelay = 50;
-+    public int protocolVersion = -1; // CraftBukkit
++    // CraftBukkit start
++    private int protocolVersion = -1;
++    public void setProtocolVersion(int protocolVersion) { this.protocolVersion = protocolVersion; }
++    public int getProtocolVersion() { return this.protocolVersion; }
++    // CraftBukkit end
  
      public NetworkManager(IConsoleLogManager iconsolelogmanager, Socket socket, String s, Connection connection, PrivateKey privatekey) throws IOException { // CraftBukkit - throws IOException
          this.B = privatekey;
-@@ -100,6 +101,7 @@ public class NetworkManager implements INetworkManager {
+@@ -100,6 +105,7 @@ public class NetworkManager implements INetworkManager {
              if (this.e == 0 || !this.highPriorityQueue.isEmpty() && MinecraftServer.aq() - ((Packet) this.highPriorityQueue.get(0)).timestamp >= (long) this.e) {
                  packet = this.a(false);
                  if (packet != null) {
@@ -45,7 +49,7 @@ index 21d5ad4..bbeefdf 100644
                      Packet.a(packet, (DataOutput) this.output);
                      if (packet instanceof Packet252KeyResponse && !this.g) {
                          if (!this.connection.a()) {
-@@ -192,7 +194,7 @@ public class NetworkManager implements INetworkManager {
+@@ -192,7 +198,7 @@ public class NetworkManager implements INetworkManager {
          boolean flag = false;
  
          try {
@@ -84,7 +88,7 @@ index e7e1d73..6d16c95 100644
              ++o;
              p += (long) packet.a();
 diff --git a/src/main/java/net/minecraft/server/PendingConnection.java b/src/main/java/net/minecraft/server/PendingConnection.java
-index 0a887cc..ebf5d5f 100644
+index 0a887cc..5443752 100644
 --- a/src/main/java/net/minecraft/server/PendingConnection.java
 +++ b/src/main/java/net/minecraft/server/PendingConnection.java
 @@ -11,6 +11,7 @@ import java.util.List;
@@ -100,13 +104,13 @@ index 0a887cc..ebf5d5f 100644
              } else {
                  PublicKey publickey = this.server.H().getPublic();
 +                // CraftBukkit start
-+                networkManager.protocolVersion = packet2handshake.d();
++                networkManager.setProtocolVersion(packet2handshake.d());
 +                int connectingVersion = Protocol.getProtocolVersion(packet2handshake.d());
  
 -                if (packet2handshake.d() != 78) {
 -                    if (packet2handshake.d() > 78) {
-+                if (connectingVersion != networkManager.protocolVersion) {
-+                    if (networkManager.protocolVersion > Protocol.CURRENT_PROTOCOL) {
++                if (connectingVersion != networkManager.getProtocolVersion()) {
++                    if (networkManager.getProtocolVersion() > Protocol.CURRENT_PROTOCOL) {
 +                        // CraftBukkit end
                          this.disconnect("Outdated server!");
                      } else {

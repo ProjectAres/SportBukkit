@@ -1,4 +1,4 @@
-From 80f6a55373b6769e019ad5da803444df7b29bdd3 Mon Sep 17 00:00:00 2001
+From 6f691bad27ffb0fbd61b820119489083a8ab3aaf Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Thu, 17 Oct 2013 12:59:16 -0500
 Subject: [PATCH] Use netty
@@ -46,10 +46,10 @@ index c7e49d5..f3c9970 100644
              this.getLogger().warning("The exception was: {0}", new Object[] { ioexception.toString()});
 diff --git a/src/main/java/net/minecraft/server/INetworkManager.java b/src/main/java/net/minecraft/server/INetworkManager.java
 new file mode 100644
-index 0000000..95f03e1
+index 0000000..54f64ac
 --- /dev/null
 +++ b/src/main/java/net/minecraft/server/INetworkManager.java
-@@ -0,0 +1,26 @@
+@@ -0,0 +1,32 @@
 +package net.minecraft.server;
 +
 +import java.net.SocketAddress;
@@ -72,12 +72,18 @@ index 0000000..95f03e1
 +
 +    void a(String s, Object... aobject);
 +
-+    java.net.Socket getSocket(); // CraftBukkit
++    // CraftBukkit start
++    java.net.Socket getSocket();
 +
-+    void setSocketAddress(java.net.SocketAddress address); // CraftBukkit
++    void setSocketAddress(java.net.SocketAddress address);
++
++    void setProtocolVersion(int protocolVersion);
++
++    int getProtocolVersion();
++    // CraftBukkit end
 +}
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index bbeefdf..87603e5 100644
+index 996cb49..b9fdfcb 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
 @@ -27,7 +27,7 @@ public class NetworkManager implements INetworkManager {
@@ -89,7 +95,7 @@ index bbeefdf..87603e5 100644
      private volatile DataInputStream input;
      private volatile DataOutputStream output;
      private volatile boolean n = true;
-@@ -308,12 +308,12 @@ public class NetworkManager implements INetworkManager {
+@@ -312,12 +312,12 @@ public class NetworkManager implements INetworkManager {
      public SocketAddress getSocketAddress() {
          return this.k;
      }
@@ -106,7 +112,7 @@ index bbeefdf..87603e5 100644
      public void d() {
          if (!this.t) {
 diff --git a/src/main/java/net/minecraft/server/PendingConnection.java b/src/main/java/net/minecraft/server/PendingConnection.java
-index 946086f..aeb3351 100644
+index 5443752..26bf229 100644
 --- a/src/main/java/net/minecraft/server/PendingConnection.java
 +++ b/src/main/java/net/minecraft/server/PendingConnection.java
 @@ -20,7 +20,7 @@ public class PendingConnection extends Connection {
@@ -118,9 +124,9 @@ index 946086f..aeb3351 100644
      public boolean b;
      private int f;
      private String g;
-@@ -31,10 +31,16 @@ public class PendingConnection extends Connection {
+@@ -30,10 +30,16 @@ public class PendingConnection extends Connection {
+     private SecretKey k;
      public String hostname = ""; // CraftBukkit - add field
-     public String playerUUID; // CraftBukkit - add field
  
 +    // CraftBukkit - add constructor
 +    public PendingConnection(MinecraftServer minecraftserver, tc.oc.netty.NettyNetworkManager networkManager) {
@@ -136,7 +142,7 @@ index 946086f..aeb3351 100644
      }
  
      // CraftBukkit start
-@@ -166,7 +172,7 @@ public class PendingConnection extends Connection {
+@@ -161,7 +167,7 @@ public class PendingConnection extends Connection {
              String s = null;
              // CraftBukkit
              org.bukkit.event.server.ServerListPingEvent pingEvent = org.bukkit.craftbukkit.event.CraftEventFactory.callServerListPingEvent(this.server.server, getSocket().getInetAddress(), this.server.getMotd(), playerlist.getPlayerCount(), playerlist.getMaxPlayers());
@@ -145,7 +151,7 @@ index 946086f..aeb3351 100644
                  // CraftBukkit
                  s = ChatColor.stripColor(pingEvent.getMotd() + "\u00A7" + pingEvent.getNumPlayers() + "\u00A7" + pingEvent.getMaxPlayers());
              } else {
-@@ -195,9 +201,11 @@ public class PendingConnection extends Connection {
+@@ -190,9 +196,11 @@ public class PendingConnection extends Connection {
  
              this.networkManager.queue(new Packet255KickDisconnect(s));
              this.networkManager.d();
@@ -299,10 +305,10 @@ index 0000000..9805064
 +}
 diff --git a/src/main/java/tc/oc/netty/NettyNetworkManager.java b/src/main/java/tc/oc/netty/NettyNetworkManager.java
 new file mode 100644
-index 0000000..546e96f
+index 0000000..87d5137
 --- /dev/null
 +++ b/src/main/java/tc/oc/netty/NettyNetworkManager.java
-@@ -0,0 +1,307 @@
+@@ -0,0 +1,312 @@
 +package tc.oc.netty;
 +
 +import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -374,6 +380,11 @@ index 0000000..546e96f
 +    private Socket socketAdaptor;
 +    private long writtenBytes;
 +    private PacketWriter writer;
++    // CraftBukkit start
++    private int protocolVersion = -1;
++    public void setProtocolVersion(int protocolVersion) { this.protocolVersion = protocolVersion; }
++    public int getProtocolVersion() { return this.protocolVersion; }
++    // CraftBukkit end
 +
 +    @Override
 +    public void channelActive(ChannelHandlerContext ctx) throws Exception
