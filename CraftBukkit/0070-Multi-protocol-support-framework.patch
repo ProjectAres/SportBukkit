@@ -1,0 +1,155 @@
+From 53b6a263b936658149e1d55d0a7c3e7e68ae639e Mon Sep 17 00:00:00 2001
+From: mrapple <tony@oc.tc>
+Date: Sat, 28 Sep 2013 17:05:35 -0500
+Subject: [PATCH] Multi-protocol support framework
+
+
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index 3936588..d98c4fb 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -20,6 +20,7 @@ import jline.console.ConsoleReader;
+ import joptsimple.OptionSet;
+ 
+ import org.bukkit.World.Environment;
++import org.bukkit.craftbukkit.util.Protocol;
+ import org.bukkit.craftbukkit.util.Waitable;
+ import org.bukkit.event.server.RemoteServerCommandEvent;
+ import org.bukkit.event.world.WorldSaveEvent;
+@@ -747,7 +748,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
+     }
+ 
+     public String getVersion() {
+-        return "1.6.4";
++        return Protocol.CURRENT_VERSION; // CraftBukkit
+     }
+ 
+     public int A() {
+diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
+index 21d5ad4..996cb49 100644
+--- a/src/main/java/net/minecraft/server/NetworkManager.java
++++ b/src/main/java/net/minecraft/server/NetworkManager.java
+@@ -51,6 +51,11 @@ public class NetworkManager implements INetworkManager {
+     private SecretKey A;
+     private PrivateKey B;
+     private int lowPriorityQueueDelay = 50;
++    // CraftBukkit start
++    private int protocolVersion = -1;
++    public void setProtocolVersion(int protocolVersion) { this.protocolVersion = protocolVersion; }
++    public int getProtocolVersion() { return this.protocolVersion; }
++    // CraftBukkit end
+ 
+     public NetworkManager(IConsoleLogManager iconsolelogmanager, Socket socket, String s, Connection connection, PrivateKey privatekey) throws IOException { // CraftBukkit - throws IOException
+         this.B = privatekey;
+@@ -100,6 +105,7 @@ public class NetworkManager implements INetworkManager {
+             if (this.e == 0 || !this.highPriorityQueue.isEmpty() && MinecraftServer.aq() - ((Packet) this.highPriorityQueue.get(0)).timestamp >= (long) this.e) {
+                 packet = this.a(false);
+                 if (packet != null) {
++                    packet.protocolVersion = this.protocolVersion; // CraftBukkit
+                     Packet.a(packet, (DataOutput) this.output);
+                     if (packet instanceof Packet252KeyResponse && !this.g) {
+                         if (!this.connection.a()) {
+@@ -192,7 +198,7 @@ public class NetworkManager implements INetworkManager {
+         boolean flag = false;
+ 
+         try {
+-            Packet packet = Packet.a(this.i, this.input, this.connection.a(), this.socket);
++            Packet packet = Packet.a(this.i, this.input, this.connection.a(), this.socket, this.protocolVersion); // CraftBukkit
+ 
+             if (packet != null) {
+                 if (packet instanceof Packet252KeyResponse && !this.f) {
+diff --git a/src/main/java/net/minecraft/server/Packet.java b/src/main/java/net/minecraft/server/Packet.java
+index e7e1d73..6d16c95 100644
+--- a/src/main/java/net/minecraft/server/Packet.java
++++ b/src/main/java/net/minecraft/server/Packet.java
+@@ -27,6 +27,7 @@ public abstract class Packet {
+     public boolean lowPriority;
+     // CraftBukkit start - Calculate packet ID once - used a bunch of times
+     private int packetID;
++    protected int protocolVersion = -1;
+ 
+     public Packet() {
+         packetID = ((Integer) a.get(this.getClass())).intValue();
+@@ -85,7 +86,7 @@ public abstract class Packet {
+         return packetID; // ((Integer) a.get(this.getClass())).intValue(); // CraftBukkit
+     }
+ 
+-    public static Packet a(IConsoleLogManager iconsolelogmanager, DataInput datainput, boolean flag, Socket socket) throws IOException { // CraftBukkit - throws IOException
++    public static Packet a(IConsoleLogManager iconsolelogmanager, DataInput datainput, boolean flag, Socket socket, int protocolVersion) throws IOException { // CraftBukkit - throws IOException
+         boolean flag1 = false;
+         Packet packet = null;
+         int i = socket.getSoTimeout();
+@@ -108,6 +109,7 @@ public abstract class Packet {
+                 socket.setSoTimeout(1500);
+             }
+ 
++            packet.protocolVersion = protocolVersion; // CraftBukkit
+             packet.a(datainput);
+             ++o;
+             p += (long) packet.a();
+diff --git a/src/main/java/net/minecraft/server/PendingConnection.java b/src/main/java/net/minecraft/server/PendingConnection.java
+index 0a887cc..5443752 100644
+--- a/src/main/java/net/minecraft/server/PendingConnection.java
++++ b/src/main/java/net/minecraft/server/PendingConnection.java
+@@ -11,6 +11,7 @@ import java.util.List;
+ import java.util.Random;
+ import javax.crypto.SecretKey;
+ 
++import org.bukkit.craftbukkit.util.Protocol;
+ import org.bukkit.event.player.PlayerHandshakeEvent; // CraftBukkit
+ import org.bukkit.ChatColor; // CraftBukkit
+ 
+@@ -74,9 +75,13 @@ public class PendingConnection extends Connection {
+                 this.disconnect("Invalid username!");
+             } else {
+                 PublicKey publickey = this.server.H().getPublic();
++                // CraftBukkit start
++                networkManager.setProtocolVersion(packet2handshake.d());
++                int connectingVersion = Protocol.getProtocolVersion(packet2handshake.d());
+ 
+-                if (packet2handshake.d() != 78) {
+-                    if (packet2handshake.d() > 78) {
++                if (connectingVersion != networkManager.getProtocolVersion()) {
++                    if (networkManager.getProtocolVersion() > Protocol.CURRENT_PROTOCOL) {
++                        // CraftBukkit end
+                         this.disconnect("Outdated server!");
+                     } else {
+                         this.disconnect("Outdated client!");
+@@ -161,7 +166,7 @@ public class PendingConnection extends Connection {
+                 s = ChatColor.stripColor(pingEvent.getMotd() + "\u00A7" + pingEvent.getNumPlayers() + "\u00A7" + pingEvent.getMaxPlayers());
+             } else {
+                 // CraftBukkit start - Don't create a list from an array
+-                Object[] list = new Object[] { 1, 78, this.server.getVersion(), pingEvent.getMotd(), pingEvent.getNumPlayers(), pingEvent.getMaxPlayers() };
++                Object[] list = new Object[] { 1, Protocol.getProtocolVersion(packet254getinfo.a), this.server.getVersion(), pingEvent.getMotd(), pingEvent.getNumPlayers(), pingEvent.getMaxPlayers() };
+ 
+                 StringBuilder builder = new StringBuilder();
+                 for (Object object : list) {
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/Protocol.java b/src/main/java/org/bukkit/craftbukkit/util/Protocol.java
+new file mode 100644
+index 0000000..d3dde85
+--- /dev/null
++++ b/src/main/java/org/bukkit/craftbukkit/util/Protocol.java
+@@ -0,0 +1,20 @@
++package org.bukkit.craftbukkit.util;
++
++public class Protocol {
++    public static final Integer CURRENT_PROTOCOL = 78;
++    public static final String CURRENT_VERSION = "1.6.4";
++    public static final Integer[] versions = new Integer[] {
++        74, // 1.6.2
++        78, // 1.6.4
++    };
++
++    public static int getProtocolVersion(int connectingVersion) {
++        for(int i : versions) {
++            if(i == connectingVersion) {
++                return i;
++            }
++        }
++
++        return CURRENT_PROTOCOL;
++    }
++}
+-- 
+1.7.12.4 (Apple Git-37)
+
