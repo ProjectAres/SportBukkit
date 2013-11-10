@@ -22,3 +22,4 @@ If you want to be added to this list, please email support@oc.tc
 * Overcast Network: https://oc.tc
 * HungerCraft: http://hungercraft.net
 * RMCT: http://reddit.com/r/mctourney
+* Hypixel: http://hypixel.net
