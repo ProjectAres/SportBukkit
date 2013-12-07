@@ -1,4 +1,4 @@
-From 652a1a5cead7cb4f97c8339ea81621a87c7ff5ea Mon Sep 17 00:00:00 2001
+From d7124b8a7b27ec90e1e2aa86eb8999506241f8a8 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Sat, 7 Dec 2013 17:53:32 -0600
 Subject: [PATCH] Make scoreboard classes public
@@ -18,7 +18,7 @@ index d2e3096..1807e19 100644
      static final CraftCriteria DUMMY;
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/scoreboard/CraftObjective.java b/src/main/java/org/bukkit/craftbukkit/scoreboard/CraftObjective.java
-index 431807a..30b9347 100644
+index 431807a..3193485 100644
 --- a/src/main/java/org/bukkit/craftbukkit/scoreboard/CraftObjective.java
 +++ b/src/main/java/org/bukkit/craftbukkit/scoreboard/CraftObjective.java
 @@ -9,7 +9,7 @@ import org.bukkit.scoreboard.DisplaySlot;
@@ -29,6 +29,15 @@ index 431807a..30b9347 100644
 +public final class CraftObjective extends CraftScoreboardComponent implements Objective {
      private final ScoreboardObjective objective;
      private final CraftCriteria criteria;
+ 
+@@ -21,7 +21,7 @@ final class CraftObjective extends CraftScoreboardComponent implements Objective
+         scoreboard.objectives.put(objective.getName(), this);
+     }
+ 
+-    ScoreboardObjective getHandle() {
++    public ScoreboardObjective getHandle() {
+         return objective;
+     }
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/scoreboard/CraftScore.java b/src/main/java/org/bukkit/craftbukkit/scoreboard/CraftScore.java
 index 0ffbe9b..64732b7 100644
