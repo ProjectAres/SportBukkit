@@ -27,7 +27,6 @@ index 0000000..3e7b0f0
 +
 +	@Override
 +	public boolean isCancelled() {
-+		// TODO Auto-generated method stub
 +		return cancelled;
 +	}
 +
