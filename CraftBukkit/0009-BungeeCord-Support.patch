@@ -1,4 +1,4 @@
-From 24152752d70ee6b5d25bae7349f1bcf986e848e4 Mon Sep 17 00:00:00 2001
+From 74d6eb818d05d953bb85e4fcfc8a25c1a850796d Mon Sep 17 00:00:00 2001
 From: Steve Anton <anxuiz.nx@gmail.com>
 Date: Sat, 13 Apr 2013 10:50:21 -0700
 Subject: [PATCH] BungeeCord Support
@@ -6,74 +6,100 @@ Subject: [PATCH] BungeeCord Support
 - Allows BungeeCord to set the players real IP address very early in the login process, so that the BungeeCord proxy IP is never even seen by a plugin.
 - Ported from Spigot
 
+diff --git a/src/main/java/net/minecraft/server/HandshakeListener.java b/src/main/java/net/minecraft/server/HandshakeListener.java
+index b7f6775..cfca2bf 100644
+--- a/src/main/java/net/minecraft/server/HandshakeListener.java
++++ b/src/main/java/net/minecraft/server/HandshakeListener.java
+@@ -1,6 +1,7 @@
+ package net.minecraft.server;
+ 
+ import net.minecraft.util.io.netty.util.concurrent.GenericFutureListener;
++import java.net.InetSocketAddress;
+ 
+ public class HandshakeListener implements PacketHandshakingInListener {
+ 
+@@ -28,6 +29,17 @@ public class HandshakeListener implements PacketHandshakingInListener {
+                 this.b.a((IChatBaseComponent) chatcomponenttext);
+             } else {
+                 this.b.a((PacketListener) (new LoginListener(this.a, this.b)));
++                InetSocketAddress socket = (InetSocketAddress) b.getSocketAddress();
++                if (a.server.bungeeIPs.contains(socket.getAddress().getHostAddress()) {
++                    String[] split = packethandshakinginsetprotocol.b.split("\00");
++                    if (split.length == 2 || split.length == 3) {
++                        packethandshakinginsetprotocol.b = split[0];
++                        b.l = new java.net.InetSocketAddress(split[1], socket.getPort());
++                    }
++                    if (split.length == 3) {
++                        b.spoofedUUID = split[2];
++                    }
++                }
+                 ((LoginListener) this.b.getPacketListener()).hostname = packethandshakinginsetprotocol.b + ":" + packethandshakinginsetprotocol.c; // CraftBukkit - set hostname
+             }
+             break;
+diff --git a/src/main/java/net/minecraft/server/LoginListener.java b/src/main/java/net/minecraft/server/LoginListener.java
+index 6beac82..00fbd87 100644
+--- a/src/main/java/net/minecraft/server/LoginListener.java
++++ b/src/main/java/net/minecraft/server/LoginListener.java
+@@ -61,9 +61,13 @@ public class LoginListener implements PacketLoginInListener {
+ 
+     public void c() {
+         if (!this.i.isComplete()) {
+-            UUID uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + this.i.getName()).getBytes(Charsets.UTF_8));
+-
+-            this.i = new GameProfile(uuid.toString().replaceAll("-", ""), this.i.getName());
++            String uuid;
++            if (networkManager.spoofedUUID != null) {
++                uuid = networkManager.spoofedUUID;
++            } else {
++                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + this.i.getName()).getBytes(Charsets.UTF_8)).toString().replaceAll("-", "");
++            }
++            this.i = new GameProfile(uuid, this.i.getName());
+         }
+ 
+         // CraftBukkit start
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index a2bdfa3..21d5ad4 100644
+index 8f829bb..de4de21 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
-@@ -27,7 +27,7 @@ public class NetworkManager implements INetworkManager {
-     private final Object h = new Object();
-     private final IConsoleLogManager i;
-     public Socket socket; // CraftBukkit - private -> public
--    private final SocketAddress k;
-+    private SocketAddress k; // Spigot - remove final
-     private volatile DataInputStream input;
-     private volatile DataOutputStream output;
-     private volatile boolean n = true;
-@@ -306,6 +306,12 @@ public class NetworkManager implements INetworkManager {
-     public SocketAddress getSocketAddress() {
-         return this.k;
-     }
-+    
-+    // Spigot start
-+    public void setSocketAddress(SocketAddress newAddress) {
-+        this.k = newAddress;
-+    }
-+    // Spigot end
- 
-     public void d() {
-         if (!this.t) {
-diff --git a/src/main/java/net/minecraft/server/PendingConnection.java b/src/main/java/net/minecraft/server/PendingConnection.java
-index 2a96168..464a5ad 100644
---- a/src/main/java/net/minecraft/server/PendingConnection.java
-+++ b/src/main/java/net/minecraft/server/PendingConnection.java
-@@ -222,4 +222,17 @@ public class PendingConnection extends Connection {
-     static boolean a(PendingConnection pendingconnection, boolean flag) {
-         return pendingconnection.h = flag;
+@@ -34,7 +34,8 @@ public class NetworkManager extends SimpleChannelInboundHandler {
+     private final Queue i = Queues.newConcurrentLinkedQueue();
+     private final Queue j = Queues.newConcurrentLinkedQueue();
+     private Channel k;
+-    private SocketAddress l;
++    public SocketAddress l;
++    public String spoofedUUID;
+     private PacketListener m;
+     private EnumProtocol n;
+     private IChatBaseComponent o;
+@@ -195,4 +196,8 @@ public class NetworkManager extends SimpleChannelInboundHandler {
+     static Channel a(NetworkManager networkmanager) {
+         return networkmanager.k;
      }
 +
-+    // Spigot start
-+    @Override
-+    public void a(Packet250CustomPayload pcp) {
-+        if (pcp.tag.equals("BungeeCord") && server.server.bungeeIPs.contains(getSocket().getInetAddress().getHostAddress())) {
-+            com.google.common.io.ByteArrayDataInput in = com.google.common.io.ByteStreams.newDataInput(pcp.data);
-+            String subTag = in.readUTF();
-+            if (subTag.equals("Login")) {
-+                networkManager.setSocketAddress(new java.net.InetSocketAddress(in.readUTF(), in.readInt()));
-+            }
-+        }
++    public SocketAddress getRawAddress() {
++        return this.k.remoteAddress();
 +    }
-+    // Spigot end
  }
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index d140c4f..1303b77 100644
+index f3e5200..a02fe26 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -158,6 +158,7 @@ public final class CraftServer implements Server {
+@@ -170,6 +170,7 @@ public final class CraftServer implements Server {
      private int ambientSpawn = -1;
      public int chunkGCPeriod = -1;
      public int chunkGCLoadThresh = 0;
-+    public List<String> bungeeIPs = new ArrayList<String>(); // Spigot
++    public List<String> bungeeIPs = new ArrayList<String>();
      private File container;
      private WarningState warningState = WarningState.DEFAULT;
      private final BooleanWrapper online = new BooleanWrapper();
-@@ -208,6 +209,7 @@ public final class CraftServer implements Server {
+@@ -223,6 +224,7 @@ public final class CraftServer implements Server {
          warningState = WarningState.value(configuration.getString("settings.deprecated-verbose"));
          chunkGCPeriod = configuration.getInt("chunk-gc.period-in-ticks");
          chunkGCLoadThresh = configuration.getInt("chunk-gc.load-threshold");
-+        bungeeIPs = configuration.getStringList("settings.bungee-proxies"); // Spigot
++        bungeeIPs = configuration.getStringList("settings.bungee-proxies");
+         loadIcon();
  
          updater = new AutoUpdater(new BukkitDLUpdaterService(configuration.getString("auto-updater.host")), getLogger(), configuration.getString("auto-updater.preferred-channel"));
-         updater.setEnabled(configuration.getBoolean("auto-updater.enabled"));
 diff --git a/src/main/resources/configurations/bukkit.yml b/src/main/resources/configurations/bukkit.yml
 index 60a894f..733ad13 100644
 --- a/src/main/resources/configurations/bukkit.yml
@@ -88,5 +114,5 @@ index 60a894f..733ad13 100644
      monsters: 70
      animals: 15
 -- 
-1.8.5.1
+1.8.3.2
 

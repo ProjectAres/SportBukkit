@@ -1,35 +1,53 @@
-From 989a8305c1646ef1e7cc26c658f45f5a5d55e3a3 Mon Sep 17 00:00:00 2001
+From 2605cfae6fb397196515184261d1e68d38e605ec Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Wed, 29 May 2013 23:52:37 -0500
 Subject: [PATCH] Visibility API
 
 
 diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
-index 3a5a6b4..7da3890 100644
+index 96349af..4b025b4 100644
 --- a/src/main/java/org/bukkit/entity/Player.java
 +++ b/src/main/java/org/bukkit/entity/Player.java
-@@ -592,6 +592,8 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
-      */
-     public void hidePlayer(Player player);
+@@ -839,6 +839,13 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+     public void setAllowFlight(boolean flight);
  
+     /**
++     * Hides an entity from this player
++     *
++     * @param entity Entity to hide
++     */
 +    public void hide(Entity entity);
 +
-     /**
-      * Allows this player to see a player that was previously hidden
++    /**
+      * Hides a player from this player
       *
-@@ -599,12 +601,16 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
-      */
-     public void showPlayer(Player player);
+      * @param player Player to hide
+@@ -846,6 +853,13 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+     public void hidePlayer(Player player);
  
+     /**
++     * Allows this player to see an entity that was previously hidden
++     *
++     * @param entity Entity to show
++     */
 +    public void show(Entity entity);
 +
++    /**
+      * Allows this player to see a player that was previously hidden
+      *
+      * @param player Player to show
+@@ -853,12 +867,14 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+     public void showPlayer(Player player);
+ 
      /**
 -     * Checks to see if a player has been hidden from this player
 +     * Checks to see if an entity has been hidden from this player
       *
-      * @param player Player to check
--     * @return True if the provided player is not being hidden from this player
-+     * @return True if the provided entity is not being hidden from this player
+-     * @param player Player to check
+-     * @return True if the provided player is not being hidden from this
++     * @param entity Entity to check
++     * @return True if the provided entity is not being hidden from this
+      *     player
       */
 +    public boolean canSee(Entity entity);
 +
@@ -37,5 +55,5 @@ index 3a5a6b4..7da3890 100644
  
      /**
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.3.2
 

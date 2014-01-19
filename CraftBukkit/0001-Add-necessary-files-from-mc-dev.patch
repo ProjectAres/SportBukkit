@@ -1,61 +1,158 @@
-From d52e2ca557db6bd5ecc204180bc99b1739dabe22 Mon Sep 17 00:00:00 2001
+From cddf547370cb633b6f7179c3b27de66d9323f774 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Tue, 18 Dec 2012 22:12:16 -0600
 Subject: [PATCH] Add necessary files from mc-dev
 
 
-diff --git a/src/main/java/net/minecraft/server/BlockFluids.java b/src/main/java/net/minecraft/server/BlockFluids.java
+diff --git a/src/main/java/net/minecraft/server/BlockFalling.java b/src/main/java/net/minecraft/server/BlockFalling.java
 new file mode 100644
-index 0000000..c2e4a7d
+index 0000000..1d5fe2f
 --- /dev/null
-+++ b/src/main/java/net/minecraft/server/BlockFluids.java
-@@ -0,0 +1,232 @@
++++ b/src/main/java/net/minecraft/server/BlockFalling.java
+@@ -0,0 +1,83 @@
 +package net.minecraft.server;
 +
 +import java.util.Random;
++import net.minecraft.server.Block;
++import net.minecraft.server.Blocks;
++import net.minecraft.server.CreativeModeTab;
++import net.minecraft.server.EntityFallingBlock;
++import net.minecraft.server.Material;
++import net.minecraft.server.World;
++
++public class BlockFalling extends Block {
++
++    public static boolean instaFall;
++
++
++    public BlockFalling() {
++        super(Material.SAND);
++        this.a(CreativeModeTab.b);
++    }
++
++    public BlockFalling(Material var1) {
++        super(var1);
++    }
++
++    public void onPlace(World var1, int var2, int var3, int var4) {
++        var1.a(var2, var3, var4, this, this.a(var1));
++    }
++
++    public void doPhysics(World var1, int var2, int var3, int var4, Block var5) {
++        var1.a(var2, var3, var4, this, this.a(var1));
++    }
++
++    public void a(World var1, int var2, int var3, int var4, Random var5) {
++        if (!var1.isStatic) {
++            this.m(var1, var2, var3, var4);
++        }
++    }
++
++    private void m(World var1, int var2, int var3, int var4) {
++        if (canFall(var1, var2, var3 - 1, var4) && var3 >= 0) {
++            byte var8 = 32;
++
++            if (!instaFall && var1.b(var2 - var8, var3 - var8, var4 - var8, var2 + var8, var3 + var8, var4 + var8)) {
++                if (!var1.isStatic) {
++                    EntityFallingBlock var9 = new EntityFallingBlock(var1, (double)((float)var2 + 0.5F), (double)((float)var3 + 0.5F), (double)((float)var4 + 0.5F), this, var1.getData(var2, var3, var4));
++                    this.a(var9);
++                    var1.addEntity(var9);
++                }
++            } else {
++                var1.setAir(var2, var3, var4);
++
++                while (canFall(var1, var2, var3 - 1, var4) && var3 > 0) {
++                    --var3;
++                }
++
++                if (var3 > 0) {
++                    var1.setTypeUpdate(var2, var3, var4, this);
++                }
++            }
++        }
++    }
++
++    protected void a(EntityFallingBlock var1) {}
++
++    public int a(World var1) {
++        return 2;
++    }
++
++    public static boolean canFall(World var0, int var1, int var2, int var3) {
++        Block var4 = var0.getType(var1, var2, var3);
++
++        if (var4.material == Material.AIR) {
++            return true;
++        } else if (var4 == Blocks.FIRE) {
++            return true;
++        } else {
++            Material var5 = var4.material;
++            return var5 == Material.WATER ? true : var5 == Material.LAVA;
++        }
++    }
++
++    public void a(World var1, int var2, int var3, int var4, int var5) {}
++}
+diff --git a/src/main/java/net/minecraft/server/BlockFluids.java b/src/main/java/net/minecraft/server/BlockFluids.java
+new file mode 100644
+index 0000000..c28eb62
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/BlockFluids.java
+@@ -0,0 +1,239 @@
++package net.minecraft.server;
++
++import java.util.Random;
++import net.minecraft.server.AxisAlignedBB;
++import net.minecraft.server.Block;
++import net.minecraft.server.Blocks;
++import net.minecraft.server.Entity;
++import net.minecraft.server.IBlockAccess;
++import net.minecraft.server.Item;
++import net.minecraft.server.Material;
++import net.minecraft.server.Vec3D;
++import net.minecraft.server.World;
 +
 +public abstract class BlockFluids extends Block {
 +
-+    protected BlockFluids(int i, Material material) {
-+        super(i, material);
-+        float f = 0.0F;
-+        float f1 = 0.0F;
-+
-+        this.a(0.0F + f1, 0.0F + f, 0.0F + f1, 1.0F + f1, 1.0F + f, 1.0F + f1);
-+        this.b(true);
++    protected BlockFluids(Material var1) {
++        super(var1);
++        float var2 = 0.0F;
++        float var3 = 0.0F;
++        this.a(0.0F + var3, 0.0F + var2, 0.0F + var3, 1.0F + var3, 1.0F + var2, 1.0F + var3);
++        this.a(true);
 +    }
 +
-+    public boolean b(IBlockAccess iblockaccess, int i, int j, int k) {
++    public boolean b(IBlockAccess var1, int var2, int var3, int var4) {
 +        return this.material != Material.LAVA;
 +    }
 +
-+    public static float d(int i) {
-+        if (i >= 8) {
-+            i = 0;
++    public static float b(int var0) {
++        if (var0 >= 8) {
++            var0 = 0;
 +        }
 +
-+        return (float) (i + 1) / 9.0F;
++        return (float)(var0 + 1) / 9.0F;
 +    }
 +
-+    protected int l_(World world, int i, int j, int k) {
-+        return world.getMaterial(i, j, k) == this.material ? world.getData(i, j, k) : -1;
++    protected int e(World var1, int var2, int var3, int var4) {
++        return var1.getType(var2, var3, var4).getMaterial() == this.material ? var1.getData(var2, var3, var4) : -1;
 +    }
 +
-+    protected int d(IBlockAccess iblockaccess, int i, int j, int k) {
-+        if (iblockaccess.getMaterial(i, j, k) != this.material) {
++    protected int e(IBlockAccess var1, int var2, int var3, int var4) {
++        if (var1.getType(var2, var3, var4).getMaterial() != this.material) {
 +            return -1;
 +        } else {
-+            int l = iblockaccess.getData(i, j, k);
++            int var5 = var1.getData(var2, var3, var4);
 +
-+            if (l >= 8) {
-+                l = 0;
++            if (var5 >= 8) {
++                var5 = 0;
 +            }
 +
-+            return l;
++            return var5;
 +        }
 +    }
 +
-+    public boolean b() {
++    public boolean d() {
 +        return false;
 +    }
 +
@@ -63,390 +160,288 @@ index 0000000..c2e4a7d
 +        return false;
 +    }
 +
-+    public boolean a(int i, boolean flag) {
-+        return flag && i == 0;
++    public boolean a(int var1, boolean var2) {
++        return var2 && var1 == 0;
 +    }
 +
-+    public boolean a_(IBlockAccess iblockaccess, int i, int j, int k, int l) {
-+        Material material = iblockaccess.getMaterial(i, j, k);
-+
-+        return material == this.material ? false : (l == 1 ? true : (material == Material.ICE ? false : super.a_(iblockaccess, i, j, k, l)));
++    public boolean d(IBlockAccess var1, int var2, int var3, int var4, int var5) {
++        Material var6 = var1.getType(var2, var3, var4).getMaterial();
++        return var6 == this.material ? false : (var5 == 1 ? true : (var6 == Material.ICE ? false : super.d(var1, var2, var3, var4, var5)));
 +    }
 +
-+    public AxisAlignedBB b(World world, int i, int j, int k) {
++    public AxisAlignedBB a(World var1, int var2, int var3, int var4) {
 +        return null;
 +    }
 +
-+    public int d() {
++    public int b() {
 +        return 4;
 +    }
 +
-+    public int getDropType(int i, Random random, int j) {
++    public Item getDropType(int var1, Random var2, int var3) {
++        return null;
++    }
++
++    public int a(Random var1) {
 +        return 0;
 +    }
 +
-+    public int a(Random random) {
-+        return 0;
-+    }
++    private Vec3D f(IBlockAccess var1, int var2, int var3, int var4) {
++        Vec3D var5 = var1.getVec3DPool().create(0.0D, 0.0D, 0.0D);
++        int var6 = this.e(var1, var2, var3, var4);
 +
-+    private Vec3D g(IBlockAccess iblockaccess, int i, int j, int k) {
-+        Vec3D vec3d = iblockaccess.getVec3DPool().create(0.0D, 0.0D, 0.0D);
-+        int l = this.d(iblockaccess, i, j, k);
++        for (int var7 = 0; var7 < 4; ++var7) {
++            int var8 = var2;
++            int var10 = var4;
 +
-+        for (int i1 = 0; i1 < 4; ++i1) {
-+            int j1 = i;
-+            int k1 = k;
-+
-+            if (i1 == 0) {
-+                j1 = i - 1;
++            if (var7 == 0) {
++                var8 = var2 - 1;
 +            }
 +
-+            if (i1 == 1) {
-+                k1 = k - 1;
++            if (var7 == 1) {
++                var10 = var4 - 1;
 +            }
 +
-+            if (i1 == 2) {
-+                ++j1;
++            if (var7 == 2) {
++                ++var8;
 +            }
 +
-+            if (i1 == 3) {
-+                ++k1;
++            if (var7 == 3) {
++                ++var10;
 +            }
 +
-+            int l1 = this.d(iblockaccess, j1, j, k1);
-+            int i2;
++            int var11 = this.e(var1, var8, var3, var10);
++            int var12;
 +
-+            if (l1 < 0) {
-+                if (!iblockaccess.getMaterial(j1, j, k1).isSolid()) {
-+                    l1 = this.d(iblockaccess, j1, j - 1, k1);
-+                    if (l1 >= 0) {
-+                        i2 = l1 - (l - 8);
-+                        vec3d = vec3d.add((double) ((j1 - i) * i2), (double) ((j - j) * i2), (double) ((k1 - k) * i2));
++            if (var11 < 0) {
++                if (!var1.getType(var8, var3, var10).getMaterial().isSolid()) {
++                    var11 = this.e(var1, var8, var3 - 1, var10);
++
++                    if (var11 >= 0) {
++                        var12 = var11 - (var6 - 8);
++                        var5 = var5.add((double)((var8 - var2) * var12), (double)((var3 - var3) * var12), (double)((var10 - var4) * var12));
 +                    }
 +                }
-+            } else if (l1 >= 0) {
-+                i2 = l1 - l;
-+                vec3d = vec3d.add((double) ((j1 - i) * i2), (double) ((j - j) * i2), (double) ((k1 - k) * i2));
++            } else if (var11 >= 0) {
++                var12 = var11 - var6;
++                var5 = var5.add((double)((var8 - var2) * var12), (double)((var3 - var3) * var12), (double)((var10 - var4) * var12));
 +            }
 +        }
 +
-+        if (iblockaccess.getData(i, j, k) >= 8) {
-+            boolean flag = false;
++        if (var1.getData(var2, var3, var4) >= 8) {
++            boolean var13 = false;
 +
-+            if (flag || this.a_(iblockaccess, i, j, k - 1, 2)) {
-+                flag = true;
++            if (var13 || this.d(var1, var2, var3, var4 - 1, 2)) {
++                var13 = true;
 +            }
 +
-+            if (flag || this.a_(iblockaccess, i, j, k + 1, 3)) {
-+                flag = true;
++            if (var13 || this.d(var1, var2, var3, var4 + 1, 3)) {
++                var13 = true;
 +            }
 +
-+            if (flag || this.a_(iblockaccess, i - 1, j, k, 4)) {
-+                flag = true;
++            if (var13 || this.d(var1, var2 - 1, var3, var4, 4)) {
++                var13 = true;
 +            }
 +
-+            if (flag || this.a_(iblockaccess, i + 1, j, k, 5)) {
-+                flag = true;
++            if (var13 || this.d(var1, var2 + 1, var3, var4, 5)) {
++                var13 = true;
 +            }
 +
-+            if (flag || this.a_(iblockaccess, i, j + 1, k - 1, 2)) {
-+                flag = true;
++            if (var13 || this.d(var1, var2, var3 + 1, var4 - 1, 2)) {
++                var13 = true;
 +            }
 +
-+            if (flag || this.a_(iblockaccess, i, j + 1, k + 1, 3)) {
-+                flag = true;
++            if (var13 || this.d(var1, var2, var3 + 1, var4 + 1, 3)) {
++                var13 = true;
 +            }
 +
-+            if (flag || this.a_(iblockaccess, i - 1, j + 1, k, 4)) {
-+                flag = true;
++            if (var13 || this.d(var1, var2 - 1, var3 + 1, var4, 4)) {
++                var13 = true;
 +            }
 +
-+            if (flag || this.a_(iblockaccess, i + 1, j + 1, k, 5)) {
-+                flag = true;
++            if (var13 || this.d(var1, var2 + 1, var3 + 1, var4, 5)) {
++                var13 = true;
 +            }
 +
-+            if (flag) {
-+                vec3d = vec3d.a().add(0.0D, -6.0D, 0.0D);
++            if (var13) {
++                var5 = var5.a().add(0.0D, -6.0D, 0.0D);
 +            }
 +        }
 +
-+        vec3d = vec3d.a();
-+        return vec3d;
++        var5 = var5.a();
++        return var5;
 +    }
 +
-+    public void a(World world, int i, int j, int k, Entity entity, Vec3D vec3d) {
-+        Vec3D vec3d1 = this.g((IBlockAccess) world, i, j, k);
-+
-+        vec3d.c += vec3d1.c;
-+        vec3d.d += vec3d1.d;
-+        vec3d.e += vec3d1.e;
++    public void a(World var1, int var2, int var3, int var4, Entity var5, Vec3D var6) {
++        Vec3D var7 = this.f(var1, var2, var3, var4);
++        var6.c += var7.c;
++        var6.d += var7.d;
++        var6.e += var7.e;
 +    }
 +
-+    public int a(World world) {
-+        return this.material == Material.WATER ? 5 : (this.material == Material.LAVA ? (world.worldProvider.g ? 10 : 30) : 0);
++    public int a(World var1) {
++        return this.material == Material.WATER ? 5 : (this.material == Material.LAVA ? (var1.worldProvider.g ? 10 : 30) : 0);
 +    }
 +
-+    public void onPlace(World world, int i, int j, int k) {
-+        this.k(world, i, j, k);
++    public void onPlace(World var1, int var2, int var3, int var4) {
++        this.n(var1, var2, var3, var4);
 +    }
 +
-+    public void doPhysics(World world, int i, int j, int k, int l) {
-+        this.k(world, i, j, k);
++    public void doPhysics(World var1, int var2, int var3, int var4, Block var5) {
++        this.n(var1, var2, var3, var4);
 +    }
 +
-+    private void k(World world, int i, int j, int k) {
-+        if (world.getTypeId(i, j, k) == this.id) {
++    private void n(World var1, int var2, int var3, int var4) {
++        if (var1.getType(var2, var3, var4) == this) {
 +            if (this.material == Material.LAVA) {
-+                boolean flag = false;
++                boolean var5 = false;
 +
-+                if (flag || world.getMaterial(i, j, k - 1) == Material.WATER) {
-+                    flag = true;
++                if (var5 || var1.getType(var2, var3, var4 - 1).getMaterial() == Material.WATER) {
++                    var5 = true;
 +                }
 +
-+                if (flag || world.getMaterial(i, j, k + 1) == Material.WATER) {
-+                    flag = true;
++                if (var5 || var1.getType(var2, var3, var4 + 1).getMaterial() == Material.WATER) {
++                    var5 = true;
 +                }
 +
-+                if (flag || world.getMaterial(i - 1, j, k) == Material.WATER) {
-+                    flag = true;
++                if (var5 || var1.getType(var2 - 1, var3, var4).getMaterial() == Material.WATER) {
++                    var5 = true;
 +                }
 +
-+                if (flag || world.getMaterial(i + 1, j, k) == Material.WATER) {
-+                    flag = true;
++                if (var5 || var1.getType(var2 + 1, var3, var4).getMaterial() == Material.WATER) {
++                    var5 = true;
 +                }
 +
-+                if (flag || world.getMaterial(i, j + 1, k) == Material.WATER) {
-+                    flag = true;
++                if (var5 || var1.getType(var2, var3 + 1, var4).getMaterial() == Material.WATER) {
++                    var5 = true;
 +                }
 +
-+                if (flag) {
-+                    int l = world.getData(i, j, k);
++                if (var5) {
++                    int var6 = var1.getData(var2, var3, var4);
 +
-+                    if (l == 0) {
-+                        world.setTypeIdUpdate(i, j, k, Block.OBSIDIAN.id);
-+                    } else if (l <= 4) {
-+                        world.setTypeIdUpdate(i, j, k, Block.COBBLESTONE.id);
++                    if (var6 == 0) {
++                        var1.setTypeUpdate(var2, var3, var4, Blocks.OBSIDIAN);
++                    } else if (var6 <= 4) {
++                        var1.setTypeUpdate(var2, var3, var4, Blocks.COBBLESTONE);
 +                    }
 +
-+                    this.fizz(world, i, j, k);
++                    this.fizz(var1, var2, var3, var4);
 +                }
 +            }
 +        }
 +    }
 +
-+    protected void fizz(World world, int i, int j, int k) {
-+        world.makeSound((double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), "random.fizz", 0.5F, 2.6F + (world.random.nextFloat() - world.random.nextFloat()) * 0.8F);
++    protected void fizz(World var1, int var2, int var3, int var4) {
++        var1.makeSound((double)((float)var2 + 0.5F), (double)((float)var3 + 0.5F), (double)((float)var4 + 0.5F), "random.fizz", 0.5F, 2.6F + (var1.random.nextFloat() - var1.random.nextFloat()) * 0.8F);
 +
-+        for (int l = 0; l < 8; ++l) {
-+            world.addParticle("largesmoke", (double) i + Math.random(), (double) j + 1.2D, (double) k + Math.random(), 0.0D, 0.0D, 0.0D);
++        for (int var5 = 0; var5 < 8; ++var5) {
++            var1.addParticle("largesmoke", (double)var2 + Math.random(), (double)var3 + 1.2D, (double)var4 + Math.random(), 0.0D, 0.0D, 0.0D);
 +        }
 +    }
-+}
-diff --git a/src/main/java/net/minecraft/server/BlockLockedChest.java b/src/main/java/net/minecraft/server/BlockLockedChest.java
-new file mode 100644
-index 0000000..7aa9b1d
---- /dev/null
-+++ b/src/main/java/net/minecraft/server/BlockLockedChest.java
-@@ -0,0 +1,18 @@
-+package net.minecraft.server;
-+
-+import java.util.Random;
-+
-+public class BlockLockedChest extends Block {
-+
-+    protected BlockLockedChest(int i) {
-+        super(i, Material.WOOD);
-+    }
-+
-+    public boolean canPlace(World world, int i, int j, int k) {
-+        return true;
-+    }
-+
-+    public void a(World world, int i, int j, int k, Random random) {
-+        world.setAir(i, j, k);
-+    }
-+}
-diff --git a/src/main/java/net/minecraft/server/BlockSand.java b/src/main/java/net/minecraft/server/BlockSand.java
-new file mode 100644
-index 0000000..3ca6e41
---- /dev/null
-+++ b/src/main/java/net/minecraft/server/BlockSand.java
-@@ -0,0 +1,78 @@
-+package net.minecraft.server;
-+
-+import java.util.Random;
-+
-+public class BlockSand extends Block {
-+
-+    public static boolean instaFall;
-+
-+    public BlockSand(int i) {
-+        super(i, Material.SAND);
-+        this.a(CreativeModeTab.b);
-+    }
-+
-+    public BlockSand(int i, Material material) {
-+        super(i, material);
-+    }
-+
-+    public void onPlace(World world, int i, int j, int k) {
-+        world.a(i, j, k, this.id, this.a(world));
-+    }
-+
-+    public void doPhysics(World world, int i, int j, int k, int l) {
-+        world.a(i, j, k, this.id, this.a(world));
-+    }
-+
-+    public void a(World world, int i, int j, int k, Random random) {
-+        if (!world.isStatic) {
-+            this.k(world, i, j, k);
-+        }
-+    }
-+
-+    private void k(World world, int i, int j, int k) {
-+        if (canFall(world, i, j - 1, k) && j >= 0) {
-+            byte b0 = 32;
-+
-+            if (!instaFall && world.e(i - b0, j - b0, k - b0, i + b0, j + b0, k + b0)) {
-+                if (!world.isStatic) {
-+                    EntityFallingBlock entityfallingblock = new EntityFallingBlock(world, (double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), this.id, world.getData(i, j, k));
-+
-+                    this.a(entityfallingblock);
-+                    world.addEntity(entityfallingblock);
-+                }
-+            } else {
-+                world.setAir(i, j, k);
-+
-+                while (canFall(world, i, j - 1, k) && j > 0) {
-+                    --j;
-+                }
-+
-+                if (j > 0) {
-+                    world.setTypeIdUpdate(i, j, k, this.id);
-+                }
-+            }
-+        }
-+    }
-+
-+    protected void a(EntityFallingBlock entityfallingblock) {}
-+
-+    public int a(World world) {
-+        return 2;
-+    }
-+
-+    public static boolean canFall(World world, int i, int j, int k) {
-+        int l = world.getTypeId(i, j, k);
-+
-+        if (l == 0) {
-+            return true;
-+        } else if (l == Block.FIRE.id) {
-+            return true;
-+        } else {
-+            Material material = Block.byId[l].material;
-+
-+            return material == Material.WATER ? true : material == Material.LAVA;
-+        }
-+    }
-+
-+    public void a_(World world, int i, int j, int k, int l) {}
 +}
 diff --git a/src/main/java/net/minecraft/server/BlockTNT.java b/src/main/java/net/minecraft/server/BlockTNT.java
 new file mode 100644
-index 0000000..9acd4f2
+index 0000000..d690ebe
 --- /dev/null
 +++ b/src/main/java/net/minecraft/server/BlockTNT.java
-@@ -0,0 +1,80 @@
+@@ -0,0 +1,90 @@
 +package net.minecraft.server;
 +
 +import java.util.Random;
++import net.minecraft.server.Block;
++import net.minecraft.server.CreativeModeTab;
++import net.minecraft.server.Entity;
++import net.minecraft.server.EntityArrow;
++import net.minecraft.server.EntityHuman;
++import net.minecraft.server.EntityLiving;
++import net.minecraft.server.EntityTNTPrimed;
++import net.minecraft.server.Explosion;
++import net.minecraft.server.Items;
++import net.minecraft.server.Material;
++import net.minecraft.server.World;
 +
 +public class BlockTNT extends Block {
 +
-+    public BlockTNT(int i) {
-+        super(i, Material.TNT);
++    public BlockTNT() {
++        super(Material.TNT);
 +        this.a(CreativeModeTab.d);
 +    }
 +
-+    public void onPlace(World world, int i, int j, int k) {
-+        super.onPlace(world, i, j, k);
-+        if (world.isBlockIndirectlyPowered(i, j, k)) {
-+            this.postBreak(world, i, j, k, 1);
-+            world.setAir(i, j, k);
++    public void onPlace(World var1, int var2, int var3, int var4) {
++        super.onPlace(var1, var2, var3, var4);
++
++        if (var1.isBlockIndirectlyPowered(var2, var3, var4)) {
++            this.postBreak(var1, var2, var3, var4, 1);
++            var1.setAir(var2, var3, var4);
 +        }
 +    }
 +
-+    public void doPhysics(World world, int i, int j, int k, int l) {
-+        if (world.isBlockIndirectlyPowered(i, j, k)) {
-+            this.postBreak(world, i, j, k, 1);
-+            world.setAir(i, j, k);
++    public void doPhysics(World var1, int var2, int var3, int var4, Block var5) {
++        if (var1.isBlockIndirectlyPowered(var2, var3, var4)) {
++            this.postBreak(var1, var2, var3, var4, 1);
++            var1.setAir(var2, var3, var4);
 +        }
 +    }
 +
-+    public int a(Random random) {
++    public int a(Random var1) {
 +        return 1;
 +    }
 +
-+    public void wasExploded(World world, int i, int j, int k, Explosion explosion) {
-+        if (!world.isStatic) {
-+            EntityTNTPrimed entitytntprimed = new EntityTNTPrimed(world, (double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), explosion.c());
-+
-+            entitytntprimed.fuseTicks = world.random.nextInt(entitytntprimed.fuseTicks / 4) + entitytntprimed.fuseTicks / 8;
-+            world.addEntity(entitytntprimed);
++    public void wasExploded(World var1, int var2, int var3, int var4, Explosion var5) {
++        if (!var1.isStatic) {
++            EntityTNTPrimed var6 = new EntityTNTPrimed(var1, (double)((float)var2 + 0.5F), (double)((float)var3 + 0.5F), (double)((float)var4 + 0.5F), var5.c());
++            var6.fuseTicks = var1.random.nextInt(var6.fuseTicks / 4) + var6.fuseTicks / 8;
++            var1.addEntity(var6);
 +        }
 +    }
 +
-+    public void postBreak(World world, int i, int j, int k, int l) {
-+        this.a(world, i, j, k, l, (EntityLiving) null);
++    public void postBreak(World var1, int var2, int var3, int var4, int var5) {
++        this.a(var1, var2, var3, var4, var5, (EntityLiving)null);
 +    }
 +
-+    public void a(World world, int i, int j, int k, int l, EntityLiving entityliving) {
-+        if (!world.isStatic) {
-+            if ((l & 1) == 1) {
-+                EntityTNTPrimed entitytntprimed = new EntityTNTPrimed(world, (double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), entityliving);
-+
-+                world.addEntity(entitytntprimed);
-+                world.makeSound(entitytntprimed, "random.fuse", 1.0F, 1.0F);
++    public void a(World var1, int var2, int var3, int var4, int var5, EntityLiving var6) {
++        if (!var1.isStatic) {
++            if ((var5 & 1) == 1) {
++                EntityTNTPrimed var7 = new EntityTNTPrimed(var1, (double)((float)var2 + 0.5F), (double)((float)var3 + 0.5F), (double)((float)var4 + 0.5F), var6);
++                var1.addEntity(var7);
++                var1.makeSound(var7, "game.tnt.primed", 1.0F, 1.0F);
 +            }
 +        }
 +    }
 +
-+    public boolean interact(World world, int i, int j, int k, EntityHuman entityhuman, int l, float f, float f1, float f2) {
-+        if (entityhuman.by() != null && entityhuman.by().id == Item.FLINT_AND_STEEL.id) {
-+            this.a(world, i, j, k, 1, entityhuman);
-+            world.setAir(i, j, k);
-+            entityhuman.by().damage(1, entityhuman);
++    public boolean interact(World var1, int var2, int var3, int var4, EntityHuman var5, int var6, float var7, float var8, float var9) {
++        if (var5.bD() != null && var5.bD().getItem() == Items.FLINT_AND_STEEL) {
++            this.a(var1, var2, var3, var4, 1, var5);
++            var1.setAir(var2, var3, var4);
++            var5.bD().damage(1, var5);
 +            return true;
 +        } else {
-+            return super.interact(world, i, j, k, entityhuman, l, f, f1, f2);
++            return super.interact(var1, var2, var3, var4, var5, var6, var7, var8, var9);
 +        }
 +    }
 +
-+    public void a(World world, int i, int j, int k, Entity entity) {
-+        if (entity instanceof EntityArrow && !world.isStatic) {
-+            EntityArrow entityarrow = (EntityArrow) entity;
++    public void a(World var1, int var2, int var3, int var4, Entity var5) {
++        if (var5 instanceof EntityArrow && !var1.isStatic) {
++            EntityArrow var6 = (EntityArrow)var5;
 +
-+            if (entityarrow.isBurning()) {
-+                this.a(world, i, j, k, 1, entityarrow.shooter instanceof EntityLiving ? (EntityLiving) entityarrow.shooter : null);
-+                world.setAir(i, j, k);
++            if (var6.isBurning()) {
++                this.a(var1, var2, var3, var4, 1, var6.shooter instanceof EntityLiving ? (EntityLiving)var6.shooter : null);
++                var1.setAir(var2, var3, var4);
 +            }
 +        }
 +    }
 +
-+    public boolean a(Explosion explosion) {
++    public boolean a(Explosion var1) {
 +        return false;
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/DataWatcher.java b/src/main/java/net/minecraft/server/DataWatcher.java
 new file mode 100644
-index 0000000..f5935f7
+index 0000000..d90b0e1
 --- /dev/null
 +++ b/src/main/java/net/minecraft/server/DataWatcher.java
-@@ -0,0 +1,295 @@
+@@ -0,0 +1,297 @@
 +package net.minecraft.server;
 +
-+import java.io.DataInput;
-+import java.io.DataOutput;
-+import java.io.IOException;
 +import java.util.ArrayList;
 +import java.util.HashMap;
 +import java.util.Iterator;
@@ -454,323 +449,330 @@ index 0000000..f5935f7
 +import java.util.Map;
 +import java.util.concurrent.locks.ReadWriteLock;
 +import java.util.concurrent.locks.ReentrantReadWriteLock;
++import net.minecraft.server.ChunkCoordinates;
++import net.minecraft.server.CrashReport;
++import net.minecraft.server.CrashReportSystemDetails;
++import net.minecraft.server.Entity;
++import net.minecraft.server.ItemStack;
++import net.minecraft.server.PacketDataSerializer;
++import net.minecraft.server.ReportedException;
++import net.minecraft.server.WatchableObject;
++import net.minecraft.util.org.apache.commons.lang3.ObjectUtils;
 +
 +public class DataWatcher {
 +
-+    private boolean a = true;
-+    private static final HashMap b = new HashMap();
-+    private final Map c = new HashMap();
-+    private boolean d;
-+    private ReadWriteLock e = new ReentrantReadWriteLock();
++    private final Entity a;
++    private boolean b = true;
++    private static final HashMap c = new HashMap();
++    private final Map d = new HashMap();
++    private boolean e;
++    private ReadWriteLock f = new ReentrantReadWriteLock();
 +
-+    public DataWatcher() {}
 +
-+    public void a(int i, Object object) {
-+        Integer integer = (Integer) b.get(object.getClass());
++    public DataWatcher(Entity var1) {
++        this.a = var1;
++    }
 +
-+        if (integer == null) {
-+            throw new IllegalArgumentException("Unknown data type: " + object.getClass());
-+        } else if (i > 31) {
-+            throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 31 + ")");
-+        } else if (this.c.containsKey(Integer.valueOf(i))) {
-+            throw new IllegalArgumentException("Duplicate id value for " + i + "!");
++    public void a(int var1, Object var2) {
++        Integer var3 = (Integer)c.get(var2.getClass());
++
++        if (var3 == null) {
++            throw new IllegalArgumentException("Unknown data type: " + var2.getClass());
++        } else if (var1 > 31) {
++            throw new IllegalArgumentException("Data value id is too big with " + var1 + "! (Max is " + 31 + ")");
++        } else if (this.d.containsKey(Integer.valueOf(var1))) {
++            throw new IllegalArgumentException("Duplicate id value for " + var1 + "!");
 +        } else {
-+            WatchableObject watchableobject = new WatchableObject(integer.intValue(), i, object);
-+
-+            this.e.writeLock().lock();
-+            this.c.put(Integer.valueOf(i), watchableobject);
-+            this.e.writeLock().unlock();
-+            this.a = false;
++            WatchableObject var4 = new WatchableObject(var3.intValue(), var1, var2);
++            this.f.writeLock().lock();
++            this.d.put(Integer.valueOf(var1), var4);
++            this.f.writeLock().unlock();
++            this.b = false;
 +        }
 +    }
 +
-+    public void a(int i, int j) {
-+        WatchableObject watchableobject = new WatchableObject(j, i, null);
-+
-+        this.e.writeLock().lock();
-+        this.c.put(Integer.valueOf(i), watchableobject);
-+        this.e.writeLock().unlock();
-+        this.a = false;
++    public void a(int var1, int var2) {
++        WatchableObject var3 = new WatchableObject(var2, var1, (Object)null);
++        this.f.writeLock().lock();
++        this.d.put(Integer.valueOf(var1), var3);
++        this.f.writeLock().unlock();
++        this.b = false;
 +    }
 +
-+    public byte getByte(int i) {
-+        return ((Byte) this.i(i).b()).byteValue();
++    public byte getByte(int var1) {
++        return ((Byte)this.i(var1).b()).byteValue();
 +    }
 +
-+    public short getShort(int i) {
-+        return ((Short) this.i(i).b()).shortValue();
++    public short getShort(int var1) {
++        return ((Short)this.i(var1).b()).shortValue();
 +    }
 +
-+    public int getInt(int i) {
-+        return ((Integer) this.i(i).b()).intValue();
++    public int getInt(int var1) {
++        return ((Integer)this.i(var1).b()).intValue();
 +    }
 +
-+    public float getFloat(int i) {
-+        return ((Float) this.i(i).b()).floatValue();
++    public float getFloat(int var1) {
++        return ((Float)this.i(var1).b()).floatValue();
 +    }
 +
-+    public String getString(int i) {
-+        return (String) this.i(i).b();
++    public String getString(int var1) {
++        return (String)this.i(var1).b();
 +    }
 +
-+    public ItemStack getItemStack(int i) {
-+        return (ItemStack) this.i(i).b();
++    public ItemStack getItemStack(int var1) {
++        return (ItemStack)this.i(var1).b();
 +    }
 +
-+    private WatchableObject i(int i) {
-+        this.e.readLock().lock();
-+
-+        WatchableObject watchableobject;
++    private WatchableObject i(int var1) {
++        this.f.readLock().lock();
++        WatchableObject var2;
 +
 +        try {
-+            watchableobject = (WatchableObject) this.c.get(Integer.valueOf(i));
-+        } catch (Throwable throwable) {
-+            CrashReport crashreport = CrashReport.a(throwable, "Getting synched entity data");
-+            CrashReportSystemDetails crashreportsystemdetails = crashreport.a("Synched entity data");
-+
-+            crashreportsystemdetails.a("Data ID", Integer.valueOf(i));
-+            throw new ReportedException(crashreport);
++            var2 = (WatchableObject)this.d.get(Integer.valueOf(var1));
++        } catch (Throwable var6) {
++            CrashReport var4 = CrashReport.a(var6, "Getting synched entity data");
++            CrashReportSystemDetails var5 = var4.a("Synched entity data");
++            var5.a("Data ID", (Object)Integer.valueOf(var1));
++            throw new ReportedException(var4);
 +        }
 +
-+        this.e.readLock().unlock();
-+        return watchableobject;
++        this.f.readLock().unlock();
++        return var2;
 +    }
 +
-+    public void watch(int i, Object object) {
-+        WatchableObject watchableobject = this.i(i);
++    public void watch(int var1, Object var2) {
++        WatchableObject var3 = this.i(var1);
 +
-+        if (!object.equals(watchableobject.b())) {
-+            watchableobject.a(object);
-+            watchableobject.a(true);
-+            this.d = true;
++        if (ObjectUtils.notEqual(var2, var3.b())) {
++            var3.a(var2);
++            this.a.i(var1);
++            var3.a(true);
++            this.e = true;
 +        }
 +    }
 +
-+    public void h(int i) {
-+        this.i(i).a(true); // CraftBukkit - visibility decompile fix
-+        this.d = true;
++    public void h(int var1) {
++        WatchableObject.a(this.i(var1), true);
++        this.e = true;
 +    }
 +
 +    public boolean a() {
-+        return this.d;
++        return this.e;
 +    }
 +
-+    public static void a(List list, DataOutput dataoutput) throws IOException {
-+        if (list != null) {
-+            Iterator iterator = list.iterator();
++    public static void a(List var0, PacketDataSerializer var1) {
++        if (var0 != null) {
++            Iterator var2 = var0.iterator();
 +
-+            while (iterator.hasNext()) {
-+                WatchableObject watchableobject = (WatchableObject) iterator.next();
-+
-+                a(dataoutput, watchableobject);
++            while (var2.hasNext()) {
++                WatchableObject var3 = (WatchableObject)var2.next();
++                a(var1, var3);
 +            }
 +        }
 +
-+        dataoutput.writeByte(127);
++        var1.writeByte(127);
 +    }
 +
 +    public List b() {
-+        ArrayList arraylist = null;
++        ArrayList var1 = null;
 +
-+        if (this.d) {
-+            this.e.readLock().lock();
-+            Iterator iterator = this.c.values().iterator();
++        if (this.e) {
++            this.f.readLock().lock();
++            Iterator var2 = this.d.values().iterator();
 +
-+            while (iterator.hasNext()) {
-+                WatchableObject watchableobject = (WatchableObject) iterator.next();
++            while (var2.hasNext()) {
++                WatchableObject var3 = (WatchableObject)var2.next();
 +
-+                if (watchableobject.d()) {
-+                    watchableobject.a(false);
-+                    if (arraylist == null) {
-+                        arraylist = new ArrayList();
++                if (var3.d()) {
++                    var3.a(false);
++
++                    if (var1 == null) {
++                        var1 = new ArrayList();
 +                    }
 +
-+                    arraylist.add(watchableobject);
++                    var1.add(var3);
 +                }
 +            }
 +
-+            this.e.readLock().unlock();
++            this.f.readLock().unlock();
 +        }
 +
-+        this.d = false;
-+        return arraylist;
++        this.e = false;
++        return var1;
 +    }
 +
-+    public void a(DataOutput dataoutput) throws IOException {
-+        this.e.readLock().lock();
-+        Iterator iterator = this.c.values().iterator();
++    public void a(PacketDataSerializer var1) {
++        this.f.readLock().lock();
++        Iterator var2 = this.d.values().iterator();
 +
-+        while (iterator.hasNext()) {
-+            WatchableObject watchableobject = (WatchableObject) iterator.next();
-+
-+            a(dataoutput, watchableobject);
++        while (var2.hasNext()) {
++            WatchableObject var3 = (WatchableObject)var2.next();
++            a(var1, var3);
 +        }
 +
-+        this.e.readLock().unlock();
-+        dataoutput.writeByte(127);
++        this.f.readLock().unlock();
++        var1.writeByte(127);
 +    }
 +
 +    public List c() {
-+        ArrayList arraylist = null;
++        ArrayList var1 = null;
++        this.f.readLock().lock();
++        WatchableObject var3;
 +
-+        this.e.readLock().lock();
++        for (Iterator var2 = this.d.values().iterator(); var2.hasNext(); var1.add(var3)) {
++            var3 = (WatchableObject)var2.next();
 +
-+        WatchableObject watchableobject;
-+
-+        for (Iterator iterator = this.c.values().iterator(); iterator.hasNext(); arraylist.add(watchableobject)) {
-+            watchableobject = (WatchableObject) iterator.next();
-+            if (arraylist == null) {
-+                arraylist = new ArrayList();
++            if (var1 == null) {
++                var1 = new ArrayList();
 +            }
 +        }
 +
-+        this.e.readLock().unlock();
-+        return arraylist;
++        this.f.readLock().unlock();
++        return var1;
 +    }
 +
-+    private static void a(DataOutput dataoutput, WatchableObject watchableobject) throws IOException {
-+        int i = (watchableobject.c() << 5 | watchableobject.a() & 31) & 255;
++    private static void a(PacketDataSerializer var0, WatchableObject var1) {
++        int var2 = (var1.c() << 5 | var1.a() & 31) & 255;
++        var0.writeByte(var2);
 +
-+        dataoutput.writeByte(i);
-+        switch (watchableobject.c()) {
-+        case 0:
-+            dataoutput.writeByte(((Byte) watchableobject.b()).byteValue());
-+            break;
-+
-+        case 1:
-+            dataoutput.writeShort(((Short) watchableobject.b()).shortValue());
-+            break;
-+
-+        case 2:
-+            dataoutput.writeInt(((Integer) watchableobject.b()).intValue());
-+            break;
-+
-+        case 3:
-+            dataoutput.writeFloat(((Float) watchableobject.b()).floatValue());
-+            break;
-+
-+        case 4:
-+            Packet.a((String) watchableobject.b(), dataoutput);
-+            break;
-+
-+        case 5:
-+            ItemStack itemstack = (ItemStack) watchableobject.b();
-+
-+            Packet.a(itemstack, dataoutput);
-+            break;
-+
-+        case 6:
-+            ChunkCoordinates chunkcoordinates = (ChunkCoordinates) watchableobject.b();
-+
-+            dataoutput.writeInt(chunkcoordinates.x);
-+            dataoutput.writeInt(chunkcoordinates.y);
-+            dataoutput.writeInt(chunkcoordinates.z);
-+        }
-+    }
-+
-+    public static List a(DataInput datainput) throws IOException {
-+        ArrayList arraylist = null;
-+
-+        for (byte b0 = datainput.readByte(); b0 != 127; b0 = datainput.readByte()) {
-+            if (arraylist == null) {
-+                arraylist = new ArrayList();
-+            }
-+
-+            int i = (b0 & 224) >> 5;
-+            int j = b0 & 31;
-+            WatchableObject watchableobject = null;
-+
-+            switch (i) {
++        switch (var1.c()) {
 +            case 0:
-+                watchableobject = new WatchableObject(i, j, Byte.valueOf(datainput.readByte()));
++                var0.writeByte(((Byte)var1.b()).byteValue());
 +                break;
 +
 +            case 1:
-+                watchableobject = new WatchableObject(i, j, Short.valueOf(datainput.readShort()));
++                var0.writeShort(((Short)var1.b()).shortValue());
 +                break;
 +
 +            case 2:
-+                watchableobject = new WatchableObject(i, j, Integer.valueOf(datainput.readInt()));
++                var0.writeInt(((Integer)var1.b()).intValue());
 +                break;
 +
 +            case 3:
-+                watchableobject = new WatchableObject(i, j, Float.valueOf(datainput.readFloat()));
++                var0.writeFloat(((Float)var1.b()).floatValue());
 +                break;
 +
 +            case 4:
-+                watchableobject = new WatchableObject(i, j, Packet.a(datainput, 64));
++                var0.a((String)var1.b());
 +                break;
 +
 +            case 5:
-+                watchableobject = new WatchableObject(i, j, Packet.c(datainput));
++                ItemStack var4 = (ItemStack)var1.b();
++                var0.a(var4);
 +                break;
 +
 +            case 6:
-+                int k = datainput.readInt();
-+                int l = datainput.readInt();
-+                int i1 = datainput.readInt();
++                ChunkCoordinates var3 = (ChunkCoordinates)var1.b();
++                var0.writeInt(var3.x);
++                var0.writeInt(var3.y);
++                var0.writeInt(var3.z);
++        }
++    }
 +
-+                watchableobject = new WatchableObject(i, j, new ChunkCoordinates(k, l, i1));
++    public static List b(PacketDataSerializer var0) {
++        ArrayList var1 = null;
++
++        for (byte var2 = var0.readByte(); var2 != 127; var2 = var0.readByte()) {
++            if (var1 == null) {
++                var1 = new ArrayList();
 +            }
 +
-+            arraylist.add(watchableobject);
++            int var3 = (var2 & 224) >> 5;
++            int var4 = var2 & 31;
++            WatchableObject var5 = null;
++
++            switch (var3) {
++                case 0:
++                    var5 = new WatchableObject(var3, var4, Byte.valueOf(var0.readByte()));
++                    break;
++
++                case 1:
++                    var5 = new WatchableObject(var3, var4, Short.valueOf(var0.readShort()));
++                    break;
++
++                case 2:
++                    var5 = new WatchableObject(var3, var4, Integer.valueOf(var0.readInt()));
++                    break;
++
++                case 3:
++                    var5 = new WatchableObject(var3, var4, Float.valueOf(var0.readFloat()));
++                    break;
++
++                case 4:
++                    var5 = new WatchableObject(var3, var4, var0.c(32767));
++                    break;
++
++                case 5:
++                    var5 = new WatchableObject(var3, var4, var0.c());
++                    break;
++
++                case 6:
++                    int var6 = var0.readInt();
++                    int var7 = var0.readInt();
++                    int var8 = var0.readInt();
++                    var5 = new WatchableObject(var3, var4, new ChunkCoordinates(var6, var7, var8));
++            }
++
++            var1.add(var5);
 +        }
 +
-+        return arraylist;
++        return var1;
 +    }
 +
 +    public boolean d() {
-+        return this.a;
++        return this.b;
 +    }
 +
 +    public void e() {
-+        this.d = false;
++        this.e = false;
 +    }
 +
 +    static {
-+        b.put(Byte.class, Integer.valueOf(0));
-+        b.put(Short.class, Integer.valueOf(1));
-+        b.put(Integer.class, Integer.valueOf(2));
-+        b.put(Float.class, Integer.valueOf(3));
-+        b.put(String.class, Integer.valueOf(4));
-+        b.put(ItemStack.class, Integer.valueOf(5));
-+        b.put(ChunkCoordinates.class, Integer.valueOf(6));
++        c.put(Byte.class, Integer.valueOf(0));
++        c.put(Short.class, Integer.valueOf(1));
++        c.put(Integer.class, Integer.valueOf(2));
++        c.put(Float.class, Integer.valueOf(3));
++        c.put(String.class, Integer.valueOf(4));
++        c.put(ItemStack.class, Integer.valueOf(5));
++        c.put(ChunkCoordinates.class, Integer.valueOf(6));
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/NextTickListEntry.java b/src/main/java/net/minecraft/server/NextTickListEntry.java
 new file mode 100644
-index 0000000..acf8838
+index 0000000..f150b86
 --- /dev/null
 +++ b/src/main/java/net/minecraft/server/NextTickListEntry.java
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,63 @@
 +package net.minecraft.server;
++
++import net.minecraft.server.Block;
 +
 +public class NextTickListEntry implements Comparable {
 +
-+    private static long g;
++    private static long f;
++    private final Block g;
 +    public int a;
 +    public int b;
 +    public int c;
-+    public int d;
-+    public long e;
-+    public int f;
++    public long d;
++    public int e;
 +    private long h;
 +
-+    public NextTickListEntry(int i, int j, int k, int l) {
-+        this.h = (long) (g++);
-+        this.a = i;
-+        this.b = j;
-+        this.c = k;
-+        this.d = l;
++
++    public NextTickListEntry(int var1, int var2, int var3, Block var4) {
++        this.h = (long)(f++);
++        this.a = var1;
++        this.b = var2;
++        this.c = var3;
++        this.g = var4;
 +    }
 +
-+    public boolean equals(Object object) {
-+        if (!(object instanceof NextTickListEntry)) {
++    public boolean equals(Object var1) {
++        if (!(var1 instanceof NextTickListEntry)) {
 +            return false;
 +        } else {
-+            NextTickListEntry nextticklistentry = (NextTickListEntry) object;
-+
-+            return this.a == nextticklistentry.a && this.b == nextticklistentry.b && this.c == nextticklistentry.c && Block.b(this.d, nextticklistentry.d);
++            NextTickListEntry var2 = (NextTickListEntry)var1;
++            return this.a == var2.a && this.b == var2.b && this.c == var2.c && Block.a(this.g, var2.g);
 +        }
 +    }
 +
@@ -778,34 +780,40 @@ index 0000000..acf8838
 +        return (this.a * 1024 * 1024 + this.c * 1024 + this.b) * 256;
 +    }
 +
-+    public NextTickListEntry a(long i) {
-+        this.e = i;
++    public NextTickListEntry a(long var1) {
++        this.d = var1;
 +        return this;
 +    }
 +
-+    public void a(int i) {
-+        this.f = i;
++    public void a(int var1) {
++        this.e = var1;
 +    }
 +
-+    public int compareTo(NextTickListEntry nextticklistentry) {
-+        return this.e < nextticklistentry.e ? -1 : (this.e > nextticklistentry.e ? 1 : (this.f != nextticklistentry.f ? this.f - nextticklistentry.f : (this.h < nextticklistentry.h ? -1 : (this.h > nextticklistentry.h ? 1 : 0))));
++    public int compareTo(NextTickListEntry var1) {
++        return this.d < var1.d ? -1 : (this.d > var1.d ? 1 : (this.e != var1.e ? this.e - var1.e : (this.h < var1.h ? -1 : (this.h > var1.h ? 1 : 0))));
 +    }
 +
 +    public String toString() {
-+        return this.d + ": (" + this.a + ", " + this.b + ", " + this.c + "), " + this.e + ", " + this.f + ", " + this.h;
++        return Block.b(this.g) + ": (" + this.a + ", " + this.b + ", " + this.c + "), " + this.d + ", " + this.e + ", " + this.h;
 +    }
 +
-+    public int compareTo(Object object) {
-+        return this.compareTo((NextTickListEntry) object);
++    public Block a() {
++        return this.g;
++    }
++
++    // $FF: synthetic method
++    public int compareTo(Object var1) {
++        return this.compareTo((NextTickListEntry)var1);
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/NibbleArray.java b/src/main/java/net/minecraft/server/NibbleArray.java
 new file mode 100644
-index 0000000..5d75a54
+index 0000000..55f3aec
 --- /dev/null
 +++ b/src/main/java/net/minecraft/server/NibbleArray.java
-@@ -0,0 +1,40 @@
+@@ -0,0 +1,41 @@
 +package net.minecraft.server;
++
 +
 +public class NibbleArray {
 +
@@ -813,415 +821,440 @@ index 0000000..5d75a54
 +    private final int b;
 +    private final int c;
 +
-+    public NibbleArray(int i, int j) {
-+        this.a = new byte[i >> 1];
-+        this.b = j;
-+        this.c = j + 4;
++
++    public NibbleArray(int var1, int var2) {
++        this.a = new byte[var1 >> 1];
++        this.b = var2;
++        this.c = var2 + 4;
 +    }
 +
-+    public NibbleArray(byte[] abyte, int i) {
-+        this.a = abyte;
-+        this.b = i;
-+        this.c = i + 4;
++    public NibbleArray(byte[] var1, int var2) {
++        this.a = var1;
++        this.b = var2;
++        this.c = var2 + 4;
 +    }
 +
-+    public int a(int i, int j, int k) {
-+        int l = j << this.c | k << this.b | i;
-+        int i1 = l >> 1;
-+        int j1 = l & 1;
-+
-+        return j1 == 0 ? this.a[i1] & 15 : this.a[i1] >> 4 & 15;
++    public int a(int var1, int var2, int var3) {
++        int var4 = var2 << this.c | var3 << this.b | var1;
++        int var5 = var4 >> 1;
++        int var6 = var4 & 1;
++        return var6 == 0 ? this.a[var5] & 15 : this.a[var5] >> 4 & 15;
 +    }
 +
-+    public void a(int i, int j, int k, int l) {
-+        int i1 = j << this.c | k << this.b | i;
-+        int j1 = i1 >> 1;
-+        int k1 = i1 & 1;
++    public void a(int var1, int var2, int var3, int var4) {
++        int var5 = var2 << this.c | var3 << this.b | var1;
++        int var6 = var5 >> 1;
++        int var7 = var5 & 1;
 +
-+        if (k1 == 0) {
-+            this.a[j1] = (byte) (this.a[j1] & 240 | l & 15);
++        if (var7 == 0) {
++            this.a[var6] = (byte)(this.a[var6] & 240 | var4 & 15);
 +        } else {
-+            this.a[j1] = (byte) (this.a[j1] & 15 | (l & 15) << 4);
++            this.a[var6] = (byte)(this.a[var6] & 15 | (var4 & 15) << 4);
 +        }
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/OldChunkLoader.java b/src/main/java/net/minecraft/server/OldChunkLoader.java
 new file mode 100644
-index 0000000..53c1cb5
+index 0000000..76f1a9e
 --- /dev/null
 +++ b/src/main/java/net/minecraft/server/OldChunkLoader.java
-@@ -0,0 +1,120 @@
+@@ -0,0 +1,124 @@
 +package net.minecraft.server;
++
++import net.minecraft.server.NBTTagCompound;
++import net.minecraft.server.NBTTagList;
++import net.minecraft.server.NibbleArray;
++import net.minecraft.server.OldChunk;
++import net.minecraft.server.OldNibbleArray;
++import net.minecraft.server.WorldChunkManager;
 +
 +public class OldChunkLoader {
 +
-+    public static OldChunk a(NBTTagCompound nbttagcompound) {
-+        int i = nbttagcompound.getInt("xPos");
-+        int j = nbttagcompound.getInt("zPos");
-+        OldChunk oldchunk = new OldChunk(i, j);
-+
-+        oldchunk.g = nbttagcompound.getByteArray("Blocks");
-+        oldchunk.f = new OldNibbleArray(nbttagcompound.getByteArray("Data"), 7);
-+        oldchunk.e = new OldNibbleArray(nbttagcompound.getByteArray("SkyLight"), 7);
-+        oldchunk.d = new OldNibbleArray(nbttagcompound.getByteArray("BlockLight"), 7);
-+        oldchunk.c = nbttagcompound.getByteArray("HeightMap");
-+        oldchunk.b = nbttagcompound.getBoolean("TerrainPopulated");
-+        oldchunk.h = nbttagcompound.getList("Entities");
-+        oldchunk.i = nbttagcompound.getList("TileEntities");
-+        oldchunk.j = nbttagcompound.getList("TileTicks");
++    public static OldChunk a(NBTTagCompound var0) {
++        int var1 = var0.getInt("xPos");
++        int var2 = var0.getInt("zPos");
++        OldChunk var3 = new OldChunk(var1, var2);
++        var3.g = var0.getByteArray("Blocks");
++        var3.f = new OldNibbleArray(var0.getByteArray("Data"), 7);
++        var3.e = new OldNibbleArray(var0.getByteArray("SkyLight"), 7);
++        var3.d = new OldNibbleArray(var0.getByteArray("BlockLight"), 7);
++        var3.c = var0.getByteArray("HeightMap");
++        var3.b = var0.getBoolean("TerrainPopulated");
++        var3.h = var0.getList("Entities", 10);
++        var3.i = var0.getList("TileEntities", 10);
++        var3.j = var0.getList("TileTicks", 10);
 +
 +        try {
-+            oldchunk.a = nbttagcompound.getLong("LastUpdate");
-+        } catch (ClassCastException classcastexception) {
-+            oldchunk.a = (long) nbttagcompound.getInt("LastUpdate");
++            var3.a = var0.getLong("LastUpdate");
++        } catch (ClassCastException var5) {
++            var3.a = (long)var0.getInt("LastUpdate");
 +        }
 +
-+        return oldchunk;
++        return var3;
 +    }
 +
-+    public static void a(OldChunk oldchunk, NBTTagCompound nbttagcompound, WorldChunkManager worldchunkmanager) {
-+        nbttagcompound.setInt("xPos", oldchunk.k);
-+        nbttagcompound.setInt("zPos", oldchunk.l);
-+        nbttagcompound.setLong("LastUpdate", oldchunk.a);
-+        int[] aint = new int[oldchunk.c.length];
++    public static void a(OldChunk var0, NBTTagCompound var1, WorldChunkManager var2) {
++        var1.setInt("xPos", var0.k);
++        var1.setInt("zPos", var0.l);
++        var1.setLong("LastUpdate", var0.a);
++        int[] var3 = new int[var0.c.length];
 +
-+        for (int i = 0; i < oldchunk.c.length; ++i) {
-+            aint[i] = oldchunk.c[i];
++        for (int var4 = 0; var4 < var0.c.length; ++var4) {
++            var3[var4] = var0.c[var4];
 +        }
 +
-+        nbttagcompound.setIntArray("HeightMap", aint);
-+        nbttagcompound.setBoolean("TerrainPopulated", oldchunk.b);
-+        NBTTagList nbttaglist = new NBTTagList("Sections");
++        var1.setIntArray("HeightMap", var3);
++        var1.setBoolean("TerrainPopulated", var0.b);
++        NBTTagList var16 = new NBTTagList();
++        int var7;
 +
-+        int j;
++        for (int var5 = 0; var5 < 8; ++var5) {
++            boolean var6 = true;
 +
-+        for (int k = 0; k < 8; ++k) {
-+            boolean flag = true;
++            for (var7 = 0; var7 < 16 && var6; ++var7) {
++                int var8 = 0;
 +
-+            for (j = 0; j < 16 && flag; ++j) {
-+                int l = 0;
-+
-+                while (l < 16 && flag) {
-+                    int i1 = 0;
++                while (var8 < 16 && var6) {
++                    int var9 = 0;
 +
 +                    while (true) {
-+                        if (i1 < 16) {
-+                            int j1 = j << 11 | i1 << 7 | l + (k << 4);
-+                            byte b0 = oldchunk.g[j1];
++                        if (var9 < 16) {
++                            int var10 = var7 << 11 | var9 << 7 | var8 + (var5 << 4);
++                            byte var11 = var0.g[var10];
 +
-+                            if (b0 == 0) {
-+                                ++i1;
++                            if (var11 == 0) {
++                                ++var9;
 +                                continue;
 +                            }
 +
-+                            flag = false;
++                            var6 = false;
 +                        }
 +
-+                        ++l;
++                        ++var8;
 +                        break;
 +                    }
 +                }
 +            }
 +
-+            if (!flag) {
-+                byte[] abyte = new byte[4096];
-+                NibbleArray nibblearray = new NibbleArray(abyte.length, 4);
-+                NibbleArray nibblearray1 = new NibbleArray(abyte.length, 4);
-+                NibbleArray nibblearray2 = new NibbleArray(abyte.length, 4);
++            if (!var6) {
++                byte[] var19 = new byte[4096];
++                NibbleArray var20 = new NibbleArray(var19.length, 4);
++                NibbleArray var21 = new NibbleArray(var19.length, 4);
++                NibbleArray var23 = new NibbleArray(var19.length, 4);
 +
-+                for (int k1 = 0; k1 < 16; ++k1) {
-+                    for (int l1 = 0; l1 < 16; ++l1) {
-+                        for (int i2 = 0; i2 < 16; ++i2) {
-+                            int j2 = k1 << 11 | i2 << 7 | l1 + (k << 4);
-+                            byte b1 = oldchunk.g[j2];
-+
-+                            abyte[l1 << 8 | i2 << 4 | k1] = (byte) (b1 & 255);
-+                            nibblearray.a(k1, l1, i2, oldchunk.f.a(k1, l1 + (k << 4), i2));
-+                            nibblearray1.a(k1, l1, i2, oldchunk.e.a(k1, l1 + (k << 4), i2));
-+                            nibblearray2.a(k1, l1, i2, oldchunk.d.a(k1, l1 + (k << 4), i2));
++                for (int var22 = 0; var22 < 16; ++var22) {
++                    for (int var12 = 0; var12 < 16; ++var12) {
++                        for (int var13 = 0; var13 < 16; ++var13) {
++                            int var14 = var22 << 11 | var13 << 7 | var12 + (var5 << 4);
++                            byte var15 = var0.g[var14];
++                            var19[var12 << 8 | var13 << 4 | var22] = (byte)(var15 & 255);
++                            var20.a(var22, var12, var13, var0.f.a(var22, var12 + (var5 << 4), var13));
++                            var21.a(var22, var12, var13, var0.e.a(var22, var12 + (var5 << 4), var13));
++                            var23.a(var22, var12, var13, var0.d.a(var22, var12 + (var5 << 4), var13));
 +                        }
 +                    }
 +                }
 +
-+                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-+
-+                nbttagcompound1.setByte("Y", (byte) (k & 255));
-+                nbttagcompound1.setByteArray("Blocks", abyte);
-+                nbttagcompound1.setByteArray("Data", nibblearray.a);
-+                nbttagcompound1.setByteArray("SkyLight", nibblearray1.a);
-+                nbttagcompound1.setByteArray("BlockLight", nibblearray2.a);
-+                nbttaglist.add(nbttagcompound1);
++                NBTTagCompound var24 = new NBTTagCompound();
++                var24.setByte("Y", (byte)(var5 & 255));
++                var24.setByteArray("Blocks", var19);
++                var24.setByteArray("Data", var20.a);
++                var24.setByteArray("SkyLight", var21.a);
++                var24.setByteArray("BlockLight", var23.a);
++                var16.add(var24);
 +            }
 +        }
 +
-+        nbttagcompound.set("Sections", nbttaglist);
-+        byte[] abyte1 = new byte[256];
++        var1.set("Sections", var16);
++        byte[] var17 = new byte[256];
 +
-+        for (int k2 = 0; k2 < 16; ++k2) {
-+            for (j = 0; j < 16; ++j) {
-+                abyte1[j << 4 | k2] = (byte) (worldchunkmanager.getBiome(oldchunk.k << 4 | k2, oldchunk.l << 4 | j).id & 255);
++        for (int var18 = 0; var18 < 16; ++var18) {
++            for (var7 = 0; var7 < 16; ++var7) {
++                var17[var7 << 4 | var18] = (byte)(var2.getBiome(var0.k << 4 | var18, var0.l << 4 | var7).id & 255);
 +            }
 +        }
 +
-+        nbttagcompound.setByteArray("Biomes", abyte1);
-+        nbttagcompound.set("Entities", oldchunk.h);
-+        nbttagcompound.set("TileEntities", oldchunk.i);
-+        if (oldchunk.j != null) {
-+            nbttagcompound.set("TileTicks", oldchunk.j);
++        var1.setByteArray("Biomes", var17);
++        var1.set("Entities", var0.h);
++        var1.set("TileEntities", var0.i);
++
++        if (var0.j != null) {
++            var1.set("TileTicks", var0.j);
 +        }
 +    }
 +}
-diff --git a/src/main/java/net/minecraft/server/Packet40EntityMetadata.java b/src/main/java/net/minecraft/server/Packet40EntityMetadata.java
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java b/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java
 new file mode 100644
-index 0000000..54299a7
+index 0000000..2ed47fb
 --- /dev/null
-+++ b/src/main/java/net/minecraft/server/Packet40EntityMetadata.java
-@@ -0,0 +1,41 @@
++++ b/src/main/java/net/minecraft/server/PacketPlayOutEntityMetadata.java
+@@ -0,0 +1,47 @@
 +package net.minecraft.server;
 +
-+import java.io.DataInput;
-+import java.io.DataOutput;
-+import java.io.IOException;
 +import java.util.List;
++import net.minecraft.server.DataWatcher;
++import net.minecraft.server.Packet;
++import net.minecraft.server.PacketDataSerializer;
++import net.minecraft.server.PacketListener;
++import net.minecraft.server.PacketPlayOutListener;
 +
-+public class Packet40EntityMetadata extends Packet {
++public class PacketPlayOutEntityMetadata extends Packet {
 +
-+    public int a;
++    private int a;
 +    private List b;
 +
-+    public Packet40EntityMetadata() {}
 +
-+    public Packet40EntityMetadata(int i, DataWatcher datawatcher, boolean flag) {
-+        this.a = i;
-+        if (flag) {
-+            this.b = datawatcher.c();
++    public PacketPlayOutEntityMetadata() {}
++
++    public PacketPlayOutEntityMetadata(int var1, DataWatcher var2, boolean var3) {
++        this.a = var1;
++
++        if (var3) {
++            this.b = var2.c();
 +        } else {
-+            this.b = datawatcher.b();
++            this.b = var2.b();
 +        }
 +    }
 +
-+    public void a(DataInput datainput) throws IOException {
-+        this.a = datainput.readInt();
-+        this.b = DataWatcher.a(datainput);
++    public void a(PacketDataSerializer var1) {
++        this.a = var1.readInt();
++        this.b = DataWatcher.b(var1);
 +    }
 +
-+    public void a(DataOutput dataoutput) throws IOException {
-+        dataoutput.writeInt(this.a);
-+        DataWatcher.a(this.b, dataoutput);
++    public void b(PacketDataSerializer var1) {
++        var1.writeInt(this.a);
++        DataWatcher.a(this.b, var1);
 +    }
 +
-+    public void handle(Connection connection) {
-+        connection.a(this);
++    public void a(PacketPlayOutListener var1) {
++        var1.a(this);
 +    }
 +
-+    public int a() {
-+        return 5;
++    // $FF: synthetic method
++    // $FF: bridge method
++    public void handle(PacketListener var1) {
++        this.a((PacketPlayOutListener)var1);
 +    }
 +}
-diff --git a/src/main/java/net/minecraft/server/Packet51MapChunk.java b/src/main/java/net/minecraft/server/Packet51MapChunk.java
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java b/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java
 new file mode 100644
-index 0000000..4409c4a
+index 0000000..234aac4
 --- /dev/null
-+++ b/src/main/java/net/minecraft/server/Packet51MapChunk.java
-@@ -0,0 +1,186 @@
++++ b/src/main/java/net/minecraft/server/PacketPlayOutMapChunk.java
+@@ -0,0 +1,199 @@
 +package net.minecraft.server;
 +
-+import java.io.DataInput;
-+import java.io.DataOutput;
 +import java.io.IOException;
 +import java.util.zip.DataFormatException;
 +import java.util.zip.Deflater;
 +import java.util.zip.Inflater;
++import net.minecraft.server.Chunk;
++import net.minecraft.server.ChunkMap;
++import net.minecraft.server.ChunkSection;
++import net.minecraft.server.NibbleArray;
++import net.minecraft.server.Packet;
++import net.minecraft.server.PacketDataSerializer;
++import net.minecraft.server.PacketListener;
++import net.minecraft.server.PacketPlayOutListener;
 +
-+public class Packet51MapChunk extends Packet {
++public class PacketPlayOutMapChunk extends Packet {
 +
-+    public int a;
-+    public int b;
-+    public int c;
-+    public int d;
++    private int a;
++    private int b;
++    private int c;
++    private int d;
++    private byte[] e;
 +    private byte[] buffer;
-+    private byte[] inflatedBuffer;
-+    public boolean e;
++    private boolean inflatedBuffer;
 +    private int size;
 +    private static byte[] buildBuffer = new byte[196864];
 +
-+    public Packet51MapChunk() {
-+        this.lowPriority = true;
-+    }
 +
-+    public Packet51MapChunk(Chunk chunk, boolean flag, int i) {
-+        this.lowPriority = true;
-+        this.a = chunk.x;
-+        this.b = chunk.z;
-+        this.e = flag;
-+        ChunkMap chunkmap = a(chunk, flag, i);
-+        Deflater deflater = new Deflater(-1);
++    public PacketPlayOutMapChunk() {}
 +
-+        this.d = chunkmap.c;
-+        this.c = chunkmap.b;
++    public PacketPlayOutMapChunk(Chunk var1, boolean var2, int var3) {
++        this.a = var1.locX;
++        this.b = var1.locZ;
++        this.inflatedBuffer = var2;
++        ChunkMap var4 = a(var1, var2, var3);
++        Deflater var5 = new Deflater(-1);
++        this.d = var4.c;
++        this.c = var4.b;
 +
 +        try {
-+            this.inflatedBuffer = chunkmap.a;
-+            deflater.setInput(chunkmap.a, 0, chunkmap.a.length);
-+            deflater.finish();
-+            this.buffer = new byte[chunkmap.a.length];
-+            this.size = deflater.deflate(this.buffer);
++            this.buffer = var4.a;
++            var5.setInput(var4.a, 0, var4.a.length);
++            var5.finish();
++            this.e = new byte[var4.a.length];
++            this.size = var5.deflate(this.e);
 +        } finally {
-+            deflater.end();
++            var5.end();
 +        }
 +    }
 +
-+    public void a(DataInput datainput) throws java.io.IOException {
-+        this.a = datainput.readInt();
-+        this.b = datainput.readInt();
-+        this.e = datainput.readBoolean();
-+        this.c = datainput.readShort();
-+        this.d = datainput.readShort();
-+        this.size = datainput.readInt();
++    public static int c() {
++        return 196864;
++    }
++
++    public void a(PacketDataSerializer var1) {
++        this.a = var1.readInt();
++        this.b = var1.readInt();
++        this.inflatedBuffer = var1.readBoolean();
++        this.c = var1.readShort();
++        this.d = var1.readShort();
++        this.size = var1.readInt();
++
 +        if (buildBuffer.length < this.size) {
 +            buildBuffer = new byte[this.size];
 +        }
 +
-+        datainput.readFully(buildBuffer, 0, this.size);
-+        int i = 0;
++        var1.readBytes(buildBuffer, 0, this.size);
++        int var2 = 0;
++        int var3;
 +
-+        int j;
-+
-+        for (j = 0; j < 16; ++j) {
-+            i += this.c >> j & 1;
++        for (var3 = 0; var3 < 16; ++var3) {
++            var2 += this.c >> var3 & 1;
 +        }
 +
-+        j = 12288 * i;
-+        if (this.e) {
-+            j += 256;
++        var3 = 12288 * var2;
++
++        if (this.inflatedBuffer) {
++            var3 += 256;
 +        }
 +
-+        this.inflatedBuffer = new byte[j];
-+        Inflater inflater = new Inflater();
-+
-+        inflater.setInput(buildBuffer, 0, this.size);
++        this.buffer = new byte[var3];
++        Inflater var4 = new Inflater();
++        var4.setInput(buildBuffer, 0, this.size);
 +
 +        try {
-+            inflater.inflate(this.inflatedBuffer);
-+        } catch (DataFormatException dataformatexception) {
++            var4.inflate(this.buffer);
++        } catch (DataFormatException var9) {
 +            throw new IOException("Bad compressed data format");
 +        } finally {
-+            inflater.end();
++            var4.end();
 +        }
 +    }
 +
-+    public void a(DataOutput dataoutput) throws java.io.IOException {
-+        dataoutput.writeInt(this.a);
-+        dataoutput.writeInt(this.b);
-+        dataoutput.writeBoolean(this.e);
-+        dataoutput.writeShort((short) (this.c & '\uffff'));
-+        dataoutput.writeShort((short) (this.d & '\uffff'));
-+        dataoutput.writeInt(this.size);
-+        dataoutput.write(this.buffer, 0, this.size);
++    public void b(PacketDataSerializer var1) {
++        var1.writeInt(this.a);
++        var1.writeInt(this.b);
++        var1.writeBoolean(this.inflatedBuffer);
++        var1.writeShort((short)(this.c & '\uffff'));
++        var1.writeShort((short)(this.d & '\uffff'));
++        var1.writeInt(this.size);
++        var1.writeBytes(this.e, 0, this.size);
 +    }
 +
-+    public void handle(Connection connection) {
-+        connection.a(this);
++    public void a(PacketPlayOutListener var1) {
++        var1.a(this);
 +    }
 +
-+    public int a() {
-+        return 17 + this.size;
++    public String b() {
++        return String.format("x=%d, z=%d, full=%b, sects=%d, add=%d, size=%d", new Object[] {Integer.valueOf(this.a), Integer.valueOf(this.b), Boolean.valueOf(this.inflatedBuffer), Integer.valueOf(this.c), Integer.valueOf(this.d), Integer.valueOf(this.size)});
 +    }
 +
-+    public static ChunkMap a(Chunk chunk, boolean flag, int i) {
-+        int j = 0;
-+        ChunkSection[] achunksection = chunk.i();
-+        int k = 0;
-+        ChunkMap chunkmap = new ChunkMap();
-+        byte[] abyte = buildBuffer;
++    public static ChunkMap a(Chunk var0, boolean var1, int var2) {
++        int var3 = 0;
++        ChunkSection[] var4 = var0.i();
++        int var5 = 0;
++        ChunkMap var6 = new ChunkMap();
++        byte[] var7 = buildBuffer;
 +
-+        if (flag) {
-+            chunk.seenByPlayer = true;
++        if (var1) {
++            var0.q = true;
 +        }
 +
-+        int l;
++        int var8;
 +
-+        for (l = 0; l < achunksection.length; ++l) {
-+            if (achunksection[l] != null && (!flag || !achunksection[l].isEmpty()) && (i & 1 << l) != 0) {
-+                chunkmap.b |= 1 << l;
-+                if (achunksection[l].getExtendedIdArray() != null) {
-+                    chunkmap.c |= 1 << l;
-+                    ++k;
++        for (var8 = 0; var8 < var4.length; ++var8) {
++            if (var4[var8] != null && (!var1 || !var4[var8].isEmpty()) && (var2 & 1 << var8) != 0) {
++                var6.b |= 1 << var8;
++
++                if (var4[var8].getExtendedIdArray() != null) {
++                    var6.c |= 1 << var8;
++                    ++var5;
 +                }
 +            }
 +        }
 +
-+        for (l = 0; l < achunksection.length; ++l) {
-+            if (achunksection[l] != null && (!flag || !achunksection[l].isEmpty()) && (i & 1 << l) != 0) {
-+                byte[] abyte1 = achunksection[l].getIdArray();
-+
-+                System.arraycopy(abyte1, 0, abyte, j, abyte1.length);
-+                j += abyte1.length;
++        for (var8 = 0; var8 < var4.length; ++var8) {
++            if (var4[var8] != null && (!var1 || !var4[var8].isEmpty()) && (var2 & 1 << var8) != 0) {
++                byte[] var9 = var4[var8].getIdArray();
++                System.arraycopy(var9, 0, var7, var3, var9.length);
++                var3 += var9.length;
 +            }
 +        }
 +
-+        NibbleArray nibblearray;
++        NibbleArray var10;
 +
-+        for (l = 0; l < achunksection.length; ++l) {
-+            if (achunksection[l] != null && (!flag || !achunksection[l].isEmpty()) && (i & 1 << l) != 0) {
-+                nibblearray = achunksection[l].getDataArray();
-+                System.arraycopy(nibblearray.a, 0, abyte, j, nibblearray.a.length);
-+                j += nibblearray.a.length;
++        for (var8 = 0; var8 < var4.length; ++var8) {
++            if (var4[var8] != null && (!var1 || !var4[var8].isEmpty()) && (var2 & 1 << var8) != 0) {
++                var10 = var4[var8].getDataArray();
++                System.arraycopy(var10.a, 0, var7, var3, var10.a.length);
++                var3 += var10.a.length;
 +            }
 +        }
 +
-+        for (l = 0; l < achunksection.length; ++l) {
-+            if (achunksection[l] != null && (!flag || !achunksection[l].isEmpty()) && (i & 1 << l) != 0) {
-+                nibblearray = achunksection[l].getEmittedLightArray();
-+                System.arraycopy(nibblearray.a, 0, abyte, j, nibblearray.a.length);
-+                j += nibblearray.a.length;
++        for (var8 = 0; var8 < var4.length; ++var8) {
++            if (var4[var8] != null && (!var1 || !var4[var8].isEmpty()) && (var2 & 1 << var8) != 0) {
++                var10 = var4[var8].getEmittedLightArray();
++                System.arraycopy(var10.a, 0, var7, var3, var10.a.length);
++                var3 += var10.a.length;
 +            }
 +        }
 +
-+        if (!chunk.world.worldProvider.g) {
-+            for (l = 0; l < achunksection.length; ++l) {
-+                if (achunksection[l] != null && (!flag || !achunksection[l].isEmpty()) && (i & 1 << l) != 0) {
-+                    nibblearray = achunksection[l].getSkyLightArray();
-+                    System.arraycopy(nibblearray.a, 0, abyte, j, nibblearray.a.length);
-+                    j += nibblearray.a.length;
++        if (!var0.world.worldProvider.g) {
++            for (var8 = 0; var8 < var4.length; ++var8) {
++                if (var4[var8] != null && (!var1 || !var4[var8].isEmpty()) && (var2 & 1 << var8) != 0) {
++                    var10 = var4[var8].getSkyLightArray();
++                    System.arraycopy(var10.a, 0, var7, var3, var10.a.length);
++                    var3 += var10.a.length;
 +                }
 +            }
 +        }
 +
-+        if (k > 0) {
-+            for (l = 0; l < achunksection.length; ++l) {
-+                if (achunksection[l] != null && (!flag || !achunksection[l].isEmpty()) && achunksection[l].getExtendedIdArray() != null && (i & 1 << l) != 0) {
-+                    nibblearray = achunksection[l].getExtendedIdArray();
-+                    System.arraycopy(nibblearray.a, 0, abyte, j, nibblearray.a.length);
-+                    j += nibblearray.a.length;
++        if (var5 > 0) {
++            for (var8 = 0; var8 < var4.length; ++var8) {
++                if (var4[var8] != null && (!var1 || !var4[var8].isEmpty()) && var4[var8].getExtendedIdArray() != null && (var2 & 1 << var8) != 0) {
++                    var10 = var4[var8].getExtendedIdArray();
++                    System.arraycopy(var10.a, 0, var7, var3, var10.a.length);
++                    var3 += var10.a.length;
 +                }
 +            }
 +        }
 +
-+        if (flag) {
-+            byte[] abyte2 = chunk.m();
-+
-+            System.arraycopy(abyte2, 0, abyte, j, abyte2.length);
-+            j += abyte2.length;
++        if (var1) {
++            byte[] var11 = var0.m();
++            System.arraycopy(var11, 0, var7, var3, var11.length);
++            var3 += var11.length;
 +        }
 +
-+        chunkmap.a = new byte[j];
-+        System.arraycopy(abyte, 0, chunkmap.a, 0, j);
-+        return chunkmap;
++        var6.a = new byte[var3];
++        System.arraycopy(var7, 0, var6.a, 0, var3);
++        return var6;
 +    }
++
++    // $FF: synthetic method
++    // $FF: bridge method
++    public void handle(PacketListener var1) {
++        this.a((PacketPlayOutListener)var1);
++    }
++
 +}
-diff --git a/src/main/java/net/minecraft/server/Packet63WorldParticles.java b/src/main/java/net/minecraft/server/Packet63WorldParticles.java
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutWorldParticles.java b/src/main/java/net/minecraft/server/PacketPlayOutWorldParticles.java
 new file mode 100644
-index 0000000..d7f4d2a
+index 0000000..17c8f1f
 --- /dev/null
-+++ b/src/main/java/net/minecraft/server/Packet63WorldParticles.java
-@@ -0,0 +1,51 @@
++++ b/src/main/java/net/minecraft/server/PacketPlayOutWorldParticles.java
+@@ -0,0 +1,68 @@
 +package net.minecraft.server;
 +
-+import java.io.DataInput;
-+import java.io.DataOutput;
++import net.minecraft.server.Packet;
++import net.minecraft.server.PacketDataSerializer;
++import net.minecraft.server.PacketListener;
++import net.minecraft.server.PacketPlayOutListener;
 +
-+public class Packet63WorldParticles extends Packet {
++public class PacketPlayOutWorldParticles extends Packet {
 +
 +    private String a;
 +    private float b;
@@ -1233,43 +1266,58 @@ index 0000000..d7f4d2a
 +    private float h;
 +    private int i;
 +
-+    public Packet63WorldParticles() {}
 +
-+    public void a(DataInput datainput) {
-+        this.a = a(datainput, 64);
-+        this.b = datainput.readFloat();
-+        this.c = datainput.readFloat();
-+        this.d = datainput.readFloat();
-+        this.e = datainput.readFloat();
-+        this.f = datainput.readFloat();
-+        this.g = datainput.readFloat();
-+        this.h = datainput.readFloat();
-+        this.i = datainput.readInt();
++    public PacketPlayOutWorldParticles() {}
++
++    public PacketPlayOutWorldParticles(String var1, float var2, float var3, float var4, float var5, float var6, float var7, float var8, int var9) {
++        this.a = var1;
++        this.b = var2;
++        this.c = var3;
++        this.d = var4;
++        this.e = var5;
++        this.f = var6;
++        this.g = var7;
++        this.h = var8;
++        this.i = var9;
 +    }
 +
-+    public void a(DataOutput dataoutput) {
-+        a(this.a, dataoutput);
-+        dataoutput.writeFloat(this.b);
-+        dataoutput.writeFloat(this.c);
-+        dataoutput.writeFloat(this.d);
-+        dataoutput.writeFloat(this.e);
-+        dataoutput.writeFloat(this.f);
-+        dataoutput.writeFloat(this.g);
-+        dataoutput.writeFloat(this.h);
-+        dataoutput.writeInt(this.i);
++    public void a(PacketDataSerializer var1) {
++        this.a = var1.c(64);
++        this.b = var1.readFloat();
++        this.c = var1.readFloat();
++        this.d = var1.readFloat();
++        this.e = var1.readFloat();
++        this.f = var1.readFloat();
++        this.g = var1.readFloat();
++        this.h = var1.readFloat();
++        this.i = var1.readInt();
 +    }
 +
-+    public void handle(Connection connection) {
-+        connection.a(this);
++    public void b(PacketDataSerializer var1) {
++        var1.a(this.a);
++        var1.writeFloat(this.b);
++        var1.writeFloat(this.c);
++        var1.writeFloat(this.d);
++        var1.writeFloat(this.e);
++        var1.writeFloat(this.f);
++        var1.writeFloat(this.g);
++        var1.writeFloat(this.h);
++        var1.writeInt(this.i);
 +    }
 +
-+    public int a() {
-+        return 64;
++    public void a(PacketPlayOutListener var1) {
++        var1.a(this);
++    }
++
++    // $FF: synthetic method
++    // $FF: bridge method
++    public void handle(PacketListener var1) {
++        this.a((PacketPlayOutListener)var1);
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/RegionFileCache.java b/src/main/java/net/minecraft/server/RegionFileCache.java
 new file mode 100644
-index 0000000..900ed68
+index 0000000..4741e41
 --- /dev/null
 +++ b/src/main/java/net/minecraft/server/RegionFileCache.java
 @@ -0,0 +1,67 @@
@@ -1282,70 +1330,70 @@ index 0000000..900ed68
 +import java.util.HashMap;
 +import java.util.Iterator;
 +import java.util.Map;
++import net.minecraft.server.RegionFile;
 +
 +public class RegionFileCache {
 +
 +    private static final Map a = new HashMap();
 +
-+    public static synchronized RegionFile a(File file1, int i, int j) {
-+        File file2 = new File(file1, "region");
-+        File file3 = new File(file2, "r." + (i >> 5) + "." + (j >> 5) + ".mca");
-+        RegionFile regionfile = (RegionFile) a.get(file3);
 +
-+        if (regionfile != null) {
-+            return regionfile;
++    public static synchronized RegionFile a(File var0, int var1, int var2) {
++        File var3 = new File(var0, "region");
++        File var4 = new File(var3, "r." + (var1 >> 5) + "." + (var2 >> 5) + ".mca");
++        RegionFile var5 = (RegionFile)a.get(var4);
++
++        if (var5 != null) {
++            return var5;
 +        } else {
-+            if (!file2.exists()) {
-+                file2.mkdirs();
++            if (!var3.exists()) {
++                var3.mkdirs();
 +            }
 +
 +            if (a.size() >= 256) {
 +                a();
 +            }
 +
-+            RegionFile regionfile1 = new RegionFile(file3);
-+
-+            a.put(file3, regionfile1);
-+            return regionfile1;
++            RegionFile var6 = new RegionFile(var4);
++            a.put(var4, var6);
++            return var6;
 +        }
 +    }
 +
 +    public static synchronized void a() {
-+        Iterator iterator = a.values().iterator();
++        Iterator var0 = a.values().iterator();
 +
-+        while (iterator.hasNext()) {
-+            RegionFile regionfile = (RegionFile) iterator.next();
++        while (var0.hasNext()) {
++            RegionFile var1 = (RegionFile)var0.next();
 +
 +            try {
-+                if (regionfile != null) {
-+                    regionfile.c();
++                if (var1 != null) {
++                    var1.c();
 +                }
-+            } catch (IOException ioexception) {
-+                ioexception.printStackTrace();
++            } catch (IOException var3) {
++                var3.printStackTrace();
 +            }
 +        }
 +
 +        a.clear();
 +    }
 +
-+    public static DataInputStream c(File file1, int i, int j) {
-+        RegionFile regionfile = a(file1, i, j);
-+
-+        return regionfile.a(i & 31, j & 31);
++    public static DataInputStream c(File var0, int var1, int var2) {
++        RegionFile var3 = a(var0, var1, var2);
++        return var3.a(var1 & 31, var2 & 31);
 +    }
 +
-+    public static DataOutputStream d(File file1, int i, int j) {
-+        RegionFile regionfile = a(file1, i, j);
-+
-+        return regionfile.b(i & 31, j & 31);
++    public static DataOutputStream d(File var0, int var1, int var2) {
++        RegionFile var3 = a(var0, var1, var2);
++        return var3.b(var1 & 31, var2 & 31);
 +    }
++
 +}
 diff --git a/src/main/java/net/minecraft/server/RemoteStatusListener.java b/src/main/java/net/minecraft/server/RemoteStatusListener.java
 new file mode 100644
-index 0000000..12815ee
+index 0000000..0608580
 --- /dev/null
 +++ b/src/main/java/net/minecraft/server/RemoteStatusListener.java
-@@ -0,0 +1,285 @@
+@@ -0,0 +1,292 @@
 +package net.minecraft.server;
 +
 +import java.io.IOException;
@@ -1362,6 +1410,12 @@ index 0000000..12815ee
 +import java.util.Iterator;
 +import java.util.Map;
 +import java.util.Map.Entry;
++import net.minecraft.server.IMinecraftServer;
++import net.minecraft.server.MinecraftServer;
++import net.minecraft.server.RemoteConnectionThread;
++import net.minecraft.server.RemoteStatusChallenge;
++import net.minecraft.server.RemoteStatusReply;
++import net.minecraft.server.StatusChallengeUtils;
 +
 +public class RemoteStatusListener extends RemoteConnectionThread {
 +
@@ -1372,124 +1426,124 @@ index 0000000..12815ee
 +    private String localAddress;
 +    private String worldName;
 +    private DatagramSocket socket;
-+    private byte[] n = new byte[1460];
-+    private DatagramPacket o;
-+    private Map p;
++    private byte[] o = new byte[1460];
++    private DatagramPacket p;
++    private Map q;
 +    private String hostname;
 +    private String motd;
 +    private Map challenges;
-+    private long t;
++    private long u;
 +    private RemoteStatusReply cachedReply;
 +    private long cacheTime;
 +
-+    public RemoteStatusListener(IMinecraftServer iminecraftserver) {
-+        super(iminecraftserver);
-+        this.bindPort = iminecraftserver.a("query.port", 0);
-+        this.motd = iminecraftserver.w();
-+        this.serverPort = iminecraftserver.x();
-+        this.localAddress = iminecraftserver.y();
-+        this.maxPlayers = iminecraftserver.B();
-+        this.worldName = iminecraftserver.L();
++
++    public RemoteStatusListener(IMinecraftServer var1) {
++        super(var1, "Query Listener");
++        this.bindPort = var1.a("query.port", 0);
++        this.motd = var1.x();
++        this.serverPort = var1.y();
++        this.localAddress = var1.z();
++        this.maxPlayers = var1.C();
++        this.worldName = var1.M();
 +        this.cacheTime = 0L;
 +        this.hostname = "0.0.0.0";
++
 +        if (0 != this.motd.length() && !this.hostname.equals(this.motd)) {
 +            this.hostname = this.motd;
 +        } else {
 +            this.motd = "0.0.0.0";
 +
 +            try {
-+                InetAddress inetaddress = InetAddress.getLocalHost();
-+
-+                this.hostname = inetaddress.getHostAddress();
-+            } catch (UnknownHostException unknownhostexception) {
-+                this.warning("Unable to determine local host IP, please set server-ip in \'" + iminecraftserver.b_() + "\' : " + unknownhostexception.getMessage());
++                InetAddress var2 = InetAddress.getLocalHost();
++                this.hostname = var2.getHostAddress();
++            } catch (UnknownHostException var3) {
++                this.warning("Unable to determine local host IP, please set server-ip in \'" + var1.b() + "\' : " + var3.getMessage());
 +            }
 +        }
 +
 +        if (0 == this.bindPort) {
 +            this.bindPort = this.serverPort;
 +            this.info("Setting default query port to " + this.bindPort);
-+            iminecraftserver.a("query.port", Integer.valueOf(this.bindPort));
-+            iminecraftserver.a("debug", Boolean.valueOf(false));
-+            iminecraftserver.a();
++            var1.a("query.port", (Object)Integer.valueOf(this.bindPort));
++            var1.a("debug", (Object)Boolean.valueOf(false));
++            var1.a();
 +        }
 +
-+        this.p = new HashMap();
++        this.q = new HashMap();
 +        this.cachedReply = new RemoteStatusReply(1460);
 +        this.challenges = new HashMap();
-+        this.t = (new Date()).getTime();
++        this.u = (new Date()).getTime();
 +    }
 +
-+    private void send(byte[] abyte, DatagramPacket datagrampacket) {
-+        this.socket.send(new DatagramPacket(abyte, abyte.length, datagrampacket.getSocketAddress()));
++    private void send(byte[] var1, DatagramPacket var2) {
++        this.socket.send(new DatagramPacket(var1, var1.length, var2.getSocketAddress()));
 +    }
 +
-+    private boolean parsePacket(DatagramPacket datagrampacket) {
-+        byte[] abyte = datagrampacket.getData();
-+        int i = datagrampacket.getLength();
-+        SocketAddress socketaddress = datagrampacket.getSocketAddress();
++    private boolean parsePacket(DatagramPacket var1) {
++        byte[] var2 = var1.getData();
++        int var3 = var1.getLength();
++        SocketAddress var4 = var1.getSocketAddress();
++        this.debug("Packet len " + var3 + " [" + var4 + "]");
 +
-+        this.debug("Packet len " + i + " [" + socketaddress + "]");
-+        if (3 <= i && -2 == abyte[0] && -3 == abyte[1]) {
-+            this.debug("Packet \'" + StatusChallengeUtils.a(abyte[2]) + "\' [" + socketaddress + "]");
-+            switch (abyte[2]) {
-+            case 0:
-+                if (!this.hasChallenged(datagrampacket).booleanValue()) {
-+                    this.debug("Invalid challenge [" + socketaddress + "]");
-+                    return false;
-+                } else if (15 == i) {
-+                    this.send(this.getFullReply(datagrampacket), datagrampacket);
-+                    this.debug("Rules [" + socketaddress + "]");
-+                } else {
-+                    RemoteStatusReply remotestatusreply = new RemoteStatusReply(1460);
++        if (3 <= var3 && -2 == var2[0] && -3 == var2[1]) {
++            this.debug("Packet \'" + StatusChallengeUtils.a(var2[2]) + "\' [" + var4 + "]");
 +
-+                    remotestatusreply.write((int) 0);
-+                    remotestatusreply.write(this.getIdentityToken(datagrampacket.getSocketAddress()));
-+                    remotestatusreply.write(this.localAddress);
-+                    remotestatusreply.write("SMP");
-+                    remotestatusreply.write(this.worldName);
-+                    remotestatusreply.write(Integer.toString(this.d()));
-+                    remotestatusreply.write(Integer.toString(this.maxPlayers));
-+                    remotestatusreply.write((short) this.serverPort);
-+                    remotestatusreply.write(this.hostname);
-+                    this.send(remotestatusreply.getBytes(), datagrampacket);
-+                    this.debug("Status [" + socketaddress + "]");
-+                }
++            switch (var2[2]) {
++                case 0:
++                    if (!this.hasChallenged(var1).booleanValue()) {
++                        this.debug("Invalid challenge [" + var4 + "]");
++                        return false;
++                    } else if (15 == var3) {
++                        this.send(this.getFullReply(var1), var1);
++                        this.debug("Rules [" + var4 + "]");
++                    } else {
++                        RemoteStatusReply var5 = new RemoteStatusReply(1460);
++                        var5.write((int)0);
++                        var5.write(this.getIdentityToken(var1.getSocketAddress()));
++                        var5.write(this.localAddress);
++                        var5.write("SMP");
++                        var5.write(this.worldName);
++                        var5.write(Integer.toString(this.d()));
++                        var5.write(Integer.toString(this.maxPlayers));
++                        var5.write((short)this.serverPort);
++                        var5.write(this.hostname);
++                        this.send(var5.getBytes(), var1);
++                        this.debug("Status [" + var4 + "]");
++                    }
 +
-+            case 9:
-+                this.createChallenge(datagrampacket);
-+                this.debug("Challenge [" + socketaddress + "]");
-+                return true;
++                case 9:
++                    this.createChallenge(var1);
++                    this.debug("Challenge [" + var4 + "]");
++                    return true;
 +
-+            default:
-+                return true;
++                default:
++                    return true;
 +            }
 +        } else {
-+            this.debug("Invalid packet [" + socketaddress + "]");
++            this.debug("Invalid packet [" + var4 + "]");
 +            return false;
 +        }
 +    }
 +
-+    private byte[] getFullReply(DatagramPacket datagrampacket) {
-+        long i = MinecraftServer.aq();
++    private byte[] getFullReply(DatagramPacket var1) {
++        long var2 = MinecraftServer.ap();
 +
-+        if (i < this.cacheTime + 5000L) {
-+            byte[] abyte = this.cachedReply.getBytes();
-+            byte[] abyte1 = this.getIdentityToken(datagrampacket.getSocketAddress());
-+
-+            abyte[1] = abyte1[0];
-+            abyte[2] = abyte1[1];
-+            abyte[3] = abyte1[2];
-+            abyte[4] = abyte1[3];
-+            return abyte;
++        if (var2 < this.cacheTime + 5000L) {
++            byte[] var9 = this.cachedReply.getBytes();
++            byte[] var10 = this.getIdentityToken(var1.getSocketAddress());
++            var9[1] = var10[0];
++            var9[2] = var10[1];
++            var9[3] = var10[2];
++            var9[4] = var10[3];
++            return var9;
 +        } else {
-+            this.cacheTime = i;
++            this.cacheTime = var2;
 +            this.cachedReply.reset();
-+            this.cachedReply.write((int) 0);
-+            this.cachedReply.write(this.getIdentityToken(datagrampacket.getSocketAddress()));
++            this.cachedReply.write((int)0);
++            this.cachedReply.write(this.getIdentityToken(var1.getSocketAddress()));
 +            this.cachedReply.write("splitnum");
-+            this.cachedReply.write((int) 128);
-+            this.cachedReply.write((int) 0);
++            this.cachedReply.write((int)128);
++            this.cachedReply.write((int)0);
 +            this.cachedReply.write("hostname");
 +            this.cachedReply.write(this.localAddress);
 +            this.cachedReply.write("gametype");
@@ -1510,58 +1564,58 @@ index 0000000..12815ee
 +            this.cachedReply.write("" + this.serverPort);
 +            this.cachedReply.write("hostip");
 +            this.cachedReply.write(this.hostname);
-+            this.cachedReply.write((int) 0);
-+            this.cachedReply.write((int) 1);
++            this.cachedReply.write((int)0);
++            this.cachedReply.write((int)1);
 +            this.cachedReply.write("player_");
-+            this.cachedReply.write((int) 0);
-+            String[] astring = this.server.getPlayers();
-+            byte b0 = (byte) astring.length;
++            this.cachedReply.write((int)0);
++            String[] var4 = this.server.getPlayers();
++            String[] var5 = var4;
++            int var6 = var4.length;
 +
-+            for (byte b1 = (byte) (b0 - 1); b1 >= 0; --b1) {
-+                this.cachedReply.write(astring[b1]);
++            for (int var7 = 0; var7 < var6; ++var7) {
++                String var8 = var5[var7];
++                this.cachedReply.write(var8);
 +            }
 +
-+            this.cachedReply.write((int) 0);
++            this.cachedReply.write((int)0);
 +            return this.cachedReply.getBytes();
 +        }
 +    }
 +
-+    private byte[] getIdentityToken(SocketAddress socketaddress) {
-+        return ((RemoteStatusChallenge) this.challenges.get(socketaddress)).getIdentityToken();
++    private byte[] getIdentityToken(SocketAddress var1) {
++        return ((RemoteStatusChallenge)this.challenges.get(var1)).getIdentityToken();
 +    }
 +
-+    private Boolean hasChallenged(DatagramPacket datagrampacket) {
-+        SocketAddress socketaddress = datagrampacket.getSocketAddress();
++    private Boolean hasChallenged(DatagramPacket var1) {
++        SocketAddress var2 = var1.getSocketAddress();
 +
-+        if (!this.challenges.containsKey(socketaddress)) {
++        if (!this.challenges.containsKey(var2)) {
 +            return Boolean.valueOf(false);
 +        } else {
-+            byte[] abyte = datagrampacket.getData();
-+
-+            return ((RemoteStatusChallenge) this.challenges.get(socketaddress)).getToken() != StatusChallengeUtils.c(abyte, 7, datagrampacket.getLength()) ? Boolean.valueOf(false) : Boolean.valueOf(true);
++            byte[] var3 = var1.getData();
++            return ((RemoteStatusChallenge)this.challenges.get(var2)).getToken() != StatusChallengeUtils.c(var3, 7, var1.getLength()) ? Boolean.valueOf(false) : Boolean.valueOf(true);
 +        }
 +    }
 +
-+    private void createChallenge(DatagramPacket datagrampacket) {
-+        RemoteStatusChallenge remotestatuschallenge = new RemoteStatusChallenge(this, datagrampacket);
-+
-+        this.challenges.put(datagrampacket.getSocketAddress(), remotestatuschallenge);
-+        this.send(remotestatuschallenge.getChallengeResponse(), datagrampacket);
++    private void createChallenge(DatagramPacket var1) {
++        RemoteStatusChallenge var2 = new RemoteStatusChallenge(this, var1);
++        this.challenges.put(var1.getSocketAddress(), var2);
++        this.send(var2.getChallengeResponse(), var1);
 +    }
 +
 +    private void cleanChallenges() {
 +        if (this.running) {
-+            long i = MinecraftServer.aq();
++            long var1 = MinecraftServer.ap();
 +
-+            if (i >= this.clearedTime + 30000L) {
-+                this.clearedTime = i;
-+                Iterator iterator = this.challenges.entrySet().iterator();
++            if (var1 >= this.clearedTime + 30000L) {
++                this.clearedTime = var1;
++                Iterator var3 = this.challenges.entrySet().iterator();
 +
-+                while (iterator.hasNext()) {
-+                    Entry entry = (Entry) iterator.next();
++                while (var3.hasNext()) {
++                    Entry var4 = (Entry)var3.next();
 +
-+                    if (((RemoteStatusChallenge) entry.getValue()).isExpired(i).booleanValue()) {
-+                        iterator.remove();
++                    if (((RemoteStatusChallenge)var4.getValue()).isExpired(var1).booleanValue()) {
++                        var3.remove();
 +                    }
 +                }
 +            }
@@ -1570,21 +1624,21 @@ index 0000000..12815ee
 +
 +    public void run() {
 +        this.info("Query running on " + this.motd + ":" + this.bindPort);
-+        this.clearedTime = MinecraftServer.aq();
-+        this.o = new DatagramPacket(this.n, this.n.length);
++        this.clearedTime = MinecraftServer.ap();
++        this.p = new DatagramPacket(this.o, this.o.length);
 +
 +        try {
 +            while (this.running) {
 +                try {
-+                    this.socket.receive(this.o);
++                    this.socket.receive(this.p);
 +                    this.cleanChallenges();
-+                    this.parsePacket(this.o);
-+                } catch (SocketTimeoutException sockettimeoutexception) {
++                    this.parsePacket(this.p);
++                } catch (SocketTimeoutException var7) {
 +                    this.cleanChallenges();
-+                } catch (PortUnreachableException portunreachableexception) {
++                } catch (PortUnreachableException var8) {
 +                    ;
-+                } catch (IOException ioexception) {
-+                    this.a(ioexception);
++                } catch (IOException var9) {
++                    this.a(var9);
 +                }
 +            }
 +        } finally {
@@ -1599,14 +1653,15 @@ index 0000000..12815ee
 +                    super.a();
 +                }
 +            } else {
-+                this.warning("Invalid query port " + this.bindPort + " found in \'" + this.server.b_() + "\' (queries disabled)");
++                this.warning("Invalid query port " + this.bindPort + " found in \'" + this.server.b() + "\' (queries disabled)");
 +            }
 +        }
 +    }
 +
-+    private void a(Exception exception) {
++    private void a(Exception var1) {
 +        if (this.running) {
-+            this.warning("Unexpected exception, buggy JRE? (" + exception.toString() + ")");
++            this.warning("Unexpected exception, buggy JRE? (" + var1.toString() + ")");
++
 +            if (!this.g()) {
 +                this.error("Failed to recover from buggy JRE, shutting down!");
 +                this.running = false;
@@ -1620,17 +1675,17 @@ index 0000000..12815ee
 +            this.a(this.socket);
 +            this.socket.setSoTimeout(500);
 +            return true;
-+        } catch (SocketException socketexception) {
-+            this.warning("Unable to initialise query system on " + this.motd + ":" + this.bindPort + " (Socket): " + socketexception.getMessage());
-+        } catch (UnknownHostException unknownhostexception) {
-+            this.warning("Unable to initialise query system on " + this.motd + ":" + this.bindPort + " (Unknown Host): " + unknownhostexception.getMessage());
-+        } catch (Exception exception) {
-+            this.warning("Unable to initialise query system on " + this.motd + ":" + this.bindPort + " (E): " + exception.getMessage());
++        } catch (SocketException var2) {
++            this.warning("Unable to initialise query system on " + this.motd + ":" + this.bindPort + " (Socket): " + var2.getMessage());
++        } catch (UnknownHostException var3) {
++            this.warning("Unable to initialise query system on " + this.motd + ":" + this.bindPort + " (Unknown Host): " + var3.getMessage());
++        } catch (Exception var4) {
++            this.warning("Unable to initialise query system on " + this.motd + ":" + this.bindPort + " (E): " + var4.getMessage());
 +        }
 +
 +        return false;
 +    }
 +}
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.3.2
 
