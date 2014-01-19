@@ -1,4 +1,4 @@
-From ae9cb8706d4ceec24c4d1758e4c6be0d0cb67b32 Mon Sep 17 00:00:00 2001
+From 6dde9276511c8f366f1bb474c6298cde33066f10 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Wed, 15 May 2013 20:09:16 -0500
 Subject: [PATCH] Fire BlockBreakEvent for extinguishing fire and fix
@@ -6,11 +6,11 @@ Subject: [PATCH] Fire BlockBreakEvent for extinguishing fire and fix
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerInteractManager.java b/src/main/java/net/minecraft/server/PlayerInteractManager.java
-index d77a4cc..dcdf9d2 100644
+index bceba7b..1e5f9af 100644
 --- a/src/main/java/net/minecraft/server/PlayerInteractManager.java
 +++ b/src/main/java/net/minecraft/server/PlayerInteractManager.java
-@@ -111,6 +111,13 @@ public class PlayerInteractManager {
-             // CraftBukkit start
+@@ -104,6 +104,13 @@ public class PlayerInteractManager {
+         if (!this.gamemode.isAdventure() || this.player.d(i, j, k)) {
              if (event.isCancelled()) {
                  // Let the client know the block still exists
 +                // Check to see if fire was doused, if so, update the fire instead of the block the fire is on
@@ -20,10 +20,10 @@ index d77a4cc..dcdf9d2 100644
 +                    j = block.getY();
 +                    k = block.getZ();
 +                }
-                 ((EntityPlayer) this.player).playerConnection.sendPacket(new Packet53BlockChange(i, j, k, this.world));
+                 ((EntityPlayer) this.player).playerConnection.sendPacket(new PacketPlayOutBlockChange(i, j, k, this.world));
                  // Update any tile entity data for this block
                  TileEntity tileentity = this.world.getTileEntity(i, j, k);
-@@ -121,11 +128,11 @@ public class PlayerInteractManager {
+@@ -114,7 +121,7 @@ public class PlayerInteractManager {
              }
              // CraftBukkit end
              if (this.isCreative()) {
@@ -32,30 +32,23 @@ index d77a4cc..dcdf9d2 100644
                      this.breakBlock(i, j, k);
                  }
              } else {
--                this.world.douseFire((EntityHuman) null, i, j, k, l);
-+                this.world.douseFire(this.player, i, j, k, l); // CraftBukkit - add this.player
-                 this.lastDigTick = this.currentTick;
-                 float f = 1.0F;
-                 int i1 = this.world.getTypeId(i, j, k);
-@@ -142,8 +149,8 @@ public class PlayerInteractManager {
-                     }
-                 } else if (i1 > 0) {
-                     Block.byId[i1].attack(this.world, i, j, k, this.player);
--                    // Allow fire punching to be blocked
+@@ -137,7 +144,7 @@ public class PlayerInteractManager {
+                     block.attack(this.world, i, j, k, this.player);
+                     f = block.getDamage(this.player, this.player.world, i, j, k);
+                     // Allow fire punching to be blocked
 -                    this.world.douseFire((EntityHuman) null, i, j, k, l);
-+                    // Allow fire punching to be blocked, add this.player
-+                    this.world.douseFire(this.player, i, j, k, l);
++                    this.world.douseFire(this.player, i, j, k, l); // CraftBukkit - add this.player
                  }
  
-                 // Handle hitting a block
+                 if (event.useItemInHand() == Event.Result.DENY) {
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 14e108f..e2035d0 100644
+index b48c1c1..9b8dc95 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -1686,8 +1686,13 @@ public abstract class World implements IBlockAccess {
+@@ -1668,8 +1668,13 @@ public abstract class World implements IBlockAccess {
          }
  
-         if (this.getTypeId(i, j, k) == Block.FIRE.id) {
+         if (this.getType(i, j, k) == Blocks.FIRE) {
 -            this.a(entityhuman, 1004, i, j, k, 0);
 -            this.setAir(i, j, k);
 +            // CraftBukkit start
@@ -69,5 +62,5 @@ index 14e108f..e2035d0 100644
          } else {
              return false;
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.3.2
 

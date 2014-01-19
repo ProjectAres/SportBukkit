@@ -1,11 +1,11 @@
-From 791e78e75961fa8e948d237479e75470cd6af03c Mon Sep 17 00:00:00 2001
+From 77601d964fab79bdca62fe88c1c81f24aeaf3ce6 Mon Sep 17 00:00:00 2001
 From: Thinkofdeath <purgames@gmail.com>
 Date: Sun, 17 Mar 2013 22:56:14 +0000
 Subject: [PATCH] Allow playEffect to spawn particles
 
 
 diff --git a/src/main/java/org/bukkit/Effect.java b/src/main/java/org/bukkit/Effect.java
-index 708bee9..8118033 100644
+index 2474a2d..f509908 100644
 --- a/src/main/java/org/bukkit/Effect.java
 +++ b/src/main/java/org/bukkit/Effect.java
 @@ -5,6 +5,7 @@ import java.util.Map;
@@ -16,7 +16,7 @@ index 708bee9..8118033 100644
  import org.bukkit.potion.Potion;
  
  /**
-@@ -78,23 +79,174 @@ public enum Effect {
+@@ -79,12 +80,152 @@ public enum Effect {
      /**
       * The flames seen on a mobspawner; a visual effect.
       */
@@ -148,12 +148,16 @@ index 708bee9..8118033 100644
 +    HAPPY_VILLAGER("happyVillager", Type.PARTICLE),
 +    /**
 +     * The particles generated when a tool breaks.
-+     * This particle requires a Material so that the client can select the correct texture.
++     *
++     * This particle requires a Material so that the client can select the
++     * correct texture.
 +     */
 +    ITEM_BREAK("iconcrack", Type.PARTICLE, Material.class),
 +    /**
 +     * The particles generated while breaking a block.
-+     * This particle requires a Material and data value so that the client can select the correct texture.
++     *
++     * This particle requires a Material and data value so that the client can
++     * select the correct texture.
 +     */
 +    TILE_BREAK("tilecrack", Type.PARTICLE, MaterialData.class);
  
@@ -165,17 +169,14 @@ index 708bee9..8118033 100644
 +    private final String particleName;
  
      Effect(int id, Type type) {
--        this(id,type,null);
-+        this(id, type, null);
-     }
- 
-     Effect(int id, Type type, Class<?> data) {
+         this(id,type,null);
+@@ -94,6 +235,21 @@ public enum Effect {
          this.id = id;
          this.type = type;
          this.data = data;
 +        this.particleName = null;
-     }
- 
++    }
++
 +    Effect(String particleName, Type type, Class<?> data) {
 +        this.particleName = particleName;
 +        this.type = type;
@@ -188,17 +189,17 @@ index 708bee9..8118033 100644
 +        this.type = type;
 +        id = 0;
 +        this.data = null;
-+      }
-+
-     /**
-      * Gets the ID for this effect.
-      *
-@@ -114,7 +266,17 @@ public enum Effect {
      }
  
      /**
--     * @return The class which represents data for this effect, or null if none
-+     * Returns the effect's name. This returns null if the effect is not a particle
+@@ -115,8 +271,18 @@ public enum Effect {
+     }
+ 
+     /**
+-     * @return The class which represents data for this effect, or null if
+-     *     none
++     * Returns the effect's name. This returns null if the effect is not a
++     *     particle
 +     *
 +     * @return The effect's name
 +     */
@@ -207,22 +208,15 @@ index 708bee9..8118033 100644
 +    }
 +
 +    /**
-+     * @return if this Effect isn't of type PARTICLE it returns the class which represents
-+     * data for this effect, or null if none.
++     * @return If this Effect isn't of type PARTICLE it returns the class
++     *     which represents data for this effect, or null if none.
       */
      public Class<?> getData() {
          return this.data;
-@@ -134,12 +296,32 @@ public enum Effect {
+@@ -134,14 +300,28 @@ public enum Effect {
+         return BY_ID.get(id);
+     }
  
-     static {
-         for (Effect effect : values()) {
--            BY_ID.put(effect.id, effect);
-+            if (effect.type != Type.PARTICLE) {
-+                BY_ID.put(effect.id, effect);
-+            }
-+        }
-+    }
-+
 +    /**
 +     * Gets the Effect associated with the given name.
 +     *
@@ -233,10 +227,13 @@ index 708bee9..8118033 100644
 +        return BY_NAME.get(name);
 +    }
 +
-+    static {
-+        for (Effect effect : values()) {
+     static {
+         for (Effect effect : values()) {
+-            BY_ID.put(effect.id, effect);
 +            if (effect.type == Type.PARTICLE) {
 +                BY_NAME.put(effect.particleName, effect);
++            } else {
++                BY_ID.put(effect.id, effect);
 +            }
          }
      }
@@ -248,7 +245,7 @@ index 708bee9..8118033 100644
 +    public enum Type {SOUND, VISUAL, PARTICLE}
  }
 diff --git a/src/main/java/org/bukkit/World.java b/src/main/java/org/bukkit/World.java
-index 62fadda..1766396 100644
+index f02bfb7..a934736 100644
 --- a/src/main/java/org/bukkit/World.java
 +++ b/src/main/java/org/bukkit/World.java
 @@ -13,6 +13,7 @@ import org.bukkit.block.Block;
@@ -259,33 +256,37 @@ index 62fadda..1766396 100644
  import org.bukkit.metadata.Metadatable;
  import org.bukkit.plugin.messaging.PluginMessageRecipient;
  import org.bukkit.util.Vector;
-@@ -686,6 +687,16 @@ public interface World extends PluginMessageRecipient, Metadatable {
-     /**
-      * Plays an effect to all players within a default radius around a given location.
+@@ -720,6 +721,17 @@ public interface World extends PluginMessageRecipient, Metadatable {
+      * Plays an effect to all players within a default radius around a given
+      * location.
       *
 +     * @param location the {@link Location} around which players must be to see the effect
 +     * @param effect the {@link Effect}
-+     * @throws IllegalArgumentException if the location or effect is null. It also throws when
-+     *                                  the effect requires a material or a material data
++     * @throws IllegalArgumentException if the location or effect is null. It
++     *     also throws when the effect requires a material or a material data
 +     */
 +    public void playEffect(Location location, Effect effect);
 +
 +    /**
-+     * Plays an effect to all players within a default radius around a given location.
++     * Plays an effect to all players within a default radius around a given
++     * location.
 +     *
-      * @param location the {@link Location} around which players must be to hear the sound
+      * @param location the {@link Location} around which players must be to
+      *     hear the sound
       * @param effect the {@link Effect}
-      * @param data a data bit needed for some effects
-@@ -722,6 +733,27 @@ public interface World extends PluginMessageRecipient, Metadatable {
+@@ -761,6 +773,30 @@ public interface World extends PluginMessageRecipient, Metadatable {
      public <T> void playEffect(Location location, Effect effect, T data, int radius);
  
      /**
-+     * Plays an effect to all players within a default radius around a given location.
-+     * The effect will use the provided material (and material data if required). The particle's
-+     * position on the client will be the given location, adjusted on each axis by a normal
-+     * distribution with mean 0 and standard deviation given in the offset parameters, each particle
-+     * has independently calculated offsets. The effect will have the given speed and particle count
-+     * if the effect is a particle. Some effect will create multiple particles.
++     * Plays an effect to all players within a default radius around a given
++     * location. The effect will use the provided material (and material data
++     * if required).
++     *
++     * The particle's position on the client will be the given location, adjusted
++     * on each axis by a normal distribution with mean 0 and standard deviation
++     * given in the offset parameters, each particle has independently calculated
++     * offsets. The effect will have the given speed and particle count if the
++     * effect is a particle. Some effect will create multiple particles.
 +     *
 +     * @param location the {@link Location} around which players must be to see the effect
 +     * @param effect effect the {@link Effect}
@@ -301,22 +302,22 @@ index 62fadda..1766396 100644
 +    public void playEffect(Location location, Effect effect, int id, int data, float offsetX, float offsetY, float offsetZ, float speed, int particleCount, int radius);
 +
 +    /**
-      * Get empty chunk snapshot (equivalent to all air blocks), optionally including valid biome
-      * data. Used for representing an ungenerated chunk, or for fetching only biome data without loading a chunk.
-      *
+      * Get empty chunk snapshot (equivalent to all air blocks), optionally
+      * including valid biome data. Used for representing an ungenerated chunk,
+      * or for fetching only biome data without loading a chunk.
 diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
-index c756796..aaedfd3 100644
+index 4341eb9..45fcd95 100644
 --- a/src/main/java/org/bukkit/entity/Player.java
 +++ b/src/main/java/org/bukkit/entity/Player.java
-@@ -275,6 +275,8 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+@@ -284,6 +284,8 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
       */
      public <T> void playEffect(Location loc, Effect effect, T data);
  
 +    public void playEffect(Location location, Effect effect, int id, int data, float offsetX, float offsetY, float offsetZ, float speed, int particleCount, int radius);
 +
      /**
-      * Send a block change. This fakes a block change packet for a user at
-      * a certain location. This will not actually change the world in any way.
+      * Send a block change. This fakes a block change packet for a user at a
+      * certain location. This will not actually change the world in any way.
 diff --git a/src/test/java/org/bukkit/EffectTest.java b/src/test/java/org/bukkit/EffectTest.java
 index 08aa71d..5217aec 100644
 --- a/src/test/java/org/bukkit/EffectTest.java
@@ -335,5 +336,5 @@ index 08aa71d..5217aec 100644
      }
  }
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.3.2
 

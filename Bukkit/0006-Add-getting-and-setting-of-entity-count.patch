@@ -1,19 +1,17 @@
-From a89cd6f8dc3b736f175a07754d40c896470cbbca Mon Sep 17 00:00:00 2001
+From b948874dd0410004f6fc1a5b8ef64c99fc64959f Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Sun, 16 Jun 2013 16:57:59 -0500
 Subject: [PATCH] Add getting and setting of entity count
 
 
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
-index 7a9502a..e3b066c 100644
+index db57b6d..075237b 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
-@@ -654,4 +654,18 @@ public final class Bukkit {
-     public static ScoreboardManager getScoreboardManager() {
-         return server.getScoreboardManager();
+@@ -659,6 +659,19 @@ public final class Bukkit {
      }
-+
-+    /**
+ 
+     /**
 +     * @see Server#getEntityCount()
 +     */
 +    public static int getEntityCount() {
@@ -25,18 +23,19 @@ index 7a9502a..e3b066c 100644
 +     */
 +    public static void setEntityCount(int count) {
 +        server.setEntityCount(count);
-+    }
- }
++
++    /*
+      * @see Server#getServerIcon()
+      */
+     public static CachedServerIcon getServerIcon() {
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
-index aa45f16..1b4f733 100644
+index 57e7b30..096cd22 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
-@@ -709,4 +709,18 @@ public interface Server extends PluginMessageRecipient {
-      * @return the scoreboard manager or null if no worlds are loaded.
-      */
+@@ -744,6 +744,20 @@ public interface Server extends PluginMessageRecipient {
      ScoreboardManager getScoreboardManager();
-+
-+    /**
+ 
+     /**
 +     * Gets the current entity count
 +     *
 +     * @return current entity count
@@ -49,7 +48,11 @@ index aa45f16..1b4f733 100644
 +     * @param count The new entity count
 +     */
 +    void setEntityCount(int count);
- }
++
++    /**
+      * Gets an instance of the server's default server-icon.
+      *
+      * @return the default server-icon; null values may be used by the
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.3.2
 

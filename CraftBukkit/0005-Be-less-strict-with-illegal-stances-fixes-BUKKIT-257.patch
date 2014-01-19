@@ -1,22 +1,22 @@
-From e77e6a501a1dc1cceb090bbda22efdc1b669f8f4 Mon Sep 17 00:00:00 2001
+From bed3d3a3f52f04f707a7d0e551f377e7f541a879 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Thu, 21 Feb 2013 19:21:29 -0600
 Subject: [PATCH] Be less strict with illegal stances, fixes BUKKIT-2578
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 6aa7a21..19f224e 100644
+index 29335ea..8def17d 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
-@@ -322,7 +322,7 @@ public class PlayerConnection extends Connection {
-                     d2 = packet10flying.y;
-                     d3 = packet10flying.z;
-                     d4 = packet10flying.stance - packet10flying.y;
+@@ -322,7 +322,7 @@ public class PlayerConnection implements PacketPlayInListener {
+                     d2 = packetplayinflying.d();
+                     d3 = packetplayinflying.e();
+                     d4 = packetplayinflying.f() - packetplayinflying.d();
 -                    if (!this.player.isSleeping() && (d4 > 1.65D || d4 < 0.1D)) {
-+                    if (!this.player.isSleeping() && (d4 > 1.65D /** || d4 < 0.1D **/)) { // CraftBukkit - be less strict
++                    if (!this.player.isSleeping() && d4 > 1.65D) {
                          this.disconnect("Illegal stance");
-                         this.minecraftServer.getLogger().warning(this.player.getName() + " had an illegal stance: " + d4);
+                         c.warn(this.player.getName() + " had an illegal stance: " + d4);
                          return;
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.3.2
 

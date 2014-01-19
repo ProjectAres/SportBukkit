@@ -1,11 +1,11 @@
-From 1f37c2625901fb4f72acac0d8f9da96023526d89 Mon Sep 17 00:00:00 2001
+From 9d13a09f6e212ff1881c9c5a27a585806f10fcda Mon Sep 17 00:00:00 2001
 From: YukonAppleGeek <yukonvinecki@gmail.com>
 Date: Fri, 12 Apr 2013 21:34:01 -0700
 Subject: [PATCH] Add BlockDispenseEntityEvent
 
 
 diff --git a/src/main/java/net/minecraft/server/DispenseBehaviorBoat.java b/src/main/java/net/minecraft/server/DispenseBehaviorBoat.java
-index 708cf60..9bf7255 100644
+index cc0b34b..f37d619 100644
 --- a/src/main/java/net/minecraft/server/DispenseBehaviorBoat.java
 +++ b/src/main/java/net/minecraft/server/DispenseBehaviorBoat.java
 @@ -2,7 +2,7 @@ package net.minecraft.server;
@@ -38,7 +38,7 @@ index 708cf60..9bf7255 100644
  
          world.addEntity(entityboat);
 diff --git a/src/main/java/net/minecraft/server/DispenseBehaviorFireball.java b/src/main/java/net/minecraft/server/DispenseBehaviorFireball.java
-index 6d428c8..a7f642c 100644
+index 56ff612..1a4409d 100644
 --- a/src/main/java/net/minecraft/server/DispenseBehaviorFireball.java
 +++ b/src/main/java/net/minecraft/server/DispenseBehaviorFireball.java
 @@ -4,7 +4,7 @@ import java.util.Random;
@@ -72,7 +72,7 @@ index 6d428c8..a7f642c 100644
          // CraftBukkit end
  
 diff --git a/src/main/java/net/minecraft/server/DispenseBehaviorFireworks.java b/src/main/java/net/minecraft/server/DispenseBehaviorFireworks.java
-index 6abc928..b25e843 100644
+index bb66cb0..fcaec69 100644
 --- a/src/main/java/net/minecraft/server/DispenseBehaviorFireworks.java
 +++ b/src/main/java/net/minecraft/server/DispenseBehaviorFireworks.java
 @@ -2,7 +2,7 @@ package net.minecraft.server;
@@ -106,7 +106,7 @@ index 6abc928..b25e843 100644
          isourceblock.k().addEntity(entityfireworks);
          // itemstack.a(1); // Handled during event processing
 diff --git a/src/main/java/net/minecraft/server/DispenseBehaviorItem.java b/src/main/java/net/minecraft/server/DispenseBehaviorItem.java
-index 290b583..65bfe1f 100644
+index 14ca919..5ee35ab 100644
 --- a/src/main/java/net/minecraft/server/DispenseBehaviorItem.java
 +++ b/src/main/java/net/minecraft/server/DispenseBehaviorItem.java
 @@ -2,7 +2,7 @@ package net.minecraft.server;
@@ -128,7 +128,7 @@ index 290b583..65bfe1f 100644
              world.getServer().getPluginManager().callEvent(event);
          }
 diff --git a/src/main/java/net/minecraft/server/DispenseBehaviorMinecart.java b/src/main/java/net/minecraft/server/DispenseBehaviorMinecart.java
-index 0682194..3d5ce90 100644
+index 0358550..3cd9afa 100644
 --- a/src/main/java/net/minecraft/server/DispenseBehaviorMinecart.java
 +++ b/src/main/java/net/minecraft/server/DispenseBehaviorMinecart.java
 @@ -2,7 +2,7 @@ package net.minecraft.server;
@@ -142,12 +142,12 @@ index 0682194..3d5ce90 100644
  final class DispenseBehaviorMinecart extends DispenseBehaviorItem {
 @@ -37,8 +37,9 @@ final class DispenseBehaviorMinecart extends DispenseBehaviorItem {
          ItemStack itemstack1 = itemstack.a(1);
-         org.bukkit.block.Block block = world.getWorld().getBlockAt(isourceblock.getBlockX(), isourceblock.getBlockY(), isourceblock.getBlockZ());
+         org.bukkit.block.Block block2 = world.getWorld().getBlockAt(isourceblock.getBlockX(), isourceblock.getBlockY(), isourceblock.getBlockZ());
          CraftItemStack craftItem = CraftItemStack.asCraftMirror(itemstack1);
 +        EntityMinecartAbstract entityminecartabstract = EntityMinecartAbstract.a(world, d0, d1 + d3, d2, ((ItemMinecart) itemstack1.getItem()).a);
  
--        BlockDispenseEvent event = new BlockDispenseEvent(block, craftItem.clone(), new org.bukkit.util.Vector(d0, d1 + d3, d2));
-+        BlockDispenseEntityEvent event = new BlockDispenseEntityEvent(block, craftItem.clone(), new org.bukkit.util.Vector(d0, d1 + d3, d2), entityminecartabstract.getBukkitEntity());
+-        BlockDispenseEvent event = new BlockDispenseEvent(block2, craftItem.clone(), new org.bukkit.util.Vector(d0, d1 + d3, d2));
++        BlockDispenseEntityEvent event = new BlockDispenseEntityEvent(block2, craftItem.clone(), new org.bukkit.util.Vector(d0, d1 + d3, d2), entityminecartabstract.getBukkitEntity());
          if (!BlockDispenser.eventFired) {
              world.getServer().getPluginManager().callEvent(event);
          }
@@ -162,7 +162,7 @@ index 0682194..3d5ce90 100644
  
          if (itemstack.hasName()) {
 diff --git a/src/main/java/net/minecraft/server/DispenseBehaviorMonsterEgg.java b/src/main/java/net/minecraft/server/DispenseBehaviorMonsterEgg.java
-index b3d0128..8a58f85 100644
+index a854f7a..8003bbc 100644
 --- a/src/main/java/net/minecraft/server/DispenseBehaviorMonsterEgg.java
 +++ b/src/main/java/net/minecraft/server/DispenseBehaviorMonsterEgg.java
 @@ -2,7 +2,7 @@ package net.minecraft.server;
@@ -195,7 +195,7 @@ index b3d0128..8a58f85 100644
          if (entity instanceof EntityLiving && itemstack.hasName()) {
              ((EntityInsentient) entity).setCustomName(itemstack.getName());
 diff --git a/src/main/java/net/minecraft/server/DispenseBehaviorProjectile.java b/src/main/java/net/minecraft/server/DispenseBehaviorProjectile.java
-index 2194808..f318496 100644
+index 0a51baf..3972c53 100644
 --- a/src/main/java/net/minecraft/server/DispenseBehaviorProjectile.java
 +++ b/src/main/java/net/minecraft/server/DispenseBehaviorProjectile.java
 @@ -2,7 +2,7 @@ package net.minecraft.server;
@@ -217,7 +217,7 @@ index 2194808..f318496 100644
              world.getServer().getPluginManager().callEvent(event);
          }
 diff --git a/src/main/java/net/minecraft/server/DispenseBehaviorTNT.java b/src/main/java/net/minecraft/server/DispenseBehaviorTNT.java
-index affe3ec..f63dd5c 100644
+index 0d7f828..f82be28 100644
 --- a/src/main/java/net/minecraft/server/DispenseBehaviorTNT.java
 +++ b/src/main/java/net/minecraft/server/DispenseBehaviorTNT.java
 @@ -2,7 +2,7 @@ package net.minecraft.server;
@@ -251,5 +251,5 @@ index affe3ec..f63dd5c 100644
  
          world.addEntity(entitytntprimed);
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.3.2
 

@@ -1,4 +1,4 @@
-From 4aa812cb78e9f63ef6128c9f8cba84f4d3a9d0ba Mon Sep 17 00:00:00 2001
+From d2ab0fc4716ba05fcbe6ce934ba19ca7289478a8 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Thu, 4 Apr 2013 21:36:54 -0500
 Subject: [PATCH] Fix invalid player death messages
@@ -6,28 +6,27 @@ Subject: [PATCH] Fix invalid player death messages
 This bug affects the /kill command and any plugin that sets a player's health to zero
 
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 2e234f1..c09352f 100644
+index 1dee8b2..619c938 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
-@@ -306,7 +306,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -362,7 +362,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
              }
          }
  
--        ChatMessage chatmessage = this.aR().b();
-+        ChatMessage chatmessage = damagesource == DamageSource.GENERIC ? damagesource.getLocalizedDeathMessage(this) : this.aR().b(); // CraftBukkit
+-        IChatBaseComponent chatmessage = this.aW().b();
++        IChatBaseComponent chatmessage = damagesource == DamageSource.GENERIC ? damagesource.getLocalizedDeathMessage(this) : this.aW().b(); // CraftBukkit
  
-         String deathmessage = chatmessage.toString();
+         String deathmessage = chatmessage.c();
          org.bukkit.event.entity.PlayerDeathEvent event = CraftEventFactory.callPlayerDeathEvent(this, loot, deathmessage);
-@@ -347,7 +347,8 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -403,7 +403,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
  
-         EntityLiving entityliving = this.aS();
+         EntityLiving entityliving = this.aX();
  
 -        if (entityliving != null) {
-+        // CraftBukkit - can't have a combat tracked killer with a generic damage source
 +        if (entityliving != null && damagesource != DamageSource.GENERIC) {
-             entityliving.b(this, this.bb);
-         }
+             int i = EntityTypes.a(entityliving);
+             MonsterEggInfo monsteregginfo = (MonsterEggInfo) EntityTypes.a.get(Integer.valueOf(i));
  
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.3.2
 
