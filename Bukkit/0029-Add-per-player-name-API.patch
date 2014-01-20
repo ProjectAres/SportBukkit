@@ -1,0 +1,32 @@
+From 246bf5b0053d1c8842eeaf8142f89356186f53f2 Mon Sep 17 00:00:00 2001
+From: Jedediah Smith <jedediah@silencegreys.com>
+Date: Sun, 19 Jan 2014 20:08:02 -0500
+Subject: [PATCH] Add per-player name API
+
+
+diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
+index 9b63c4d..c4eca2d 100644
+--- a/src/main/java/org/bukkit/entity/Player.java
++++ b/src/main/java/org/bukkit/entity/Player.java
+@@ -26,6 +26,18 @@ import org.bukkit.scoreboard.Scoreboard;
+  */
+ public interface Player extends HumanEntity, Conversable, CommandSender, OfflinePlayer, PluginMessageRecipient {
+ 
++    public String getDisplayName(Player viewer);
++
++    public String getPlayerListName(Player viewer);
++
++    public String getOverheadName(Player viewer);
++
++    public void setDisplayName(Player viewer, String name);
++
++    public void setPlayerListName(Player viewer, String name);
++
++    public void setOverheadName(Player viewer, String name);
++
+     /**
+      * Gets the "friendly" name to display of this player. This may include color.
+      * <p>
+-- 
+1.7.3.5
+
