@@ -1,4 +1,4 @@
-From 7a81b32d8801df15e99f597168925c0e4a5df7b1 Mon Sep 17 00:00:00 2001
+From b8eeb21f3613f82a558bf3408c6d138f24d44f17 Mon Sep 17 00:00:00 2001
 From: Chad Waters <authorblues@gmail.com>
 Date: Thu, 2 Aug 2012 16:47:02 -0700
 Subject: [PATCH] Fire ExplosionPrimeEvent properly. Fixes BUKKIT-770
@@ -76,53 +76,41 @@ index 9acd4f2..a2b55ef 100644
              return true;
          } else {
 diff --git a/src/main/java/net/minecraft/server/EntityCreeper.java b/src/main/java/net/minecraft/server/EntityCreeper.java
-index 5424003..2607f35 100644
+index 3c51de5..d50cbd4 100644
 --- a/src/main/java/net/minecraft/server/EntityCreeper.java
 +++ b/src/main/java/net/minecraft/server/EntityCreeper.java
-@@ -80,9 +80,19 @@ public class EntityCreeper extends EntityMonster {
-             this.bp = this.fuseTicks;
-             int i = this.bV();
+@@ -90,9 +90,20 @@ public class EntityCreeper extends EntityMonster {
+ 
+             int i = this.bZ();
  
 +            // CraftBukkit start - fire ExplosionPrimeEvent
 +            float radius = this.isPowered() ? 6.0F : 3.0F;
++
              if (i > 0 && this.fuseTicks == 0) {
--                this.makeSound("random.fuse", 1.0F, 0.5F);
+-                this.makeSound("creeper.primed", 1.0F, 0.5F);
 +                ExplosionPrimeEvent event = new ExplosionPrimeEvent(this.getBukkitEntity(), radius, false);
 +                this.world.getServer().getPluginManager().callEvent(event);
 +
 +                if (event.isCancelled()) {
 +                    i = 0;
 +                } else {
-+                    this.makeSound("random.fuse", 1.0F, 0.5F);
++                    this.makeSound("creeper.primed", 1.0F, 0.5F);
 +                }
              }
 +            // CraftBukkit end
  
              this.fuseTicks += i;
              if (this.fuseTicks < 0) {
-@@ -93,18 +103,8 @@ public class EntityCreeper extends EntityMonster {
+@@ -101,6 +112,7 @@ public class EntityCreeper extends EntityMonster {
+ 
+             if (this.fuseTicks >= this.maxFuseTicks) {
                  this.fuseTicks = this.maxFuseTicks;
-                 if (!this.world.isStatic) {
-                     boolean flag = this.world.getGameRules().getBoolean("mobGriefing");
--                    // CraftBukkit start
--                    float radius = this.isPowered() ? 6.0F : 3.0F;
--
--                    ExplosionPrimeEvent event = new ExplosionPrimeEvent(this.getBukkitEntity(), radius, false);
--                    this.world.getServer().getPluginManager().callEvent(event);
--                    if (!event.isCancelled()) {
--                        this.world.createExplosion(this, this.locX, this.locY, this.locZ, event.getRadius(), event.getFire(), flag);
--                        this.die();
--                    } else {
--                        this.fuseTicks = 0;
--                    }
--                    // CraftBukkit end
-+                    this.world.createExplosion(this, this.locX, this.locY, this.locZ, radius, false, flag); // CraftBukkit
-+                    this.die();
-                 }
++
+                 this.cc();
              }
          }
 diff --git a/src/main/java/net/minecraft/server/EntityLargeFireball.java b/src/main/java/net/minecraft/server/EntityLargeFireball.java
-index df86311..002a76d 100644
+index d136d2d..b3ab7ee 100644
 --- a/src/main/java/net/minecraft/server/EntityLargeFireball.java
 +++ b/src/main/java/net/minecraft/server/EntityLargeFireball.java
 @@ -20,16 +20,8 @@ public class EntityLargeFireball extends EntityFireball {
@@ -145,7 +133,7 @@ index df86311..002a76d 100644
          }
      }
 diff --git a/src/main/java/net/minecraft/server/EntityTNTPrimed.java b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
-index 858d11e..50c20bc 100644
+index 92f0042..df133ca 100644
 --- a/src/main/java/net/minecraft/server/EntityTNTPrimed.java
 +++ b/src/main/java/net/minecraft/server/EntityTNTPrimed.java
 @@ -73,15 +73,10 @@ public class EntityTNTPrimed extends Entity {
@@ -168,5 +156,5 @@ index 858d11e..50c20bc 100644
  
      protected void b(NBTTagCompound nbttagcompound) {
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.5.1
 

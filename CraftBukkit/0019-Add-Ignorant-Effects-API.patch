@@ -1,4 +1,4 @@
-From 12f1ed9a342044d90fafd9ed3b82c7e9b3a22b98 Mon Sep 17 00:00:00 2001
+From 1837ffee9e3fbf9fc1532451984ac9801cca5741 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Thu, 16 May 2013 20:20:34 -0500
 Subject: [PATCH] Add Ignorant Effects API
@@ -28,32 +28,32 @@ index f5935f7..9d726b9 100644
  
          WatchableObject watchableobject;
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index c09352f..7b15d73 100644
+index caf7d03..7e01aa3 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
-@@ -792,12 +792,18 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -863,12 +863,18 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
  
      protected void a(MobEffect mobeffect) {
          super.a(mobeffect);
--        this.playerConnection.sendPacket(new Packet41MobEffect(this.id, mobeffect));
+-        this.playerConnection.sendPacket(new PacketPlayOutEntityEffect(this.getId(), mobeffect));
 +        // CraftBukkit - account for ignorant effects
 +        if (!this.getBukkitEntity().hasIgnorantEffect(org.bukkit.potion.PotionEffectType.getById(mobeffect.getEffectId()))) {
-+            this.playerConnection.sendPacket(new Packet41MobEffect(this.id, mobeffect));
++            this.playerConnection.sendPacket(new PacketPlayOutEntityEffect(this.getId(), mobeffect));
 +        }
      }
  
      protected void a(MobEffect mobeffect, boolean flag) {
          super.a(mobeffect, flag);
--        this.playerConnection.sendPacket(new Packet41MobEffect(this.id, mobeffect));
+-        this.playerConnection.sendPacket(new PacketPlayOutEntityEffect(this.getId(), mobeffect));
 +        // CraftBukkit - account for ignorant effects
 +        if (!this.getBukkitEntity().hasIgnorantEffect(org.bukkit.potion.PotionEffectType.getById(mobeffect.getEffectId()))) {
-+            this.playerConnection.sendPacket(new Packet41MobEffect(this.id, mobeffect));
++            this.playerConnection.sendPacket(new PacketPlayOutEntityEffect(this.getId(), mobeffect));
 +        }
      }
  
      protected void b(MobEffect mobeffect) {
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index baa5b55..06a52d7 100644
+index 9f818cf..748417d 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 @@ -1,5 +1,6 @@
@@ -63,16 +63,16 @@ index baa5b55..06a52d7 100644
  import java.util.Collection;
  import java.util.HashSet;
  import java.util.Iterator;
-@@ -97,7 +98,7 @@ public class EntityTrackerEntry {
+@@ -99,7 +100,7 @@ public class EntityTrackerEntry {
                  }
              }
  
 -            this.b();
 +            this.sendMetadata(this.tracker.getDataWatcher(), false); // CraftBukkit - custom metadata sender
-         } else if (this.m % this.c == 0 || this.tracker.an || this.tracker.getDataWatcher().a()) {
+         } else if (this.m % this.c == 0 || this.tracker.am || this.tracker.getDataWatcher().a()) {
              int i;
              int j;
-@@ -168,7 +169,7 @@ public class EntityTrackerEntry {
+@@ -170,7 +171,7 @@ public class EntityTrackerEntry {
                      this.broadcast((Packet) object);
                  }
  
@@ -81,16 +81,18 @@ index baa5b55..06a52d7 100644
                  /* CraftBukkit start - Code moved up
                  if (flag) {
                      this.xLoc = i;
-@@ -197,7 +198,7 @@ public class EntityTrackerEntry {
+@@ -199,8 +200,9 @@ public class EntityTrackerEntry {
                  this.xLoc = this.tracker.at.a(this.tracker.locX);
                  this.yLoc = MathHelper.floor(this.tracker.locY * 32.0D);
                  this.zLoc = this.tracker.at.a(this.tracker.locZ);
 -                this.b();
 +                this.sendMetadata(this.tracker.getDataWatcher(), false); // CraftBukkit - custom metadata sender
-                 this.w = true;
+                 this.x = true;
++                this.w = true;
              }
  
-@@ -279,6 +280,64 @@ public class EntityTrackerEntry {
+             i = MathHelper.d(this.tracker.getHeadRotation() * 256.0F / 360.0F);
+@@ -281,6 +283,64 @@ public class EntityTrackerEntry {
          }
      }
  
@@ -101,11 +103,11 @@ index baa5b55..06a52d7 100644
 +        }
 +
 +        if (!flag && this.tracker instanceof EntityLiving) {
-+            AttributeMapServer attributemapserver = (AttributeMapServer) ((EntityLiving) this.tracker).aX();
++            AttributeMapServer attributemapserver = (AttributeMapServer) ((EntityLiving) this.tracker).bc();
 +            Set set = attributemapserver.b();
 +
 +            if (!set.isEmpty()) {
-+                this.broadcastIncludingSelf(new Packet44UpdateAttributes(this.tracker.id, set));
++                this.broadcastIncludingSelf(new PacketPlayOutUpdateAttributes(this.tracker.getId(), set));
 +            }
 +
 +            set.clear();
@@ -125,8 +127,8 @@ index baa5b55..06a52d7 100644
 +            dataVisible.add(visible);
 +        }
 +
-+        Packet40EntityMetadata normal = new Packet40EntityMetadata(this.tracker.id, dataNormal);
-+        Packet40EntityMetadata visible = new Packet40EntityMetadata(this.tracker.id, dataVisible);
++        PacketPlayOutEntityMetadata normal = new PacketPlayOutEntityMetadata(this.tracker.getId(), dataNormal);
++        PacketPlayOutEntityMetadata visible = new PacketPlayOutEntityMetadata(this.tracker.getId(), dataVisible);
 +        Iterator iterator = this.trackedPlayers.iterator();
 +
 +        if(entityplayer == null) {
@@ -143,7 +145,7 @@ index baa5b55..06a52d7 100644
 +        }
 +    }
 +
-+    private void sendMetadata(EntityPlayer entityplayer, Packet40EntityMetadata normal, Packet40EntityMetadata visible) {
++    private void sendMetadata(EntityPlayer entityplayer, PacketPlayOutEntityMetadata normal, PacketPlayOutEntityMetadata visible) {
 +        if (entityplayer.getBukkitEntity().hasIgnorantEffect(org.bukkit.potion.PotionEffectType.getById(MobEffectList.INVISIBILITY.getId()))) {
 +            entityplayer.playerConnection.sendPacket(visible);
 +        } else {
@@ -155,23 +157,24 @@ index baa5b55..06a52d7 100644
      public void a() {
          Iterator iterator = this.trackedPlayers.iterator();
  
-@@ -319,7 +378,7 @@ public class EntityTrackerEntry {
+@@ -321,7 +381,7 @@ public class EntityTrackerEntry {
  
                      entityplayer.playerConnection.sendPacket(packet);
                      if (!this.tracker.getDataWatcher().d()) {
--                        entityplayer.playerConnection.sendPacket(new Packet40EntityMetadata(this.tracker.id, this.tracker.getDataWatcher(), true));
+-                        entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityMetadata(this.tracker.getId(), this.tracker.getDataWatcher(), true));
 +                        this.sendMetadata(this.tracker.getDataWatcher(), true, entityplayer); // CraftBukkit - custom metadata sender
                      }
  
                      if (this.tracker instanceof EntityLiving) {
-@@ -387,7 +446,10 @@ public class EntityTrackerEntry {
+@@ -388,8 +448,10 @@ public class EntityTrackerEntry {
+ 
                          while (iterator.hasNext()) {
                              MobEffect mobeffect = (MobEffect) iterator.next();
- 
--                            entityplayer.playerConnection.sendPacket(new Packet41MobEffect(this.tracker.id, mobeffect));
+-
+-                            entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityEffect(this.tracker.getId(), mobeffect));
 +                            // CraftBukkit - account for ignorant effects
 +                            if (!entityplayer.getBukkitEntity().hasIgnorantEffect(org.bukkit.potion.PotionEffectType.getById(mobeffect.getEffectId()))) {
-+                                entityplayer.playerConnection.sendPacket(new Packet41MobEffect(this.tracker.id, mobeffect));
++                                entityplayer.playerConnection.sendPacket(new PacketPlayOutEntityEffect(this.tracker.getId(), mobeffect));
 +                            }
                          }
                      }
@@ -195,46 +198,46 @@ index 54299a7..a94eb75 100644
          this.a = i;
          if (flag) {
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index e913cc1..64b91e7 100644
+index b71bec4..e268441 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
-@@ -113,7 +113,10 @@ public abstract class PlayerList {
+@@ -125,7 +125,10 @@ public abstract class PlayerList {
          while (iterator.hasNext()) {
              MobEffect mobeffect = (MobEffect) iterator.next();
  
--            playerconnection.sendPacket(new Packet41MobEffect(entityplayer.id, mobeffect));
+-            playerconnection.sendPacket(new PacketPlayOutEntityEffect(entityplayer.getId(), mobeffect));
 +            // CraftBukkit - account for ignorant effects
 +            if (!entityplayer.getBukkitEntity().hasIgnorantEffect(org.bukkit.potion.PotionEffectType.getById(mobeffect.getEffectId()))) {
-+                playerconnection.sendPacket(new Packet41MobEffect(entityplayer.id, mobeffect));
++                playerconnection.sendPacket(new PacketPlayOutEntityEffect(entityplayer.getId(), mobeffect));
 +            }
          }
  
          entityplayer.syncInventory();
-@@ -464,7 +467,10 @@ public abstract class PlayerList {
+@@ -513,7 +516,10 @@ public abstract class PlayerList {
          while (iterator.hasNext()) {
              MobEffect mobeffect = (MobEffect) iterator.next();
  
--            entityplayer1.playerConnection.sendPacket(new Packet41MobEffect(entityplayer1.id, mobeffect));
+-            entityplayer1.playerConnection.sendPacket(new PacketPlayOutEntityEffect(entityplayer1.getId(), mobeffect));
 +            // CraftBukkit - account for ignorant effects
 +            if (!entityplayer1.getBukkitEntity().hasIgnorantEffect(org.bukkit.potion.PotionEffectType.getById(mobeffect.getEffectId()))) {
-+                entityplayer1.playerConnection.sendPacket(new Packet41MobEffect(entityplayer1.id, mobeffect));
++                entityplayer1.playerConnection.sendPacket(new PacketPlayOutEntityEffect(entityplayer1.getId(), mobeffect));
 +            }
          }
          // entityplayer1.syncInventory();
          // CraftBukkit end
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index ac73273..ec4647e 100644
+index 60b0435..622e09f 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-@@ -51,6 +51,7 @@ import org.bukkit.metadata.MetadataValue;
+@@ -54,6 +54,7 @@ import org.bukkit.map.MapView;
+ import org.bukkit.metadata.MetadataValue;
  import org.bukkit.plugin.Plugin;
- import org.bukkit.plugin.messaging.Messenger;
  import org.bukkit.plugin.messaging.StandardMessenger;
 +import org.bukkit.potion.PotionEffectType;
  import org.bukkit.scoreboard.Scoreboard;
  
  @DelegateDeserialization(CraftOfflinePlayer.class)
-@@ -61,6 +62,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -64,6 +65,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
      private final ConversationTracker conversationTracker = new ConversationTracker();
      private final Set<String> channels = new HashSet<String>();
      private final Map<String, Player> hiddenPlayers = new MapMaker().softValues().makeMap();
@@ -242,9 +245,9 @@ index ac73273..ec4647e 100644
      private int hash = 0;
      private double health = 20;
      private boolean scaledHealth = false;
-@@ -1072,4 +1074,43 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -1252,4 +1254,43 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
          }
-         collection.add(new AttributeModifiable(getHandle().aX(), (new AttributeRanged("generic.maxHealth", scaledHealth ? healthScale : getMaxHealth(), 0.0D, Float.MAX_VALUE)).a("Max Health").a(true)));
+         collection.add(new AttributeModifiable(getHandle().bc(), (new AttributeRanged("generic.maxHealth", scaledHealth ? healthScale : getMaxHealth(), 0.0D, Float.MAX_VALUE)).a("Max Health").a(true)));
      }
 +
 +    public Set<PotionEffectType> getIgnorantEffects() {
@@ -287,5 +290,5 @@ index ac73273..ec4647e 100644
 +    }
  }
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.5.1
 
