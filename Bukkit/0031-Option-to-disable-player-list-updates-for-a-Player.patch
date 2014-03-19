@@ -1,14 +1,14 @@
-From 6908ad4686719c7618a894c698238a643074ae91 Mon Sep 17 00:00:00 2001
+From 10206dbedac5f675438e789bf021b9f4eb745bcb Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Sun, 9 Mar 2014 04:39:21 -0400
 Subject: [PATCH] Option to disable player list updates for a Player
 
 
 diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
-index aee5244..98ee38a 100644
+index 6dd46e0..8be8b5c 100644
 --- a/src/main/java/org/bukkit/entity/Player.java
 +++ b/src/main/java/org/bukkit/entity/Player.java
-@@ -155,6 +155,18 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+@@ -159,6 +159,18 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      public void setOverheadName(String name);
  
      /**
@@ -28,5 +28,5 @@ index aee5244..98ee38a 100644
       *
       * @param loc Location to point to
 -- 
-1.7.3.5
+1.8.5.1
 
