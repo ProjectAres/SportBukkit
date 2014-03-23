@@ -1,11 +1,11 @@
-From 8724f6434306bdd9c0a795c11d205146912ddaea Mon Sep 17 00:00:00 2001
+From c9afafbab9fce0986807be1e69866febaff23df6 Mon Sep 17 00:00:00 2001
 From: YukonAppleGeek <yukonvinecki@gmail.com>
 Date: Sun, 26 May 2013 18:43:56 -0700
 Subject: [PATCH] Add PlayerSpawnEntityEvent
 
 
 diff --git a/src/main/java/net/minecraft/server/ItemMonsterEgg.java b/src/main/java/net/minecraft/server/ItemMonsterEgg.java
-index 06967d8..2b2ff26 100644
+index a41184e..ac5c075 100644
 --- a/src/main/java/net/minecraft/server/ItemMonsterEgg.java
 +++ b/src/main/java/net/minecraft/server/ItemMonsterEgg.java
 @@ -1,5 +1,11 @@
@@ -19,8 +19,8 @@ index 06967d8..2b2ff26 100644
 +
  public class ItemMonsterEgg extends Item {
  
-     public ItemMonsterEgg(int i) {
-@@ -34,7 +40,29 @@ public class ItemMonsterEgg extends Item {
+     public ItemMonsterEgg() {
+@@ -33,7 +39,29 @@ public class ItemMonsterEgg extends Item {
                  d0 = 0.5D;
              }
  
@@ -52,5 +52,5 @@ index 06967d8..2b2ff26 100644
              if (entity != null) {
                  if (entity instanceof EntityLiving && itemstack.hasName()) {
 -- 
-1.8.3.4 (Apple Git-47)
+1.8.5.1
 

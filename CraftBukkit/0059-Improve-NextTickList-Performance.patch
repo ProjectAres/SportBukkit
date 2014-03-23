@@ -1,0 +1,23 @@
+From ce67d29985281579f5416526ea410e2787be9411 Mon Sep 17 00:00:00 2001
+From: Mike Primm <mike@primmhome.com>
+Date: Wed, 24 Apr 2013 01:43:33 -0500
+Subject: [PATCH] Improve NextTickList Performance
+
+Improve next-tick-list performance on chunk unloads, large
+ queues
+
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index b9b967f..bba76fa 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -557,6 +557,7 @@ public class WorldServer extends World implements org.bukkit.BlockChangeDelegate
+         }
+     }
+ 
++    // TODO - investigate broken tick list patch
+     public List a(Chunk chunk, boolean flag) {
+         ArrayList arraylist = null;
+         ChunkCoordIntPair chunkcoordintpair = chunk.l();
+-- 
+1.8.5.1
+

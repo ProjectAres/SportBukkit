@@ -1,4 +1,4 @@
-From b3be68812e469c35d90cdb92666f1afeab9f183b Mon Sep 17 00:00:00 2001
+From 66e721afa3ced6eca7d6faacaec68372bd1120ea Mon Sep 17 00:00:00 2001
 From: Steve Anton <anxuiz.nx@gmail.com>
 Date: Thu, 2 Aug 2012 18:33:13 -0700
 Subject: [PATCH] Support PlayerInitialSpawnEvent for modifying a player's
@@ -6,11 +6,11 @@ Subject: [PATCH] Support PlayerInitialSpawnEvent for modifying a player's
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
-index 64b91e7..08dc065 100644
+index e268441..a1f620d 100644
 --- a/src/main/java/net/minecraft/server/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/PlayerList.java
-@@ -68,6 +68,22 @@ public abstract class PlayerList {
-     public void a(INetworkManager inetworkmanager, EntityPlayer entityplayer) {
+@@ -75,6 +75,22 @@ public abstract class PlayerList {
+     public void a(NetworkManager networkmanager, EntityPlayer entityplayer) {
          NBTTagCompound nbttagcompound = this.a(entityplayer);
  
 +        // CraftBukkit start - support PlayerInitialSpawnEvent
@@ -33,5 +33,5 @@ index 64b91e7..08dc065 100644
          entityplayer.playerInteractManager.a((WorldServer) entityplayer.world);
          String s = "local";
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.5.1
 

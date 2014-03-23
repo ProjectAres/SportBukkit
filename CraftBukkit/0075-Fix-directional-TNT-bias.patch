@@ -1,14 +1,14 @@
-From 17737bc33964211ceb01c95b85151fd8113786fd Mon Sep 17 00:00:00 2001
+From 7322c6033160bcbe37f242ca0a1e66487b19647e Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Mon, 10 Mar 2014 16:18:41 -0400
 Subject: [PATCH] Fix directional TNT bias
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 216ecda..f6f1fd2 100644
+index 992fc5c..2a287fd 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -1650,6 +1650,12 @@ public abstract class World implements IBlockAccess {
+@@ -1640,6 +1640,12 @@ public abstract class World implements IBlockAccess {
          int i = 0;
          int j = 0;
  
@@ -21,7 +21,7 @@ index 216ecda..f6f1fd2 100644
          Vec3D vec3d2 = vec3d.b.create(0, 0, 0); // CraftBukkit
          for (float f = 0.0F; f <= 1.0F; f = (float) ((double) f + d0)) {
              for (float f1 = 0.0F; f1 <= 1.0F; f1 = (float) ((double) f1 + d1)) {
-@@ -1658,7 +1664,7 @@ public abstract class World implements IBlockAccess {
+@@ -1648,7 +1654,7 @@ public abstract class World implements IBlockAccess {
                      double d4 = axisalignedbb.b + (axisalignedbb.e - axisalignedbb.b) * (double) f1;
                      double d5 = axisalignedbb.c + (axisalignedbb.f - axisalignedbb.c) * (double) f2;
  
@@ -31,5 +31,5 @@ index 216ecda..f6f1fd2 100644
                      }
  
 -- 
-1.7.3.5
+1.8.5.1
 

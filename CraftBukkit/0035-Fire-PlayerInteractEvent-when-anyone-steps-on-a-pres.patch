@@ -1,4 +1,4 @@
-From b0bb91942b36c929cdfa24deb7ce0f7dd57f8c26 Mon Sep 17 00:00:00 2001
+From 18fc2b67f8f91b6ed18f1d5f9ce9038a11612465 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Sun, 17 Feb 2013 23:15:32 -0600
 Subject: [PATCH] Fire PlayerInteractEvent when anyone steps on a pressure
@@ -9,7 +9,7 @@ In order to not spam the PlayerInteractEvent, we need to keep track of wether or
 This does modify PlayerInteractEvent firing, but it shouldn't be 'breaking'.
 
 diff --git a/src/main/java/net/minecraft/server/BlockPressurePlateBinary.java b/src/main/java/net/minecraft/server/BlockPressurePlateBinary.java
-index 23c6f87..a9c1191 100644
+index 25ef883..9772d82 100644
 --- a/src/main/java/net/minecraft/server/BlockPressurePlateBinary.java
 +++ b/src/main/java/net/minecraft/server/BlockPressurePlateBinary.java
 @@ -8,6 +8,7 @@ import org.bukkit.event.entity.EntityInteractEvent; // CraftBukkit
@@ -18,8 +18,8 @@ index 23c6f87..a9c1191 100644
      private EnumMobType a;
 +    public java.util.Map<Object, Boolean> entities = new java.util.HashMap<Object, Boolean>(); // CraftBukkit
  
-     protected BlockPressurePlateBinary(int i, String s, Material material, EnumMobType enummobtype) {
-         super(i, s, material);
+     protected BlockPressurePlateBinary(String s, Material material, EnumMobType enummobtype) {
+         super(s, material);
 @@ -37,6 +38,19 @@ public class BlockPressurePlateBinary extends BlockPressurePlateAbstract {
              list = world.a(EntityHuman.class, this.a(i, j, k));
          }
@@ -69,12 +69,12 @@ index 23c6f87..a9c1191 100644
                  }
 -                // CraftBukkit end
  
--                if (!entity.au()) {
-+                if (!entity.au() && (result == null || result)) {
+-                if (!entity.az()) {
++                if (!entity.az() && (result == null || result)) {
 +                    // CraftBukkit end
                      return 15;
                  }
              }
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.5.1
 

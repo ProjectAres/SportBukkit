@@ -1,4 +1,4 @@
-From d8358999039e4ddde7e9bdc587a1ab2261f9d0eb Mon Sep 17 00:00:00 2001
+From 2d5a821e975e02c06891f9bb9e8d569a16c66fda Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Sat, 7 Dec 2013 17:53:32 -0600
 Subject: [PATCH] Make scoreboard classes public
@@ -78,7 +78,7 @@ index d08e5a2..4a305bb 100644
      static ImmutableBiMap<DisplaySlot, String> SLOTS = ImmutableBiMap.of(
              DisplaySlot.BELOW_NAME, "belowName",
 diff --git a/src/main/java/org/bukkit/craftbukkit/scoreboard/CraftTeam.java b/src/main/java/org/bukkit/craftbukkit/scoreboard/CraftTeam.java
-index 03a3207..3bf5352 100644
+index 8a640d3..68a0009 100644
 --- a/src/main/java/org/bukkit/craftbukkit/scoreboard/CraftTeam.java
 +++ b/src/main/java/org/bukkit/craftbukkit/scoreboard/CraftTeam.java
 @@ -11,7 +11,7 @@ import com.google.common.collect.ImmutableSet;

@@ -1,4 +1,4 @@
-From 98832d599d0512dfa29c6e6c520ab9d88d3a3dc0 Mon Sep 17 00:00:00 2001
+From ce487e5d8e5468deed595ac893049632cc64eb53 Mon Sep 17 00:00:00 2001
 From: Ammar Askar <ammar@ammaraskar.com>
 Date: Tue, 16 Jul 2013 03:32:32 +0500
 Subject: [PATCH] Entity ticking chunk caching
@@ -6,10 +6,10 @@ Subject: [PATCH] Entity ticking chunk caching
 Cache known loaded chunks so we avoid making a potentially expensive contains call for every single entity in exchange for some simple arithmetic. Best case scenario, this cuts down contains call to once per chunk, worst case it adds on some simple arithmetic operations
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index ab4eed1..98f7a78 100644
+index f8ab2a5..a3c05da 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -1143,6 +1143,7 @@ public abstract class World implements IBlockAccess {
+@@ -1136,6 +1136,7 @@ public abstract class World implements IBlockAccess {
          CrashReport crashreport;
          CrashReportSystemDetails crashreportsystemdetails;
  
@@ -17,7 +17,7 @@ index ab4eed1..98f7a78 100644
          for (i = 0; i < this.i.size(); ++i) {
              entity = (Entity) this.i.get(i);
              // CraftBukkit start - Fixed an NPE, don't process entities in chunks queued for unload
-@@ -1151,10 +1152,15 @@ public abstract class World implements IBlockAccess {
+@@ -1144,10 +1145,15 @@ public abstract class World implements IBlockAccess {
              }
  
              ChunkProviderServer chunkProviderServer = ((WorldServer) this).chunkProviderServer;
@@ -35,7 +35,7 @@ index ab4eed1..98f7a78 100644
  
              try {
                  ++entity.ticksLived;
-@@ -1175,6 +1181,7 @@ public abstract class World implements IBlockAccess {
+@@ -1168,6 +1174,7 @@ public abstract class World implements IBlockAccess {
                  this.i.remove(i--);
              }
          }
@@ -43,9 +43,9 @@ index ab4eed1..98f7a78 100644
  
          this.methodProfiler.c("remove");
          this.entityList.removeAll(this.f);
-@@ -1203,10 +1210,15 @@ public abstract class World implements IBlockAccess {
+@@ -1197,10 +1204,15 @@ public abstract class World implements IBlockAccess {
  
-             // CraftBukkit start - Don't tick entities in chunks queued for unload
+             // Don't tick entities in chunks queued for unload
              ChunkProviderServer chunkProviderServer = ((WorldServer) this).chunkProviderServer;
 -            if (chunkProviderServer.unloadQueue.contains(MathHelper.floor(entity.locX) >> 4, MathHelper.floor(entity.locZ) >> 4)) {
 -                continue;
@@ -57,18 +57,10 @@ index ab4eed1..98f7a78 100644
 +                }
              }
              // CraftBukkit end
-+            lastChunk = chunk; // Spigot
++            lastChunk = Long.MIN_VALUE; // Spigot
  
              if (entity.vehicle != null) {
                  if (!entity.vehicle.dead && entity.vehicle.passenger == entity) {
-@@ -1244,6 +1256,7 @@ public abstract class World implements IBlockAccess {
- 
-             this.methodProfiler.b();
-         }
-+        lastChunk = Long.MIN_VALUE; // Spigot
- 
-         this.methodProfiler.c("tileEntities");
-         this.N = true;
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.5.1
 

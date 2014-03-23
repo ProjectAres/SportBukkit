@@ -1,18 +1,18 @@
-From 30513dc2bc4264d06ba3c07a887c6423b631e832 Mon Sep 17 00:00:00 2001
+From a9d9d5c747ed30248674e31848057e74d4311686 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Fri, 17 May 2013 20:44:04 -0500
 Subject: [PATCH] Add PlayerPickupExperienceEvent
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityExperienceOrb.java b/src/main/java/net/minecraft/server/EntityExperienceOrb.java
-index 5247d5a..066e682 100644
+index d79f693..44949d4 100644
 --- a/src/main/java/net/minecraft/server/EntityExperienceOrb.java
 +++ b/src/main/java/net/minecraft/server/EntityExperienceOrb.java
-@@ -152,10 +152,17 @@ public class EntityExperienceOrb extends Entity {
+@@ -147,10 +147,17 @@ public class EntityExperienceOrb extends Entity {
          if (!this.world.isStatic) {
-             if (this.c == 0 && entityhuman.bv == 0) {
-                 entityhuman.bv = 2;
--                this.makeSound("random.orb", 0.1F, 0.5F * ((this.random.nextFloat() - this.random.nextFloat()) * 0.7F + 1.8F));
+             if (this.c == 0 && entityhuman.bu == 0) {
+                 entityhuman.bu = 2;
+-                this.world.makeSound(entityhuman, "random.orb", 0.1F, 0.5F * ((this.random.nextFloat() - this.random.nextFloat()) * 0.7F + 1.8F));
 -                entityhuman.receive(this, 1);
 -                entityhuman.giveExp(CraftEventFactory.callPlayerExpChangeEvent(entityhuman, this.value).getAmount()); // CraftBukkit - this.value to event.getAmount()
 -                this.die();
@@ -22,7 +22,7 @@ index 5247d5a..066e682 100644
 +
 +                if(!event.isCancelled()) {
 +                    // CraftBukkit end
-+                    this.makeSound("random.orb", 0.1F, 0.5F * ((this.random.nextFloat() - this.random.nextFloat()) * 0.7F + 1.8F));
++                    this.world.makeSound(entityhuman, "random.orb", 0.1F, 0.5F * ((this.random.nextFloat() - this.random.nextFloat()) * 0.7F + 1.8F));
 +                    entityhuman.receive(this, 1);
 +                    entityhuman.giveExp(CraftEventFactory.callPlayerExpChangeEvent(entityhuman, this.value).getAmount()); // CraftBukkit - this.value to event.getAmount()
 +                    this.die();
@@ -31,21 +31,23 @@ index 5247d5a..066e682 100644
          }
      }
 diff --git a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
-index cccfe75..fa41be4 100644
+index a91ffb1..3dfd2e8 100644
 --- a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 +++ b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
-@@ -716,4 +716,11 @@ public class CraftEventFactory {
-         entity.world.getServer().getPluginManager().callEvent(event);
+@@ -736,6 +736,13 @@ public class CraftEventFactory {
          return event;
      }
-+
+ 
 +    public static PlayerPickupExperienceEvent callPlayerPickupExperienceEvent(EntityPlayer player, net.minecraft.server.EntityExperienceOrb orb) {
 +        World world = player.world;
 +        PlayerPickupExperienceEvent event = new PlayerPickupExperienceEvent(player.getBukkitEntity(), new org.bukkit.craftbukkit.entity.CraftExperienceOrb(world.getServer(), orb));
 +        world.getServer().getPluginManager().callEvent(event);
 +        return event;
 +    }
- }
++
+     public static Cancellable handleStatisticsIncrease(EntityHuman entityHuman, net.minecraft.server.Statistic statistic, int current, int incrementation) {
+         Player player = ((EntityPlayer) entityHuman).getBukkitEntity();
+         Event event;
 -- 
-1.7.9.6 (Apple Git-31.1)
+1.8.5.1
 

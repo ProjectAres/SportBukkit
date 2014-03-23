@@ -1,14 +1,14 @@
-From c85d3d7273ac9c2f66eb453f59cf8e8f6416d875 Mon Sep 17 00:00:00 2001
+From 9b874da2ae283073fe6ae2d6a8aec34061f6cb32 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Tue, 9 Jul 2013 17:06:59 -0500
 Subject: [PATCH] Fix invalid positions kicking players
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index e8c9098..3018170 100644
+index 61f4cc4..b5c0e90 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
-@@ -216,6 +216,11 @@ public class PlayerConnection extends Connection {
+@@ -222,6 +222,11 @@ public class PlayerConnection implements PacketPlayInListener {
              double delta = Math.pow(this.lastPosX - to.getX(), 2) + Math.pow(this.lastPosY - to.getY(), 2) + Math.pow(this.lastPosZ - to.getZ(), 2);
              float deltaAngle = Math.abs(this.lastYaw - to.getYaw()) + Math.abs(this.lastPitch - to.getPitch());
  
@@ -20,21 +20,7 @@ index e8c9098..3018170 100644
              if ((delta > 1f / 256 || deltaAngle > 10f) && (this.checkMovement && !this.player.dead)) {
                  this.lastPosX = to.getX();
                  this.lastPosY = to.getY();
-@@ -251,13 +256,6 @@ public class PlayerConnection extends Connection {
-                 }
-             }
- 
--            if (Double.isNaN(packet10flying.x) || Double.isNaN(packet10flying.y) || Double.isNaN(packet10flying.z) || Double.isNaN(packet10flying.stance)) {
--                player.teleport(player.getWorld().getSpawnLocation(), PlayerTeleportEvent.TeleportCause.UNKNOWN);
--                System.err.println(player.getName() + " was caught trying to crash the server with an invalid position.");
--                player.kickPlayer("Nope!");
--                return;
--            }
--
-             if (this.checkMovement && !this.player.dead) {
-                 // CraftBukkit end
-                 double d1;
-@@ -466,6 +464,18 @@ public class PlayerConnection extends Connection {
+@@ -461,6 +466,18 @@ public class PlayerConnection implements PacketPlayInListener {
              f1 = 0;
          }
  

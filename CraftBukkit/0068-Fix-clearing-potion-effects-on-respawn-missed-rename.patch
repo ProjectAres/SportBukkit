@@ -1,22 +1,22 @@
-From 1bae811fba2af5397d2702480779e29089ff37a9 Mon Sep 17 00:00:00 2001
+From 7813027267efe02d5dc80a77cff56d1ae1918fc0 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Tue, 1 Oct 2013 21:10:50 -0500
 Subject: [PATCH] Fix clearing potion effects on respawn -- missed rename
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index fd49c80..54dad5c 100644
+index 0e408e1..e03464c 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
-@@ -968,7 +968,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -1053,7 +1053,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
          this.expTotal = this.newTotalExp;
          this.exp = 0;
          this.deathTicks = 0;
--        this.aJ(); // Should be removeAllEffects.
-+        this.aK(); // Should be removeAllEffects.
+-        this.aP(); // Should be remapped: removeAllEffects should be remapped to this.
++        this.aP(); // Should be remapped: removeAllEffects should be remapped to this...
          this.updateEffects = true;
          this.activeContainer = this.defaultContainer;
          this.killer = null;
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.5.1
 

@@ -1,4 +1,4 @@
-From 9e0584a09ba2e381fdbc9cb5c98883b123e736ba Mon Sep 17 00:00:00 2001
+From eacd7985aa65fc7c4d568e97b93e54222a209493 Mon Sep 17 00:00:00 2001
 From: md_5 <md_5@live.com.au>
 Date: Sat, 23 Mar 2013 19:08:41 +1100
 Subject: [PATCH] Limit Custom Map Rendering
@@ -6,10 +6,10 @@ Subject: [PATCH] Limit Custom Map Rendering
 The default CraftBukkit render sequence for maps is ridiculously slow. By only using it when a custom renderer has been added (rarely in most cases), we can fallback to the Vanilla renderer for general usage. This leads to a much higher effiency overall, especially if no plugins are rendering such maps.
 
 diff --git a/src/main/java/net/minecraft/server/WorldMapHumanTracker.java b/src/main/java/net/minecraft/server/WorldMapHumanTracker.java
-index 22d9c7e..bed8705 100644
+index ec708d1..ef56386 100644
 --- a/src/main/java/net/minecraft/server/WorldMapHumanTracker.java
 +++ b/src/main/java/net/minecraft/server/WorldMapHumanTracker.java
-@@ -38,23 +38,29 @@ public class WorldMapHumanTracker {
+@@ -37,23 +37,29 @@ public class WorldMapHumanTracker {
              int i;
              int j;
  
@@ -47,7 +47,7 @@ index 22d9c7e..bed8705 100644
                  // CraftBukkit end
  
                  boolean flag = !itemstack.A();
-@@ -89,7 +95,7 @@ public class WorldMapHumanTracker {
+@@ -88,7 +94,7 @@ public class WorldMapHumanTracker {
                      abyte1[2] = (byte) j;
  
                      for (int i1 = 0; i1 < abyte1.length - 3; ++i1) {
@@ -57,7 +57,7 @@ index 22d9c7e..bed8705 100644
  
                      this.c[i] = -1;
 diff --git a/src/main/java/org/bukkit/craftbukkit/map/CraftMapView.java b/src/main/java/org/bukkit/craftbukkit/map/CraftMapView.java
-index b28d6a3..e70e4e4 100644
+index 1a150d9..c9f0027 100644
 --- a/src/main/java/org/bukkit/craftbukkit/map/CraftMapView.java
 +++ b/src/main/java/org/bukkit/craftbukkit/map/CraftMapView.java
 @@ -18,7 +18,7 @@ import org.bukkit.map.MapView;
@@ -70,5 +70,5 @@ index b28d6a3..e70e4e4 100644
      protected final WorldMap worldMap;
  
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.5.1
 

@@ -1,15 +1,15 @@
-From e089e791b23f9ad7cbc730e4115f839ec2bd6afc Mon Sep 17 00:00:00 2001
+From 96633d60946b28d63640835bd7a20f7b7a705347 Mon Sep 17 00:00:00 2001
 From: YukonAppleGeek <yukonvinecki@gmail.com>
 Date: Sun, 10 Nov 2013 12:26:30 -0800
 Subject: [PATCH] Add support for opening dropper inventory
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftHumanEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftHumanEntity.java
-index e17112e..597f4cc 100644
+index 806fbed..2717a81 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftHumanEntity.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftHumanEntity.java
-@@ -10,6 +10,7 @@ import net.minecraft.server.Packet100OpenWindow;
- import net.minecraft.server.Packet101CloseWindow;
+@@ -10,6 +10,7 @@ import net.minecraft.server.PacketPlayInCloseWindow;
+ import net.minecraft.server.PacketPlayOutOpenWindow;
  import net.minecraft.server.TileEntityBrewingStand;
  import net.minecraft.server.TileEntityDispenser;
 +import net.minecraft.server.TileEntityDropper;
