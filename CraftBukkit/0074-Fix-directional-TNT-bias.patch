@@ -1,4 +1,4 @@
-From 7322c6033160bcbe37f242ca0a1e66487b19647e Mon Sep 17 00:00:00 2001
+From de359ec3622396a7007a1a15ec692420425566eb Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Mon, 10 Mar 2014 16:18:41 -0400
 Subject: [PATCH] Fix directional TNT bias

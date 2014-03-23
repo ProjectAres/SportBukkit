@@ -1,4 +1,4 @@
-From b004b10a9cb4106c533ecd9dc647a13615b18f33 Mon Sep 17 00:00:00 2001
+From e964fa7376e7cadfc625df9ae7835c5671dde3d4 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Sat, 1 Feb 2014 05:49:34 -0500
 Subject: [PATCH] Add fake name API

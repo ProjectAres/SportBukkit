@@ -1,11 +1,11 @@
-From 39374fcb85fc46b772b84f4bc75b838ce009972c Mon Sep 17 00:00:00 2001
+From d812b98dc72576fba28a86b0ce5d1ca66c22d302 Mon Sep 17 00:00:00 2001
 From: Isaac Moore <rmsy@me.com>
 Date: Sun, 5 Jan 2014 20:35:57 -0600
 Subject: [PATCH] Allow plugins to access player locale
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index e03464c..c69ad9a 100644
+index 0e408e1..b1e1389 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
 @@ -30,7 +30,7 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;

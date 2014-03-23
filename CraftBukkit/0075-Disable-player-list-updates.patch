@@ -1,4 +1,4 @@
-From b513d769771d449aecba5a31d7ccd16a89ee0f9a Mon Sep 17 00:00:00 2001
+From c37fdf318c7a9d7deb7b8b54bd005c862a8fa93b Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Sun, 9 Mar 2014 04:38:32 -0400
 Subject: [PATCH] Disable player list updates
