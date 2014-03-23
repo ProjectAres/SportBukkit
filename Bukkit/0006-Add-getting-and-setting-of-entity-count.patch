@@ -1,14 +1,14 @@
-From d91f3230fa259e04e86d3a6233d778b28e20cda7 Mon Sep 17 00:00:00 2001
+From 67e8798e3d432c4a02633961384274ca32a53883 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Sun, 16 Jun 2013 16:57:59 -0500
 Subject: [PATCH] Add getting and setting of entity count
 
 
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
-index a90b390..d2d7b9c 100644
+index a90b390..94d5000 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
-@@ -666,6 +666,19 @@ public final class Bukkit {
+@@ -666,6 +666,20 @@ public final class Bukkit {
      }
  
      /**
@@ -23,6 +23,7 @@ index a90b390..d2d7b9c 100644
 +     */
 +    public static void setEntityCount(int count) {
 +        server.setEntityCount(count);
++    }
 +
 +    /**
       * @see Server#getServerIcon()
