@@ -1,53 +1,9 @@
-From 27dfd01dc9779c7694cb329a5e4a7e65d3271750 Mon Sep 17 00:00:00 2001
+From 53c287e71ae960c25ed269ce5d42c520dd58a42c Mon Sep 17 00:00:00 2001
 From: thinkofdeath <purggames@gmail.com>
 Date: Fri, 12 Apr 2013 18:19:11 +0100
 Subject: [PATCH] Allow playEffect to spawn particles
 
 
-diff --git a/src/main/java/net/minecraft/server/Packet63WorldParticles.java b/src/main/java/net/minecraft/server/Packet63WorldParticles.java
-index d7f4d2a..af52c88 100644
---- a/src/main/java/net/minecraft/server/Packet63WorldParticles.java
-+++ b/src/main/java/net/minecraft/server/Packet63WorldParticles.java
-@@ -2,6 +2,7 @@ package net.minecraft.server;
- 
- import java.io.DataInput;
- import java.io.DataOutput;
-+import java.io.IOException; // CraftBukkit - import IOException
- 
- public class Packet63WorldParticles extends Packet {
- 
-@@ -17,7 +18,21 @@ public class Packet63WorldParticles extends Packet {
- 
-     public Packet63WorldParticles() {}
- 
--    public void a(DataInput datainput) {
-+    // CraftBukkit start - Added constructor
-+    public Packet63WorldParticles(String particleName, float x, float y, float z, float offsetX, float offsetY, float offsetZ, float speed, int count) {
-+        a = particleName;
-+        b = x;
-+        c = y;
-+        d = z;
-+        e = offsetX;
-+        f = offsetY;
-+        g = offsetZ;
-+        h = speed;
-+        i = count;
-+    }
-+    // CraftBukkit end
-+
-+    public void a(DataInput datainput) throws IOException { // CraftBukkit - throws IOException
-         this.a = a(datainput, 64);
-         this.b = datainput.readFloat();
-         this.c = datainput.readFloat();
-@@ -29,7 +44,7 @@ public class Packet63WorldParticles extends Packet {
-         this.i = datainput.readInt();
-     }
- 
--    public void a(DataOutput dataoutput) {
-+    public void a(DataOutput dataoutput) throws IOException { // CraftBukkit - throws IOException
-         a(this.a, dataoutput);
-         dataoutput.writeFloat(this.b);
-         dataoutput.writeFloat(this.c);
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftEffect.java b/src/main/java/org/bukkit/craftbukkit/CraftEffect.java
 index 7de0de5..7eca388 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftEffect.java

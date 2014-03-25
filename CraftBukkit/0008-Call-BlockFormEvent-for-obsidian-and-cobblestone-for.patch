@@ -1,4 +1,4 @@
-From 66f74efe5c719bf23f3ae5c0e53527ab03dc7405 Mon Sep 17 00:00:00 2001
+From ca3a2bc81f70b1193822ca80d6747201d34ed8b3 Mon Sep 17 00:00:00 2001
 From: Steve Anton <anxuiz.nx@gmail.com>
 Date: Fri, 5 Oct 2012 12:00:26 -0700
 Subject: [PATCH] Call BlockFormEvent for obsidian and cobblestone formation
@@ -6,7 +6,7 @@ Subject: [PATCH] Call BlockFormEvent for obsidian and cobblestone formation
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockFluids.java b/src/main/java/net/minecraft/server/BlockFluids.java
-index c2e4a7d..5f0a06a 100644
+index 482f15a..36f8ba6 100644
 --- a/src/main/java/net/minecraft/server/BlockFluids.java
 +++ b/src/main/java/net/minecraft/server/BlockFluids.java
 @@ -210,13 +210,27 @@ public abstract class BlockFluids extends Block {
@@ -14,25 +14,25 @@ index c2e4a7d..5f0a06a 100644
                      int l = world.getData(i, j, k);
  
 +                    // CraftBukkit start
-+                    int formedId = -1;
++                    Block formed = null;
                      if (l == 0) {
--                        world.setTypeIdUpdate(i, j, k, Block.OBSIDIAN.id);
-+                        formedId = Block.OBSIDIAN.id;
+-                        world.setTypeUpdate(i, j, k, Blocks.OBSIDIAN);
++                        formedId = Blocks.OBSIDIAN;
                      } else if (l <= 4) {
--                        world.setTypeIdUpdate(i, j, k, Block.COBBLESTONE.id);
-+                        formedId = Block.COBBLESTONE.id;
+-                        world.setTypeUpdate(i, j, k, Blocks.COBBLESTONE);
++                        formedId = Blocks.COBBLESTONE;
                      }
  
 -                    this.fizz(world, i, j, k);
-+                    if (formedId != -1) {
++                    if (formed != null) {
 +                        org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
 +                        org.bukkit.block.BlockState newState = block.getState();
-+                        newState.setTypeId(formedId);
++                        newState.setType(org.bukkit.craftbukkit.util.CraftMagicNumbers.getMaterial(formed));
 +                        org.bukkit.event.block.BlockFormEvent event = new org.bukkit.event.block.BlockFormEvent(block, newState);
 +                        world.getServer().getPluginManager().callEvent(event);
 +
 +                        if (!event.isCancelled()) {
-+                            world.setTypeIdUpdate(i, j, k, formedId);
++                            world.setTypeUpdate(i, j, k, formed);
 +                            this.fizz(world, i, j, k);
 +                        }
 +                    }
@@ -41,5 +41,5 @@ index c2e4a7d..5f0a06a 100644
              }
          }
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.5.1
 

@@ -1,0 +1,22 @@
+From 6d848e9ee4fe24ab3635c1707030a2b590671d22 Mon Sep 17 00:00:00 2001
+From: mrapple <tony@oc.tc>
+Date: Mon, 21 Jan 2013 18:12:27 -0600
+Subject: [PATCH] Remove useless debug message
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityItem.java b/src/main/java/net/minecraft/server/EntityItem.java
+index bbcf674..f3893ac 100644
+--- a/src/main/java/net/minecraft/server/EntityItem.java
++++ b/src/main/java/net/minecraft/server/EntityItem.java
+@@ -317,7 +317,7 @@ public class EntityItem extends Entity {
+ 
+         if (itemstack == null) {
+             if (this.world != null) {
+-                d.error("Item entity " + this.getId() + " has no item?!");
++                // d.error("Item entity " + this.getId() + " has no item?!"); CraftBukkit - remove useless debug message
+             }
+ 
+             return new ItemStack(Blocks.STONE);
+-- 
+1.8.5.1
+
