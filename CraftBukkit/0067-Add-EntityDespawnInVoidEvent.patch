@@ -1,0 +1,31 @@
+From 365060aa41902a53462985da056820febdd0bc15 Mon Sep 17 00:00:00 2001
+From: Isaac Moore <rmsy@me.com>
+Date: Wed, 25 Dec 2013 20:11:34 -0600
+Subject: [PATCH] Add EntityDespawnInVoidEvent
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index bc243cd..6c982c9 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -15,6 +15,7 @@ import org.bukkit.entity.LivingEntity;
+ import org.bukkit.entity.Painting;
+ import org.bukkit.entity.Vehicle;
+ import org.bukkit.event.entity.EntityCombustByEntityEvent;
++import org.bukkit.event.entity.EntityDespawnInVoidEvent;
+ import org.bukkit.event.painting.PaintingBreakByEntityEvent;
+ import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
+ import org.bukkit.event.vehicle.VehicleEnterEvent;
+@@ -397,6 +398,9 @@ public abstract class Entity {
+     }
+ 
+     protected void G() {
++        // SportBukkit start - call EntityDespawnInVoidEvent
++        this.world.getServer().getPluginManager().callEvent(new EntityDespawnInVoidEvent(this.bukkitEntity));
++        // SportBukkit end
+         this.die();
+     }
+ 
+-- 
+1.8.5.1
+

@@ -1,0 +1,48 @@
+From 94cbef0b9cc0267cc1ea3716dc7ba78f94011e50 Mon Sep 17 00:00:00 2001
+From: Daniel <ZetaetaDaniel@gmail.com>
+Date: Sat, 12 May 2012 16:07:48 +0100
+Subject: [PATCH] Adds ability to set the number of online players sent in
+ ServerListPingEvent
+
+
+diff --git a/src/main/java/org/bukkit/event/server/ServerListPingEvent.java b/src/main/java/org/bukkit/event/server/ServerListPingEvent.java
+index c61afdf..d5e1b84 100644
+--- a/src/main/java/org/bukkit/event/server/ServerListPingEvent.java
++++ b/src/main/java/org/bukkit/event/server/ServerListPingEvent.java
+@@ -17,7 +17,7 @@ public class ServerListPingEvent extends ServerEvent implements Iterable<Player>
+     private static final HandlerList handlers = new HandlerList();
+     private final InetAddress address;
+     private String motd;
+-    private final int numPlayers;
++    private int numPlayers;
+     private int maxPlayers;
+ 
+     public ServerListPingEvent(final InetAddress address, final String motd, final int numPlayers, final int maxPlayers) {
+@@ -84,6 +84,15 @@ public class ServerListPingEvent extends ServerEvent implements Iterable<Player>
+     }
+ 
+     /**
++     * Set the number of players sent.
++     *
++     * @param numPlayers the number of players to be sent
++     */
++    public void setNumPlayers(int numPlayers) {
++        this.numPlayers = numPlayers;
++    }
++
++    /**
+      * Get the maximum number of players sent.
+      *
+      * @return the maximum number of players
+@@ -95,7 +104,7 @@ public class ServerListPingEvent extends ServerEvent implements Iterable<Player>
+     /**
+      * Set the maximum number of players sent.
+      *
+-     * @param maxPlayers the maximum number of player
++     * @param maxPlayers the maximum number of players
+      */
+     public void setMaxPlayers(int maxPlayers) {
+         this.maxPlayers = maxPlayers;
+-- 
+1.8.5.1
+
