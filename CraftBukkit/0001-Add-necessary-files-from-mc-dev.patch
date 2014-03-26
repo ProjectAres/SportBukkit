@@ -1,4 +1,4 @@
-From 8419d09f0919c24d8e7f752b13e87be9fcaa5964 Mon Sep 17 00:00:00 2001
+From 575f3f2fd4c3bd10ba5bae376ffdac049955259a Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Tue, 18 Dec 2012 22:12:16 -0600
 Subject: [PATCH] Add necessary files from mc-dev
@@ -1187,6 +1187,148 @@ index 0000000..0239d12
 +        chunkmap.a = new byte[j];
 +        System.arraycopy(abyte, 0, chunkmap.a, 0, j);
 +        return chunkmap;
++    }
++
++    public void handle(PacketListener packetlistener) {
++        this.a((PacketPlayOutListener) packetlistener);
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java b/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java
+new file mode 100644
+index 0000000..a58dc60
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java
+@@ -0,0 +1,36 @@
++package net.minecraft.server;
++
++public class PacketPlayOutPlayerInfo extends Packet {
++
++    private String a;
++    private boolean b;
++    private int c;
++
++    public PacketPlayOutPlayerInfo() {}
++
++    public PacketPlayOutPlayerInfo(String s, boolean flag, int i) {
++        this.a = s;
++        this.b = flag;
++        this.c = i;
++    }
++
++    public void a(PacketDataSerializer packetdataserializer) {
++        this.a = packetdataserializer.c(16);
++        this.b = packetdataserializer.readBoolean();
++        this.c = packetdataserializer.readShort();
++    }
++
++    public void b(PacketDataSerializer packetdataserializer) {
++        packetdataserializer.a(this.a);
++        packetdataserializer.writeBoolean(this.b);
++        packetdataserializer.writeShort(this.c);
++    }
++
++    public void a(PacketPlayOutListener packetplayoutlistener) {
++        packetplayoutlistener.a(this);
++    }
++
++    public void handle(PacketListener packetlistener) {
++        this.a((PacketPlayOutListener) packetlistener);
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutScoreboardTeam.java b/src/main/java/net/minecraft/server/PacketPlayOutScoreboardTeam.java
+new file mode 100644
+index 0000000..35d3be1
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PacketPlayOutScoreboardTeam.java
+@@ -0,0 +1,94 @@
++package net.minecraft.server;
++
++import java.util.ArrayList;
++import java.util.Collection;
++import java.util.Iterator;
++
++public class PacketPlayOutScoreboardTeam extends Packet {
++
++    private String a = "";
++    private String b = "";
++    private String c = "";
++    private String d = "";
++    private Collection e = new ArrayList();
++    private int f;
++    private int g;
++
++    public PacketPlayOutScoreboardTeam() {}
++
++    public PacketPlayOutScoreboardTeam(ScoreboardTeam scoreboardteam, int i) {
++        this.a = scoreboardteam.getName();
++        this.f = i;
++        if (i == 0 || i == 2) {
++            this.b = scoreboardteam.getDisplayName();
++            this.c = scoreboardteam.getPrefix();
++            this.d = scoreboardteam.getSuffix();
++            this.g = scoreboardteam.packOptionData();
++        }
++
++        if (i == 0) {
++            this.e.addAll(scoreboardteam.getPlayerNameSet());
++        }
++    }
++
++    public PacketPlayOutScoreboardTeam(ScoreboardTeam scoreboardteam, Collection collection, int i) {
++        if (i != 3 && i != 4) {
++            throw new IllegalArgumentException("Method must be join or leave for player constructor");
++        } else if (collection != null && !collection.isEmpty()) {
++            this.f = i;
++            this.a = scoreboardteam.getName();
++            this.e.addAll(collection);
++        } else {
++            throw new IllegalArgumentException("Players cannot be null/empty");
++        }
++    }
++
++    public void a(PacketDataSerializer packetdataserializer) {
++        this.a = packetdataserializer.c(16);
++        this.f = packetdataserializer.readByte();
++        if (this.f == 0 || this.f == 2) {
++            this.b = packetdataserializer.c(32);
++            this.c = packetdataserializer.c(16);
++            this.d = packetdataserializer.c(16);
++            this.g = packetdataserializer.readByte();
++        }
++
++        if (this.f == 0 || this.f == 3 || this.f == 4) {
++            short short1 = packetdataserializer.readShort();
++
++            for (int i = 0; i < short1; ++i) {
++                this.e.add(packetdataserializer.c(16));
++            }
++        }
++    }
++
++    public void b(PacketDataSerializer packetdataserializer) {
++        packetdataserializer.a(this.a);
++        packetdataserializer.writeByte(this.f);
++        if (this.f == 0 || this.f == 2) {
++            packetdataserializer.a(this.b);
++            packetdataserializer.a(this.c);
++            packetdataserializer.a(this.d);
++            packetdataserializer.writeByte(this.g);
++        }
++
++        if (this.f == 0 || this.f == 3 || this.f == 4) {
++            packetdataserializer.writeShort(this.e.size());
++            Iterator iterator = this.e.iterator();
++
++            while (iterator.hasNext()) {
++                String s = (String) iterator.next();
++
++                packetdataserializer.a(s);
++            }
++        }
++    }
++
++    public void a(PacketPlayOutListener packetplayoutlistener) {
++        packetplayoutlistener.a(this);
 +    }
 +
 +    public void handle(PacketListener packetlistener) {
