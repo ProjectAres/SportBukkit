@@ -1,14 +1,14 @@
-From cfe7ca1f588774252e631436e3a3e6f2971037bc Mon Sep 17 00:00:00 2001
+From 2f547d5c35f79ba47c39509fb1c02c9c0d082a3a Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Tue, 11 Feb 2014 22:12:50 -0600
 Subject: [PATCH] Stop server on failed port binding
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 0f717dc..6ea750c 100644
+index 6cda99d..9aa7f59 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -456,7 +456,8 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
+@@ -458,7 +458,8 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
                  }
                  // Spigot end
              } else {

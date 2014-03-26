@@ -1,4 +1,4 @@
-From 7b86bee7aa30dbe3874114c1e0f3e420bb85b9f0 Mon Sep 17 00:00:00 2001
+From 60ec481e7b154dca4ebad1a92dc7a24675a0ee56 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Sat, 1 Feb 2014 05:49:34 -0500
 Subject: [PATCH] Add fake name API
@@ -27,7 +27,7 @@ index 38d12bf..a581ed1 100644
                      if (!this.tracker.getDataWatcher().d()) {
                          this.sendMetadata(this.tracker.getDataWatcher(), true, entityplayer); // CraftBukkit - custom metadata sender
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index b5c0e90..e923a7c 100644
+index a633345..65b992f 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -21,7 +21,9 @@ import java.io.UnsupportedEncodingException;
@@ -114,15 +114,15 @@ index b5c0e90..e923a7c 100644
 +                }
 +            }
 +
-+        } else if (packet instanceof Packet201PlayerInfo) {
++        } else if (packet instanceof PacketPlayOutPlayerInfo) {
 +            // Translate fake names in player list packets
 +            Player viewer = this.getPlayer();
 +            if (viewer != null) {
-+                Packet201PlayerInfo oldPacket = (Packet201PlayerInfo) packet;
++                PacketPlayOutPlayerInfo oldPacket = (PacketPlayOutPlayerInfo) packet;
 +                Player player = this.server.getPlayer(oldPacket.a);
 +                String fakeName;
 +                if(player != null && (fakeName = player.getFakeName(viewer)) != null) {
-+                    packet = new Packet201PlayerInfo(fakeName, oldPacket.b, oldPacket.c);
++                    packet = new PacketPlayOutPlayerInfo(fakeName, oldPacket.b, oldPacket.c);
 +                }
 +            }
 +

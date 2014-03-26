@@ -1,14 +1,14 @@
-From 12d6f5c0e355aab8dd13bd3cc56b69b71a28127f Mon Sep 17 00:00:00 2001
+From 65980d3f96e0d127aff7de7e295ec3239497226a Mon Sep 17 00:00:00 2001
 From: Mike Primm <mike@primmhome.com>
 Date: Wed, 16 Jan 2013 15:27:22 -0600
 Subject: [PATCH] Sync Free Chunk Reference Cache
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index a3c05da..992fc5c 100644
+index a3c05da..833c4bf 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -261,20 +261,17 @@ public abstract class World implements IBlockAccess {
+@@ -261,20 +261,18 @@ public abstract class World implements IBlockAccess {
          return this.getChunkAt(i >> 4, j >> 4);
      }
  
@@ -24,9 +24,6 @@ index a3c05da..992fc5c 100644
 -            }
 -            result = this.lastChunkAccessed;
 -        }
--        return result;
--        // CraftBukkit end
--    }
 +        //synchronized (this.chunkLock) {
 +        Chunk result = this.lastChunkAccessed; // Exploit fact that read is atomic
 +        if (result == null || result.locX != i || result.locZ != j) {
@@ -34,7 +31,9 @@ index a3c05da..992fc5c 100644
 +            this.lastChunkAccessed = result; // Exploit fact that write is atomic
 +         }
 +        //}
-+    }
+         return result;
+-        // CraftBukkit end
+     }
 +    // Spigot end
  
      public boolean setTypeAndData(int i, int j, int k, Block block, int l, int i1) {

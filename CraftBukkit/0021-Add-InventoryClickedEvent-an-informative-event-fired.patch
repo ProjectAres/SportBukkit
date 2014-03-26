@@ -1,4 +1,4 @@
-From e7d956469a3b8808c90a4bc08d81e84499cecb26 Mon Sep 17 00:00:00 2001
+From e7c17b56aece5ca7e5f9c89b72c9001e3496c8f8 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Mon, 12 Nov 2012 20:53:11 -0600
 Subject: [PATCH] Add InventoryClickedEvent, an informative event fired after
@@ -6,7 +6,7 @@ Subject: [PATCH] Add InventoryClickedEvent, an informative event fired after
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index ffb43d0..fe57b34 100644
+index ffb43d0..30d3db9 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -1413,8 +1413,9 @@ public class PlayerConnection implements PacketPlayInListener {
@@ -15,7 +15,7 @@ index ffb43d0..fe57b34 100644
                          }
 -                        return;
                  }
-+                server.getPluginManager().callEvent(new org.bukkit.event.inventory.InventoryClickedEvent(inventory, type, packet102windowclick.slot, packet102windowclick.button != 0, packet102windowclick.shift == 1));
++                server.getPluginManager().callEvent(new org.bukkit.event.inventory.InventoryClickedEvent(inventory, type, packetplayinwindowclick.slot, packetplayinwindowclick.button != 0, packetplayinwindowclick.shift == 1));
 +                if(event.getResult() == org.bukkit.event.Event.Result.DENY) return;
              }
              // CraftBukkit end
