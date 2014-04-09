@@ -1,0 +1,116 @@
+From 98ed061f81f88dfd0fcc1a4bf750d21dca639ef8 Mon Sep 17 00:00:00 2001
+From: mrapple <tony@oc.tc>
+Date: Wed, 9 Apr 2014 03:13:12 -0500
+Subject: [PATCH] Support for 1.7.6 skins
+
+
+diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
+index 21d5ad4..124b4d8 100644
+--- a/src/main/java/net/minecraft/server/NetworkManager.java
++++ b/src/main/java/net/minecraft/server/NetworkManager.java
+@@ -51,6 +51,21 @@ public class NetworkManager implements INetworkManager {
+     private SecretKey A;
+     private PrivateKey B;
+     private int lowPriorityQueueDelay = 50;
++    // CraftBukkit start
++    public Textures textures = null;
++
++    public class Textures {
++        public String id;
++        public String name;
++        public List<Property> properties = new ArrayList<Property>();
++
++        public class Property {
++            public String name;
++            public String value;
++            public String signature;
++        }
++    }
++    // CraftBukkit end
+ 
+     public NetworkManager(IConsoleLogManager iconsolelogmanager, Socket socket, String s, Connection connection, PrivateKey privatekey) throws IOException { // CraftBukkit - throws IOException
+         this.B = privatekey;
+@@ -306,7 +321,7 @@ public class NetworkManager implements INetworkManager {
+     public SocketAddress getSocketAddress() {
+         return this.k;
+     }
+-    
++
+     // Spigot start
+     public void setSocketAddress(SocketAddress newAddress) {
+         this.k = newAddress;
+diff --git a/src/main/java/net/minecraft/server/Packet20NamedEntitySpawn.java b/src/main/java/net/minecraft/server/Packet20NamedEntitySpawn.java
+index 543d44e..c170c96 100644
+--- a/src/main/java/net/minecraft/server/Packet20NamedEntitySpawn.java
++++ b/src/main/java/net/minecraft/server/Packet20NamedEntitySpawn.java
+@@ -18,6 +18,8 @@ public class Packet20NamedEntitySpawn extends Packet {
+     public int h;
+     private DataWatcher i;
+     private List j;
++    // CraftBukkit
++    private NetworkManager.Textures textures;
+ 
+     public Packet20NamedEntitySpawn() {}
+ 
+@@ -28,6 +30,7 @@ public class Packet20NamedEntitySpawn extends Packet {
+         String name = entityhuman.name;
+         if (entityhuman instanceof EntityPlayer) {
+             name = ((EntityPlayer) entityhuman).overheadName;
++            textures = ((NetworkManager) ((EntityPlayer) entityhuman).playerConnection.networkManager).textures;
+         }
+ 
+         if (name.length() > 16) {
+@@ -62,7 +65,24 @@ public class Packet20NamedEntitySpawn extends Packet {
+ 
+     public void a(DataOutput dataoutput) throws IOException { // CraftBukkit
+         dataoutput.writeInt(this.a);
++
++        // CraftBukkit
++        a(this.textures.id, dataoutput);
+         a(this.b, dataoutput);
++
++        NetworkManager.Textures.Property property = textures.properties.get(0);
++        if(property != null) {
++            dataoutput.writeInt(1);
++            a("textures", dataoutput);
++            a(property.value, dataoutput);
++            a(property.signature, dataoutput);
++        } else {
++            dataoutput.writeInt(0);
++            a(" ", dataoutput);
++            a(" ", dataoutput);
++            a(" ", dataoutput);
++        }
++
+         dataoutput.writeInt(this.c);
+         dataoutput.writeInt(this.d);
+         dataoutput.writeInt(this.e);
+diff --git a/src/main/java/net/minecraft/server/PendingConnection.java b/src/main/java/net/minecraft/server/PendingConnection.java
+index 0a887cc..82be2c5 100644
+--- a/src/main/java/net/minecraft/server/PendingConnection.java
++++ b/src/main/java/net/minecraft/server/PendingConnection.java
+@@ -232,6 +232,8 @@ public class PendingConnection extends Connection {
+     }
+ 
+     // Spigot start
++    private static com.google.gson.Gson gson = new com.google.gson.Gson();
++
+     @Override
+     public void a(Packet250CustomPayload pcp) {
+         if (pcp.tag.equals("BungeeCord") && server.server.bungeeIPs.contains(getSocket().getInetAddress().getHostAddress())) {
+@@ -241,6 +243,12 @@ public class PendingConnection extends Connection {
+                 networkManager.setSocketAddress(new java.net.InetSocketAddress(in.readUTF(), in.readInt()));
+             }
+         }
++
++        if (pcp.tag.equals("textures")) {
++            com.google.common.io.ByteArrayDataInput in2 = com.google.common.io.ByteStreams.newDataInput(pcp.data);
++            String json = in2.readUTF();
++            this.networkManager.textures = gson.fromJson(json, NetworkManager.Textures.class);
++        }
+     }
+     // Spigot end
+ }
+-- 
+1.8.5.1
+
