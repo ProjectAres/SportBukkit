@@ -1,9 +1,26 @@
-From 98ed061f81f88dfd0fcc1a4bf750d21dca639ef8 Mon Sep 17 00:00:00 2001
+From e97b7ae8e965d428585de38349e1dfdf63709158 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Wed, 9 Apr 2014 03:13:12 -0500
 Subject: [PATCH] Support for 1.7.6 skins
 
 
+diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+index 8fcbef5..bf3759d 100644
+--- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
++++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+@@ -367,7 +367,11 @@ public class EntityTrackerEntry {
+                     Packet packet = this.c();
+ 
+                     if(packet instanceof Packet20NamedEntitySpawn) {
+-                        ((Packet20NamedEntitySpawn) packet).b = ((Player)this.tracker.getBukkitEntity()).getOverheadName(entityplayer.getBukkitEntity());
++                        Player player = (Player) this.tracker.getBukkitEntity();
++                        if(player.hasFakeName(entityplayer.getBukkitEntity())) {
++                            ((Packet20NamedEntitySpawn) packet).b = ((Player)this.tracker.getBukkitEntity()).getOverheadName(entityplayer.getBukkitEntity());
++                            ((Packet20NamedEntitySpawn) packet).fakeName = true;
++                        }
+                     }
+ 
+                     // CraftBukkit end
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
 index 21d5ad4..124b4d8 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
@@ -40,19 +57,30 @@ index 21d5ad4..124b4d8 100644
      public void setSocketAddress(SocketAddress newAddress) {
          this.k = newAddress;
 diff --git a/src/main/java/net/minecraft/server/Packet20NamedEntitySpawn.java b/src/main/java/net/minecraft/server/Packet20NamedEntitySpawn.java
-index 543d44e..c170c96 100644
+index 543d44e..51cf824 100644
 --- a/src/main/java/net/minecraft/server/Packet20NamedEntitySpawn.java
 +++ b/src/main/java/net/minecraft/server/Packet20NamedEntitySpawn.java
-@@ -18,6 +18,8 @@ public class Packet20NamedEntitySpawn extends Packet {
-     public int h;
+@@ -5,6 +5,7 @@ import java.io.DataOutput;
+ import java.util.List;
+ 
+ import java.io.IOException; // CraftBukkit
++import java.util.UUID;
+ 
+ public class Packet20NamedEntitySpawn extends Packet {
+ 
+@@ -19,6 +20,11 @@ public class Packet20NamedEntitySpawn extends Packet {
      private DataWatcher i;
      private List j;
-+    // CraftBukkit
-+    private NetworkManager.Textures textures;
  
++    // CraftBukkit start
++    private NetworkManager.Textures textures;
++    public boolean fakeName;
++    // CraftBukkit end
++
      public Packet20NamedEntitySpawn() {}
  
-@@ -28,6 +30,7 @@ public class Packet20NamedEntitySpawn extends Packet {
+     public Packet20NamedEntitySpawn(EntityHuman entityhuman) {
+@@ -28,6 +34,7 @@ public class Packet20NamedEntitySpawn extends Packet {
          String name = entityhuman.name;
          if (entityhuman instanceof EntityPlayer) {
              name = ((EntityPlayer) entityhuman).overheadName;
@@ -60,17 +88,26 @@ index 543d44e..c170c96 100644
          }
  
          if (name.length() > 16) {
-@@ -62,7 +65,24 @@ public class Packet20NamedEntitySpawn extends Packet {
+@@ -62,7 +69,33 @@ public class Packet20NamedEntitySpawn extends Packet {
  
      public void a(DataOutput dataoutput) throws IOException { // CraftBukkit
          dataoutput.writeInt(this.a);
 +
 +        // CraftBukkit
-+        a(this.textures.id, dataoutput);
++        if(this.textures == null) {
++            throw new IOException("Attempt to spawn a player with no UUID/skin data");
++        }
++        String uuid = this.textures.id;
++        if(this.fakeName) {
++            // If name is fake, change the UUID version from 4 to 5 so the client won't verify it
++            // http://en.wikipedia.org/wiki/Universally_unique_identifier#Variants_and_versions
++            uuid = uuid.substring(0, "xxxxxxxx-xxxx-".length()) + "5" + uuid.substring("xxxxxxxx-xxxx-M".length());
++        }
++        a(uuid, dataoutput);
          a(this.b, dataoutput);
 +
 +        NetworkManager.Textures.Property property = textures.properties.get(0);
-+        if(property != null) {
++        if(property != null && !this.fakeName) {
 +            dataoutput.writeInt(1);
 +            a("textures", dataoutput);
 +            a(property.value, dataoutput);
@@ -112,5 +149,5 @@ index 0a887cc..82be2c5 100644
      // Spigot end
  }
 -- 
-1.8.5.1
+1.8.5.2 (Apple Git-48)
 
