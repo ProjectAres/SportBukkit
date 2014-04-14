@@ -1,4 +1,4 @@
-From fb2a4beaeca0db505780513ff9dc8f4b06720af7 Mon Sep 17 00:00:00 2001
+From 01725798310a368afd7b5caad286ae0dd146a783 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Thu, 23 Jan 2014 00:17:31 -0500
 Subject: [PATCH] Add fake name API
@@ -118,10 +118,10 @@ index 287f49f..5f79ad6 100644
          // If a player is hidden from the sender pretend they are offline
          if (player == null || (sender instanceof Player && !((Player) sender).canSee(player))) {
 diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
-index ce879e3..1dd4d43 100644
+index ce879e3..740c882 100644
 --- a/src/main/java/org/bukkit/entity/Player.java
 +++ b/src/main/java/org/bukkit/entity/Player.java
-@@ -27,6 +27,65 @@ import org.bukkit.scoreboard.Scoreboard;
+@@ -27,6 +27,60 @@ import org.bukkit.scoreboard.Scoreboard;
  public interface Player extends HumanEntity, Conversable, CommandSender, OfflinePlayer, PluginMessageRecipient {
  
      /**
@@ -172,11 +172,6 @@ index ce879e3..1dd4d43 100644
 +     * Return this player's list name as viewed by the given player, fake or not
 +     */
 +    public String getPlayerListName(CommandSender viewer);
-+
-+    /**
-+     * Return this player's overhead name as viewed by the given player, fake or not
-+     */
-+    public String getOverheadName(CommandSender viewer);
 +
 +    /**
 +     * Return this player's display name as viewed by the given player, fake or not
