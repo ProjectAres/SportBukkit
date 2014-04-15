@@ -1,44 +1,34 @@
-From dc5c35a09f15ae2e74cd32db91c96a16e16015c3 Mon Sep 17 00:00:00 2001
+From 9cd3e14968baa5294fc09db0ea8f81a16cade8a0 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Tue, 22 Jan 2013 14:12:03 -0500
 Subject: [PATCH] Add onGround API
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index bc246b9..acb2336 100644
+index fe57b34..61f4cc4 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
-@@ -43,6 +43,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
- import org.bukkit.event.player.PlayerItemHeldEvent;
- import org.bukkit.event.player.PlayerKickEvent;
- import org.bukkit.event.player.PlayerMoveEvent;
-+import org.bukkit.event.player.PlayerOnGroundEvent;
- import org.bukkit.event.player.PlayerTeleportEvent;
- import org.bukkit.event.player.PlayerToggleFlightEvent;
- import org.bukkit.event.player.PlayerToggleSneakEvent;
-@@ -196,6 +197,7 @@ public class PlayerConnection extends Connection {
+@@ -203,6 +203,7 @@ public class PlayerConnection implements PacketPlayInListener {
              Player player = this.getPlayer();
              Location from = new Location(player.getWorld(), lastPosX, lastPosY, lastPosZ, lastYaw, lastPitch); // Get the Players previous Event location.
              Location to = player.getLocation().clone(); // Start off the To location as the Players current location.
 +            boolean wasOnGround = this.player.onGround;
  
              // If the packet contains movement information then we update the To location with the correct XYZ.
-             if (packet10flying.hasPos && !(packet10flying.hasPos && packet10flying.y == -999.0D && packet10flying.stance == -999.0D)) {
-@@ -415,6 +417,14 @@ public class PlayerConnection extends Connection {
+             if (packetplayinflying.hasPos && !(packetplayinflying.hasPos && packetplayinflying.y == -999.0D && packetplayinflying.stance == -999.0D)) {
+@@ -414,6 +415,12 @@ public class PlayerConnection implements PacketPlayInListener {
  
-                 this.player.onGround = packet10flying.g;
+                 this.player.onGround = packetplayinflying.i();
                  this.minecraftServer.getPlayerList().d(this.player);
-+
 +                // CraftBukkit start
 +                if (wasOnGround != this.player.onGround) {
-+                    PlayerOnGroundEvent onGroundEvent = new PlayerOnGroundEvent(player, this.player.onGround);
++                    org.bukkit.event.player.PlayerOnGroundEvent onGroundEvent = new org.bukkit.event.player.PlayerOnGroundEvent(player, this.player.onGround);
 +                    this.server.getPluginManager().callEvent(onGroundEvent);
 +                }
 +                // CraftBukkit end
-+
-                 if (this.player.playerInteractManager.isCreative()) return; // CraftBukkit - fixed fall distance accumulating while being in Creative mode.
-                 this.player.b(this.player.locY - d0, packet10flying.g);
+                 this.player.b(this.player.locY - d0, packetplayinflying.i());
              } else if (this.e % 20 == 0) {
+                 this.a(this.y, this.z, this.q, this.player.yaw, this.player.pitch);
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.5.1
 

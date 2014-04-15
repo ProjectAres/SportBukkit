@@ -1,14 +1,14 @@
-From 1c251eb68823f4092b6911663b25387248d5e4d5 Mon Sep 17 00:00:00 2001
+From 6d23c23b3f4c107fca4eed3ed6a02d3445af88ad Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Sat, 17 Nov 2012 12:42:05 -0600
 Subject: [PATCH] Make AsyncPlayerPreLoginEvent more versatile
 
 
 diff --git a/src/main/java/org/bukkit/event/player/AsyncPlayerPreLoginEvent.java b/src/main/java/org/bukkit/event/player/AsyncPlayerPreLoginEvent.java
-index 4e4b3a2..bc4e5b0 100644
+index 02b373c..a27ae2b 100644
 --- a/src/main/java/org/bukkit/event/player/AsyncPlayerPreLoginEvent.java
 +++ b/src/main/java/org/bukkit/event/player/AsyncPlayerPreLoginEvent.java
-@@ -16,12 +16,17 @@ public class AsyncPlayerPreLoginEvent extends Event {
+@@ -17,12 +17,17 @@ public class AsyncPlayerPreLoginEvent extends Event {
      private final String name;
      private final InetAddress ipAddress;
  
@@ -28,7 +28,7 @@ index 4e4b3a2..bc4e5b0 100644
      }
  
      /**
-@@ -166,6 +171,10 @@ public class AsyncPlayerPreLoginEvent extends Event {
+@@ -172,6 +177,10 @@ public class AsyncPlayerPreLoginEvent extends Event {
           */
          KICK_WHITELIST,
          /**
@@ -40,10 +40,10 @@ index 4e4b3a2..bc4e5b0 100644
           */
          KICK_OTHER;
 diff --git a/src/main/java/org/bukkit/event/player/PlayerPreLoginEvent.java b/src/main/java/org/bukkit/event/player/PlayerPreLoginEvent.java
-index bc62248..850d8da 100644
+index b86ba5d..9092c16 100644
 --- a/src/main/java/org/bukkit/event/player/PlayerPreLoginEvent.java
 +++ b/src/main/java/org/bukkit/event/player/PlayerPreLoginEvent.java
-@@ -130,6 +130,10 @@ public class PlayerPreLoginEvent extends Event {
+@@ -135,6 +135,10 @@ public class PlayerPreLoginEvent extends Event {
           */
          KICK_WHITELIST,
          /**
@@ -55,5 +55,5 @@ index bc62248..850d8da 100644
           */
          KICK_OTHER
 -- 
-1.7.12.4 (Apple Git-37)
+1.8.5.1
 
