@@ -1,4 +1,4 @@
-From ca3a2bc81f70b1193822ca80d6747201d34ed8b3 Mon Sep 17 00:00:00 2001
+From 3090f497aec6d4eb6d9229152d55d30b317c5eee Mon Sep 17 00:00:00 2001
 From: Steve Anton <anxuiz.nx@gmail.com>
 Date: Fri, 5 Oct 2012 12:00:26 -0700
 Subject: [PATCH] Call BlockFormEvent for obsidian and cobblestone formation
@@ -6,9 +6,18 @@ Subject: [PATCH] Call BlockFormEvent for obsidian and cobblestone formation
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockFluids.java b/src/main/java/net/minecraft/server/BlockFluids.java
-index 482f15a..36f8ba6 100644
+index 482f15a..7370708 100644
 --- a/src/main/java/net/minecraft/server/BlockFluids.java
 +++ b/src/main/java/net/minecraft/server/BlockFluids.java
+@@ -163,7 +163,7 @@ public abstract class BlockFluids extends Block {
+     }
+ 
+     public void a(World world, int i, int j, int k, Entity entity, Vec3D vec3d) {
+-        Vec3D vec3d1 = this.f(world, i, j, k);
++        Vec3D vec3d1 = this.f((IBlockAccess) world, i, j, k); // CraftBukkit - fix decompile error with cast
+ 
+         vec3d.c += vec3d1.c;
+         vec3d.d += vec3d1.d;
 @@ -210,13 +210,27 @@ public abstract class BlockFluids extends Block {
                  if (flag) {
                      int l = world.getData(i, j, k);
@@ -17,10 +26,10 @@ index 482f15a..36f8ba6 100644
 +                    Block formed = null;
                      if (l == 0) {
 -                        world.setTypeUpdate(i, j, k, Blocks.OBSIDIAN);
-+                        formedId = Blocks.OBSIDIAN;
++                        formed = Blocks.OBSIDIAN;
                      } else if (l <= 4) {
 -                        world.setTypeUpdate(i, j, k, Blocks.COBBLESTONE);
-+                        formedId = Blocks.COBBLESTONE;
++                        formed = Blocks.COBBLESTONE;
                      }
  
 -                    this.fizz(world, i, j, k);

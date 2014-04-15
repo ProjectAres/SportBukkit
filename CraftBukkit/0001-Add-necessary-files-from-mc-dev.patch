@@ -1,4 +1,4 @@
-From 575f3f2fd4c3bd10ba5bae376ffdac049955259a Mon Sep 17 00:00:00 2001
+From ef8187f17a0373a90ed149af3ab2b20b0ee8365c Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Tue, 18 Dec 2012 22:12:16 -0600
 Subject: [PATCH] Add necessary files from mc-dev
@@ -1406,6 +1406,56 @@ index 0000000..900ed68
 +        RegionFile regionfile = a(file1, i, j);
 +
 +        return regionfile.b(i & 31, j & 31);
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/WatchableObject.java b/src/main/java/net/minecraft/server/WatchableObject.java
+new file mode 100644
+index 0000000..678aa91
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/WatchableObject.java
+@@ -0,0 +1,44 @@
++package net.minecraft.server;
++
++public class WatchableObject {
++
++    private final int a;
++    private final int b;
++    private Object c;
++    private boolean d;
++
++    public WatchableObject(int i, int j, Object object) {
++        this.b = j;
++        this.c = object;
++        this.a = i;
++        this.d = true;
++    }
++
++    public int a() {
++        return this.b;
++    }
++
++    public void a(Object object) {
++        this.c = object;
++    }
++
++    public Object b() {
++        return this.c;
++    }
++
++    public int c() {
++        return this.a;
++    }
++
++    public boolean d() {
++        return this.d;
++    }
++
++    public void a(boolean flag) {
++        this.d = flag;
++    }
++
++    static boolean a(WatchableObject watchableobject, boolean flag) {
++        return watchableobject.d = flag;
 +    }
 +}
 -- 

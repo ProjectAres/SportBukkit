@@ -1,4 +1,4 @@
-From e98985c7be4893f33b25644f9bbbdd0a375e5421 Mon Sep 17 00:00:00 2001
+From 7d9ab75e5e010a008d0b814b7569a2a13636efe4 Mon Sep 17 00:00:00 2001
 From: mrapple <tony@oc.tc>
 Date: Tue, 23 Apr 2013 19:45:55 -0500
 Subject: [PATCH] Call AsyncPlayerPreLoginEvent regardless of online-mode
@@ -19,10 +19,10 @@ index 24a77a2..5825a7f 100644
      }
  
 diff --git a/src/main/java/net/minecraft/server/ThreadPlayerLookupUUID.java b/src/main/java/net/minecraft/server/ThreadPlayerLookupUUID.java
-index 09580d7..bbaded5 100644
+index 09580d7..6a41817 100644
 --- a/src/main/java/net/minecraft/server/ThreadPlayerLookupUUID.java
 +++ b/src/main/java/net/minecraft/server/ThreadPlayerLookupUUID.java
-@@ -22,15 +22,20 @@ class ThreadPlayerLookupUUID extends Thread {
+@@ -22,15 +22,21 @@ class ThreadPlayerLookupUUID extends Thread {
      }
  
      public void run() {
@@ -30,11 +30,12 @@ index 09580d7..bbaded5 100644
 -        try {
 -            String s = (new BigInteger(MinecraftEncryption.a(LoginListener.a(this.a), LoginListener.b(this.a).I().getPublic(), LoginListener.c(this.a)))).toString(16);
 +        // CraftBukkit start
++        final org.bukkit.craftbukkit.CraftServer server = LoginListener.b(this.a).server;
 +        boolean allowed = false;
  
 -            LoginListener.a(this.a, LoginListener.b(this.a).as().hasJoinedServer(new GameProfile((String) null, LoginListener.d(this.a).getName()), s));
 -        } catch(Exception exception) {}
-+        if (this.server.getOnlineMode()) {
++        if (server.getOnlineMode()) {
 +            try {
 +                String s = (new BigInteger(MinecraftEncryption.a(LoginListener.a(this.a), LoginListener.b(this.a).I().getPublic(), LoginListener.c(this.a)))).toString(16);
  
@@ -50,6 +51,14 @@ index 09580d7..bbaded5 100644
  
          if (!this.a.networkManager.d()) {
              return;
+@@ -38,7 +44,6 @@ class ThreadPlayerLookupUUID extends Thread {
+ 
+         String playerName = LoginListener.d(this.a).getName();
+         java.net.InetAddress address = ((java.net.InetSocketAddress) a.networkManager.getSocketAddress()).getAddress();
+-        final org.bukkit.craftbukkit.CraftServer server = LoginListener.b(this.a).server;
+ 
+         AsyncPlayerPreLoginEvent asyncEvent = new AsyncPlayerPreLoginEvent(playerName, address, allowed);
+         server.getPluginManager().callEvent(asyncEvent);
 -- 
 1.8.5.1
 

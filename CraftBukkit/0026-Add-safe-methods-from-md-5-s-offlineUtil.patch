@@ -1,11 +1,11 @@
-From 641b4f953c09b0faeaf57e6e91918a6a31913538 Mon Sep 17 00:00:00 2001
+From bdebc845ad288ba47ab3adbfbe7d257eb9e3d883 Mon Sep 17 00:00:00 2001
 From: Chad Waters <authorblues@gmail.com>
 Date: Wed, 6 Feb 2013 14:45:43 -0500
 Subject: [PATCH] Add safe methods from @md-5's offlineUtil
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftOfflinePlayer.java b/src/main/java/org/bukkit/craftbukkit/CraftOfflinePlayer.java
-index 36bcfef..0b0c346 100644
+index 36bcfef..9982353 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftOfflinePlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftOfflinePlayer.java
 @@ -4,10 +4,15 @@ import java.io.File;
@@ -52,7 +52,7 @@ index 36bcfef..0b0c346 100644
 +
 +    public PlayerInventory getInventory() {
 +        if (inventory == null) {
-+            NBTTagList nbttaglist = getData().getList("Inventory");
++            NBTTagList nbttaglist = getData().getList("Inventory", 10);
 +            net.minecraft.server.PlayerInventory inv = new net.minecraft.server.PlayerInventory(null);
 +            inv.b(nbttaglist);
 +            inventory = new CraftInventoryPlayer(inv);
@@ -64,13 +64,13 @@ index 36bcfef..0b0c346 100644
 +        NBTTagCompound data = getData();
 +        Location location = null;
 +        if (data.hasKey("Pos") && data.hasKey("Rotation")) {
-+            NBTTagList pos = data.getList("Pos");
-+            NBTTagList rot = data.getList("Rotation");
-+            double locX = ((NBTTagDouble) pos.get(0)).data;
-+            double locY = ((NBTTagDouble) pos.get(1)).data;
-+            double locZ = ((NBTTagDouble) pos.get(2)).data;
-+            float yaw = ((NBTTagFloat) rot.get(0)).data;
-+            float pitch = ((NBTTagFloat) rot.get(1)).data;
++            NBTTagList pos = data.getList("Pos", 6);
++            NBTTagList rot = data.getList("Rotation", 5);
++            double locX = pos.d(0);
++            double locY = pos.d(1);
++            double locZ = pos.d(2);
++            float yaw = rot.e(0);
++            float pitch = rot.e(1);
 +            World world = null;
 +            if (data.hasKey("WorldUUIDMost") && data.hasKey("WorldUUIDLeast")) {
 +                UUID uid = new UUID(data.getLong("WorldUUIDMost"), data.getLong("WorldUUIDLeast"));

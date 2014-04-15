@@ -1,14 +1,22 @@
-From 947346044bd5a9e98b738849102cab0e187d2e2b Mon Sep 17 00:00:00 2001
+From 8d71a4427dca8ec911e71132751b219c71228e9c Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Sat, 1 Feb 2014 05:49:34 -0500
 Subject: [PATCH] Add fake name API
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-index 38d12bf..a581ed1 100644
+index b049ebe..217c4f8 100644
 --- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
 +++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
-@@ -365,11 +365,16 @@ public class EntityTrackerEntry {
+@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
+ // CraftBukkit start
+ import org.bukkit.entity.Player;
+ import org.bukkit.event.player.PlayerVelocityEvent;
++import net.minecraft.util.com.mojang.authlib.GameProfile;
+ // CraftBukkit end
+ 
+ public class EntityTrackerEntry {
+@@ -364,11 +365,18 @@ public class EntityTrackerEntry {
                      }
  
                      // entityplayer.removeQueue.remove(Integer.valueOf(this.tracker.getId())); CraftBukkit - remove destroy queue
@@ -17,8 +25,10 @@ index 38d12bf..a581ed1 100644
                      this.trackedPlayers.add(entityplayer);
                      Packet packet = this.c();
  
-+                    if(packet instanceof Packet20NamedEntitySpawn) {
-+                        ((Packet20NamedEntitySpawn) packet).b = ((Player)this.tracker.getBukkitEntity()).getOverheadName(entityplayer.getBukkitEntity());
++                    if(packet instanceof PacketPlayOutNamedEntitySpawn) {
++                        EntityPlayer tracked = (EntityPlayer) this.tracker;
++                        GameProfile newProfile = new GameProfile(tracked.getProfile().getId(), tracked.getBukkitEntity().getName(entityplayer.getBukkitEntity()));
++                        ((PacketPlayOutNamedEntitySpawn) packet).b = newProfile;
 +                    }
 +
 +                    // CraftBukkit end
@@ -26,8 +36,21 @@ index 38d12bf..a581ed1 100644
                      entityplayer.playerConnection.sendPacket(packet);
                      if (!this.tracker.getDataWatcher().d()) {
                          this.sendMetadata(this.tracker.getDataWatcher(), true, entityplayer); // CraftBukkit - custom metadata sender
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutNamedEntitySpawn.java b/src/main/java/net/minecraft/server/PacketPlayOutNamedEntitySpawn.java
+index 8bab528..f92b915 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutNamedEntitySpawn.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutNamedEntitySpawn.java
+@@ -9,7 +9,7 @@ import java.io.IOException; // CraftBukkit
+ public class PacketPlayOutNamedEntitySpawn extends Packet {
+ 
+     private int a;
+-    private GameProfile b;
++    public GameProfile b; // CraftBukkit - private -> public
+     private int c;
+     private int d;
+     private int e;
 diff --git a/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java b/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java
-index a58dc60..34986a0 100644
+index cfb98ab..71de560 100644
 --- a/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java
 +++ b/src/main/java/net/minecraft/server/PacketPlayOutPlayerInfo.java
 @@ -2,9 +2,10 @@ package net.minecraft.server;
@@ -45,7 +68,7 @@ index a58dc60..34986a0 100644
      public PacketPlayOutPlayerInfo() {}
  
 diff --git a/src/main/java/net/minecraft/server/PacketPlayOutScoreboardTeam.java b/src/main/java/net/minecraft/server/PacketPlayOutScoreboardTeam.java
-index 35d3be1..a7b3f73 100644
+index 35d3be1..0b638fa 100644
 --- a/src/main/java/net/minecraft/server/PacketPlayOutScoreboardTeam.java
 +++ b/src/main/java/net/minecraft/server/PacketPlayOutScoreboardTeam.java
 @@ -6,13 +6,14 @@ import java.util.Iterator;
@@ -70,6 +93,24 @@ index 35d3be1..a7b3f73 100644
  
      public PacketPlayOutScoreboardTeam() {}
  
+@@ -43,7 +44,7 @@ public class PacketPlayOutScoreboardTeam extends Packet {
+         }
+     }
+ 
+-    public void a(PacketDataSerializer packetdataserializer) {
++    public void a(PacketDataSerializer packetdataserializer) throws java.io.IOException { // CraftBukkit - added throws
+         this.a = packetdataserializer.c(16);
+         this.f = packetdataserializer.readByte();
+         if (this.f == 0 || this.f == 2) {
+@@ -62,7 +63,7 @@ public class PacketPlayOutScoreboardTeam extends Packet {
+         }
+     }
+ 
+-    public void b(PacketDataSerializer packetdataserializer) {
++    public void b(PacketDataSerializer packetdataserializer) throws java.io.IOException { // CraftBukkit - added throws
+         packetdataserializer.a(this.a);
+         packetdataserializer.writeByte(this.f);
+         if (this.f == 0 || this.f == 2) {
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
 index cf537e8..081cd77 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
@@ -281,6 +322,22 @@ index 1314c74..8f875ca 100644
 +        return this.getName();
 +    }
  }
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftMinecartCommand.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftMinecartCommand.java
+index 4c23727..75169ae 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftMinecartCommand.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftMinecartCommand.java
+@@ -56,6 +56,11 @@ public class CraftMinecartCommand extends CraftMinecart implements CommandMineca
+     }
+ 
+     @Override
++    public String getName(org.bukkit.command.CommandSender viewer) {
++        return this.getName();
++    }
++
++    @Override
+     public boolean isOp() {
+         return true;
+     }
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 index 77d1a7f..7f48e5b 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java

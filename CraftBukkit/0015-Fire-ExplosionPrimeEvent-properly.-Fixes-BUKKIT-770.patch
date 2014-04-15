@@ -1,11 +1,11 @@
-From a7743d99358597b0705574f995a517b7d82740e5 Mon Sep 17 00:00:00 2001
+From 807e5c3f1b50ef0d139302bf7de95e0c72c19519 Mon Sep 17 00:00:00 2001
 From: Chad Waters <authorblues@gmail.com>
 Date: Thu, 2 Aug 2012 16:47:02 -0700
 Subject: [PATCH] Fire ExplosionPrimeEvent properly. Fixes BUKKIT-770
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockTNT.java b/src/main/java/net/minecraft/server/BlockTNT.java
-index 6d5090b..b6498f9 100644
+index 6d5090b..3979439 100644
 --- a/src/main/java/net/minecraft/server/BlockTNT.java
 +++ b/src/main/java/net/minecraft/server/BlockTNT.java
 @@ -3,6 +3,7 @@ package net.minecraft.server;
@@ -30,7 +30,7 @@ index 6d5090b..b6498f9 100644
 +                entitytntprimed.fuseTicks = world.random.nextInt(entitytntprimed.fuseTicks / 4) + entitytntprimed.fuseTicks / 8;
 +                world.addEntity(entitytntprimed);
 +            } else {
-+                this.b(world, i, j, k, new ItemStack(Block.TNT.id, 1, 0));
++                this.a(world, i, j, k, new ItemStack(this, 1, 0));
 +            }
 +            // CraftBukkit end
          }
@@ -76,7 +76,7 @@ index 6d5090b..b6498f9 100644
              return true;
          } else {
 diff --git a/src/main/java/net/minecraft/server/EntityCreeper.java b/src/main/java/net/minecraft/server/EntityCreeper.java
-index 3c51de5..d50cbd4 100644
+index 3c51de5..81913fc 100644
 --- a/src/main/java/net/minecraft/server/EntityCreeper.java
 +++ b/src/main/java/net/minecraft/server/EntityCreeper.java
 @@ -90,9 +90,20 @@ public class EntityCreeper extends EntityMonster {
@@ -101,14 +101,6 @@ index 3c51de5..d50cbd4 100644
  
              this.fuseTicks += i;
              if (this.fuseTicks < 0) {
-@@ -101,6 +112,7 @@ public class EntityCreeper extends EntityMonster {
- 
-             if (this.fuseTicks >= this.maxFuseTicks) {
-                 this.fuseTicks = this.maxFuseTicks;
-+
-                 this.cc();
-             }
-         }
 diff --git a/src/main/java/net/minecraft/server/EntityLargeFireball.java b/src/main/java/net/minecraft/server/EntityLargeFireball.java
 index d136d2d..b3ab7ee 100644
 --- a/src/main/java/net/minecraft/server/EntityLargeFireball.java
