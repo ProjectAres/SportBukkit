@@ -1,0 +1,33 @@
+From b74e870d4250ed7aa87fadfc2bfc5298f8416cb1 Mon Sep 17 00:00:00 2001
+From: Marcos Vives Del Sol <socram8888@gmail.com>
+Date: Thu, 24 Apr 2014 15:45:07 +0200
+Subject: [PATCH] Add CacheBuilder.build which returns Cache
+
+
+diff --git a/guava/maps.yml b/guava/maps.yml
+index e69de29..00c5585 100644
+--- a/guava/maps.yml
++++ b/guava/maps.yml
+@@ -0,0 +1,2 @@
++members:
++  "com/google/common/cache/CacheBuilder _INVALID_build (Lcom/google/common/cache/CacheLoader;)Lcom/google/common/cache/Cache;": build
+diff --git a/guava/src/com/google/common/cache/CacheBuilder.java b/guava/src/com/google/common/cache/CacheBuilder.java
+index 8f8a13d..4f51e42 100644
+--- a/guava/src/com/google/common/cache/CacheBuilder.java
++++ b/guava/src/com/google/common/cache/CacheBuilder.java
+@@ -793,6 +793,12 @@ public final class CacheBuilder<K, V> {
+     return new LocalCache.LocalLoadingCache<K1, V1>(this, loader);
+   }
+ 
++  @Deprecated
++  public <K1 extends K, V1 extends V> Cache<K1, V1> _INVALID_build(
++      CacheLoader<? super K1, V1> loader) {
++    return build(loader);
++  }
++
+   /**
+    * Builds a cache which does not automatically load values when keys are requested.
+    *
+-- 
+1.9.1
+
