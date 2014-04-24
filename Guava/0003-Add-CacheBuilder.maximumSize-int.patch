@@ -1,0 +1,39 @@
+From f6ff01cee9c14c8f6e281d1c944db3f730cc0eda Mon Sep 17 00:00:00 2001
+From: Marcos Vives Del Sol <socram8888@gmail.com>
+Date: Thu, 24 Apr 2014 13:25:52 +0200
+Subject: [PATCH] Add CacheBuilder.maximumSize(int)
+
+
+diff --git a/guava-gwt/src-super/com/google/common/cache/super/com/google/common/cache/CacheBuilder.java b/guava-gwt/src-super/com/google/common/cache/super/com/google/common/cache/CacheBuilder.java
+index 40753be..5fcce3e 100644
+--- a/guava-gwt/src-super/com/google/common/cache/super/com/google/common/cache/CacheBuilder.java
++++ b/guava-gwt/src-super/com/google/common/cache/super/com/google/common/cache/CacheBuilder.java
+@@ -341,6 +341,10 @@ public final class CacheBuilder<K, V> {
+     return this;
+   }
+ 
++  public CacheBuilder<K, V> maximumSize(int size) {
++    return maximumSize((long) size);
++  }
++
+   long getMaximumWeight() {
+     if (expireAfterWriteNanos == 0 || expireAfterAccessNanos == 0) {
+       return 0;
+diff --git a/guava/src/com/google/common/cache/CacheBuilder.java b/guava/src/com/google/common/cache/CacheBuilder.java
+index ea99856..8f8a13d 100644
+--- a/guava/src/com/google/common/cache/CacheBuilder.java
++++ b/guava/src/com/google/common/cache/CacheBuilder.java
+@@ -409,6 +409,10 @@ public final class CacheBuilder<K, V> {
+     return this;
+   }
+ 
++  public CacheBuilder<K, V> maximumSize(int size) {
++    return maximumSize((long) size);
++  }
++
+   /**
+    * Specifies the maximum weight of entries the cache may contain. Weight is determined using the
+    * {@link Weigher} specified with {@link #weigher}, and use of this method requires a
+-- 
+1.9.1
+
