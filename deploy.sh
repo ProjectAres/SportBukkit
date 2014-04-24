@@ -20,6 +20,7 @@ function deploy {
     cd ../..
 }
 
+deploy Guava
 deploy Bukkit
 deploy CraftBukkit
 

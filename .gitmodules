@@ -4,3 +4,7 @@
 [submodule "base/CraftBukkit"]
 	path = base/CraftBukkit
 	url = https://github.com/Bukkit/CraftBukkit.git
+[submodule "base/Guava"]
+	path = base/Guava
+	url = https://code.google.com/p/guava-libraries/
+	branch = release17

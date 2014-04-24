@@ -21,6 +21,7 @@ function compile {
     cd ../..
 }
 
+compile Guava
 compile Bukkit
 compile CraftBukkit
 
