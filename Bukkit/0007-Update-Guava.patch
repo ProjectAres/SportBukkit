@@ -5,7 +5,7 @@ Subject: [PATCH] Update Guava
 
 
 diff --git a/pom.xml b/pom.xml
-index a14b55e..a198574 100644
+index feac8db..a0e9144 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -118,7 +118,7 @@
@@ -13,10 +13,10 @@ index a14b55e..a198574 100644
              <groupId>com.google.guava</groupId>
              <artifactId>guava</artifactId>
 -            <version>10.0.1</version>
-+            <version>14.0.1</version>
++            <version>17.0-compat-10</version>
              <type>jar</type>
              <scope>compile</scope>
          </dependency>
 -- 
-1.8.5.1
+1.9.1
 
