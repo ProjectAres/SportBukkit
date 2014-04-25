@@ -1,11 +1,11 @@
-From 7817a43d47731549c3ae7c973eb849308d5e0127 Mon Sep 17 00:00:00 2001
+From bdf920f423a15f9c8ce3e45072b7b6550dbcdffe Mon Sep 17 00:00:00 2001
 From: Marcos Vives Del Sol <socram8888@gmail.com>
 Date: Thu, 24 Apr 2014 16:40:16 +0200
 Subject: [PATCH] Add Cache.get and Cache.getUnchecked
 
 
 diff --git a/guava/src/com/google/common/cache/AbstractCache.java b/guava/src/com/google/common/cache/AbstractCache.java
-index efe579e..6270b79 100644
+index efe579e..06ddd48 100644
 --- a/guava/src/com/google/common/cache/AbstractCache.java
 +++ b/guava/src/com/google/common/cache/AbstractCache.java
 @@ -20,6 +20,7 @@ import com.google.common.annotations.Beta;
@@ -25,9 +25,9 @@ index efe579e..6270b79 100644
 +  public V get(K key) throws ExecutionException {
 +    V value = getIfPresent(key);
 +    if (value == null) {
-+	  throw new ExecutionException(new NullPointerException("No value for key " + key));
-+	}
-+	return value;
++      throw new ExecutionException(new NullPointerException("No value for key " + key));
++    }
++    return value;
 +  }
 +
 +  @Override
@@ -87,7 +87,7 @@ index 9313c5f..0ea01dd 100644
 +  V getUnchecked(K key);
  }
 diff --git a/guava/src/com/google/common/cache/ForwardingCache.java b/guava/src/com/google/common/cache/ForwardingCache.java
-index 44fe683..5462900 100644
+index 44fe683..561bd16 100644
 --- a/guava/src/com/google/common/cache/ForwardingCache.java
 +++ b/guava/src/com/google/common/cache/ForwardingCache.java
 @@ -124,6 +124,18 @@ public abstract class ForwardingCache<K, V> extends ForwardingObject implements
@@ -97,13 +97,13 @@ index 44fe683..5462900 100644
 +  @Override
 +  @Deprecated
 +  public V get(K key) throws ExecutionException {
-+	return delegate().get(key);
++    return delegate().get(key);
 +  }
 +
 +  @Override
 +  @Deprecated
 +  public V getUnchecked(K key) {
-+	return delegate().getUnchecked(key);
++    return delegate().getUnchecked(key);
 +  }
 +
    /**

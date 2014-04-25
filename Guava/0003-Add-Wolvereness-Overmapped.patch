@@ -1,4 +1,4 @@
-From 3b7716ab3e0a4e580669ad70597bff363bc2c5a0 Mon Sep 17 00:00:00 2001
+From 53c6894a9b7e9c2f40e573543a4449940bddf103 Mon Sep 17 00:00:00 2001
 From: Marcos Vives Del Sol <socram8888@gmail.com>
 Date: Thu, 24 Apr 2014 15:44:05 +0200
 Subject: [PATCH] Add Wolvereness' Overmapped
@@ -6,7 +6,11 @@ Subject: [PATCH] Add Wolvereness' Overmapped
 
 diff --git a/guava/maps.yml b/guava/maps.yml
 new file mode 100644
-index 0000000..e69de29
+index 0000000..585cdef
+--- /dev/null
++++ b/guava/maps.yml
+@@ -0,0 +1 @@
++members: { }
 diff --git a/guava/pom.xml b/guava/pom.xml
 index e2fa294..a630c83 100644
 --- a/guava/pom.xml
