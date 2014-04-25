@@ -34,5 +34,6 @@ function rebuildPatches {
     echo "  Patches saved for $what to $patches"
 }
 
+rebuildPatches Guava
 rebuildPatches Bukkit
 rebuildPatches CraftBukkit

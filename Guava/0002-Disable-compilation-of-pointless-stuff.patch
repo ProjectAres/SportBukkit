@@ -1,0 +1,25 @@
+From 10b34416945f49e6654801bda4e1551d88f50de5 Mon Sep 17 00:00:00 2001
+From: Marcos Vives Del Sol <socram8888@gmail.com>
+Date: Thu, 24 Apr 2014 13:03:05 +0200
+Subject: [PATCH] Disable compilation of pointless stuff
+
+
+diff --git a/pom.xml b/pom.xml
+index 7e00e59..183d58a 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -57,9 +57,11 @@
+   </developers>
+   <modules>
+     <module>guava</module>
++    <!-- Disable GWT Guava, as it is not used in SportBukkit, and disable tests, as they slow down the compilation
+     <module>guava-gwt</module>
+     <module>guava-testlib</module>
+     <module>guava-tests</module>
++    -->
+   </modules>
+   <build>
+     <!-- Handle where Guava deviates from Maven defaults -->
+-- 
+1.9.1
+

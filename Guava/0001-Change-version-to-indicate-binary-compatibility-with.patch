@@ -1,0 +1,74 @@
+From c1b2ec8d91a3c47414eb6cd2b08c3218df7a5741 Mon Sep 17 00:00:00 2001
+From: Marcos Vives Del Sol <socram8888@gmail.com>
+Date: Thu, 24 Apr 2014 13:01:36 +0200
+Subject: [PATCH] Change version to indicate binary compatibility with Guava 10
+
+
+diff --git a/guava-gwt/pom.xml b/guava-gwt/pom.xml
+index 4c1be38..2a7a185 100644
+--- a/guava-gwt/pom.xml
++++ b/guava-gwt/pom.xml
+@@ -5,7 +5,7 @@
+   <parent>
+     <groupId>com.google.guava</groupId>
+     <artifactId>guava-parent</artifactId>
+-    <version>17.0</version>
++    <version>17.0-compat-10</version>
+   </parent>
+   <artifactId>guava-gwt</artifactId>
+   <name>Guava GWT compatible libs</name>
+diff --git a/guava-testlib/pom.xml b/guava-testlib/pom.xml
+index bd315a9..e9618fb 100644
+--- a/guava-testlib/pom.xml
++++ b/guava-testlib/pom.xml
+@@ -5,7 +5,7 @@
+   <parent>
+     <groupId>com.google.guava</groupId>
+     <artifactId>guava-parent</artifactId>
+-    <version>17.0</version>
++    <version>17.0-compat-10</version>
+   </parent>
+   <artifactId>guava-testlib</artifactId>
+   <name>Guava Testing Library</name>
+diff --git a/guava-tests/pom.xml b/guava-tests/pom.xml
+index 6495adf..22877e1 100644
+--- a/guava-tests/pom.xml
++++ b/guava-tests/pom.xml
+@@ -5,7 +5,7 @@
+   <parent>
+     <groupId>com.google.guava</groupId>
+     <artifactId>guava-parent</artifactId>
+-    <version>17.0</version>
++    <version>17.0-compat-10</version>
+   </parent>
+   <artifactId>guava-tests</artifactId>
+   <name>Guava Unit Tests</name>
+diff --git a/guava/pom.xml b/guava/pom.xml
+index 225856c..e2fa294 100644
+--- a/guava/pom.xml
++++ b/guava/pom.xml
+@@ -5,7 +5,7 @@
+   <parent>
+     <groupId>com.google.guava</groupId>
+     <artifactId>guava-parent</artifactId>
+-    <version>17.0</version>
++    <version>17.0-compat-10</version>
+   </parent>
+   <artifactId>guava</artifactId>
+   <name>Guava: Google Core Libraries for Java</name>
+diff --git a/pom.xml b/pom.xml
+index 587a9ad..7e00e59 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -11,7 +11,7 @@
+   </parent>
+   <groupId>com.google.guava</groupId>
+   <artifactId>guava-parent</artifactId>
+-  <version>17.0</version>
++  <version>17.0-compat-10</version>
+   <packaging>pom</packaging>
+   <name>Guava Maven Parent</name>
+   <url>http://code.google.com/p/guava-libraries</url>
+-- 
+1.9.1
+

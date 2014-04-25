@@ -1,0 +1,80 @@
+From 53c6894a9b7e9c2f40e573543a4449940bddf103 Mon Sep 17 00:00:00 2001
+From: Marcos Vives Del Sol <socram8888@gmail.com>
+Date: Thu, 24 Apr 2014 15:44:05 +0200
+Subject: [PATCH] Add Wolvereness' Overmapped
+
+
+diff --git a/guava/maps.yml b/guava/maps.yml
+new file mode 100644
+index 0000000..585cdef
+--- /dev/null
++++ b/guava/maps.yml
+@@ -0,0 +1 @@
++members: { }
+diff --git a/guava/pom.xml b/guava/pom.xml
+index e2fa294..a630c83 100644
+--- a/guava/pom.xml
++++ b/guava/pom.xml
+@@ -25,6 +25,11 @@
+       <optional>true</optional><!-- needed only for annotations -->
+     </dependency>
+     <!-- TODO(cpovirk): want this only for dependency plugin but seems not to work there? Maven runs without failure, but the resulting Javadoc is missing the hoped-for inherited text -->
++    <dependency>
++      <groupId>com.wolvereness</groupId>
++      <artifactId>overmapped</artifactId>
++      <version>0.0.2</version>
++    </dependency>
+   </dependencies>
+   <build>
+     <plugins>
+@@ -124,6 +129,24 @@
+           </execution>
+         </executions>
+       </plugin>
++      <plugin>
++        <groupId>com.wolvereness</groupId>
++        <artifactId>overmapped</artifactId>
++        <version>0.0.2</version>
++        <executions>
++          <execution>
++            <phase>package</phase>
++            <goals>
++              <goal>map</goal>
++            </goals>
++            <configuration>
++              <maps>${basedir}/maps.yml</maps>
++              <input>${basedir}/target/${project.artifactId}-${project.version}.jar</input>
++              <original>${basedir}/target/unmapped-${project.artifactId}-${project.version}.jar</original>
++            </configuration>
++          </execution>
++        </executions>
++      </plugin>
+     </plugins>
+   </build>
+   <profiles>
+diff --git a/pom.xml b/pom.xml
+index 183d58a..7f9cc68 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -41,6 +41,18 @@
+     <developerConnection>scm:git:https://code.google.com/p/guava-libraries/</developerConnection>
+     <url>http://code.google.com/p/guava-libraries/source/browse</url>
+   </scm>
++  <repositories>
++    <repository>
++      <id>repobo-snap</id>
++      <url>http://repo.bukkit.org/content/groups/public</url>
++    </repository>
++  </repositories>
++  <pluginRepositories>
++    <pluginRepository>
++      <id>bukkit-plugins</id>
++      <url>http://repo.bukkit.org/content/groups/public</url>
++    </pluginRepository>
++  </pluginRepositories>
+   <developers>
+     <developer>
+       <id>kevinb9n</id>
+-- 
+1.9.1
+

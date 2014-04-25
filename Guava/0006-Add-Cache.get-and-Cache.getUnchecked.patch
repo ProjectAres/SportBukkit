@@ -1,0 +1,165 @@
+From bdf920f423a15f9c8ce3e45072b7b6550dbcdffe Mon Sep 17 00:00:00 2001
+From: Marcos Vives Del Sol <socram8888@gmail.com>
+Date: Thu, 24 Apr 2014 16:40:16 +0200
+Subject: [PATCH] Add Cache.get and Cache.getUnchecked
+
+
+diff --git a/guava/src/com/google/common/cache/AbstractCache.java b/guava/src/com/google/common/cache/AbstractCache.java
+index efe579e..06ddd48 100644
+--- a/guava/src/com/google/common/cache/AbstractCache.java
++++ b/guava/src/com/google/common/cache/AbstractCache.java
+@@ -20,6 +20,7 @@ import com.google.common.annotations.Beta;
+ import com.google.common.annotations.GwtCompatible;
+ import com.google.common.collect.ImmutableMap;
+ import com.google.common.collect.Maps;
++import com.google.common.util.concurrent.UncheckedExecutionException;
+ 
+ import java.util.Map;
+ import java.util.concurrent.Callable;
+@@ -133,6 +134,26 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
+     throw new UnsupportedOperationException();
+   }
+ 
++  @Override
++  @Deprecated
++  public V get(K key) throws ExecutionException {
++    V value = getIfPresent(key);
++    if (value == null) {
++      throw new ExecutionException(new NullPointerException("No value for key " + key));
++    }
++    return value;
++  }
++
++  @Override
++  @Deprecated
++  public V getUnchecked(K key) {
++    try {
++      return get(key);
++    } catch (ExecutionException e) {
++      throw new UncheckedExecutionException(e.getCause());
++    }
++  }
++
+   /**
+    * Accumulates statistics during the operation of a {@link Cache} for presentation by {@link
+    * Cache#stats}. This is solely intended for consumption by {@code Cache} implementors.
+diff --git a/guava/src/com/google/common/cache/Cache.java b/guava/src/com/google/common/cache/Cache.java
+index 9313c5f..0ea01dd 100644
+--- a/guava/src/com/google/common/cache/Cache.java
++++ b/guava/src/com/google/common/cache/Cache.java
+@@ -149,4 +149,38 @@ public interface Cache<K, V> {
+    * performed -- if any -- is implementation-dependent.
+    */
+   void cleanUp();
++
++  /**
++   * Returns the value associated with the given key, creating or retrieving that value if
++   * necessary, and throwing an execution exception on failure. No state associated with this cache
++   * is modified until loading completes. Note that this method will never return {@code null}.
++   *
++   * @throws ExecutionException if a checked exception was thrown while loading the response
++   * @throws UncheckedExecutionException if an unchecked exception was thrown while loading the
++   *     response
++   * @throws ExecutionError if an error was thrown while loading the response
++   * @deprecated This method is only for reasons of binary compatibility with Guava v10. You should
++   *     use getIfPresent instead.
++   */
++  @Deprecated
++  V get(K key) throws ExecutionException;
++
++  /**
++   * Returns the value associated with the given key, loading that value if necessary. No state
++   * associated with this cache is modified until computation completes. Unlike {@link #get}, this
++   * method does not throw a checked exception, and thus should only be used in situations where
++   * checked exceptions are not thrown by the cache loader. Note that this method will never return
++   * {@code null}.
++   *
++   * <p><b>Warning:</b> this method silently converts checked exceptions to unchecked exceptions.
++   * The {@link #get} method should be preferred for cache loaders which throw checked exceptions.
++   *
++   * @throws UncheckedExecutionException if an exception was thrown while loading the response,
++   *     regardless of whether the exception was checked or unchecked
++   * @throws ExecutionError if an error was thrown while loading the response
++   * @deprecated This method is only for reasons of binary compatibility with Guava v10. You should
++   *     use getIfPresent instead.
++   */
++  @Deprecated
++  V getUnchecked(K key);
+ }
+diff --git a/guava/src/com/google/common/cache/ForwardingCache.java b/guava/src/com/google/common/cache/ForwardingCache.java
+index 44fe683..561bd16 100644
+--- a/guava/src/com/google/common/cache/ForwardingCache.java
++++ b/guava/src/com/google/common/cache/ForwardingCache.java
+@@ -124,6 +124,18 @@ public abstract class ForwardingCache<K, V> extends ForwardingObject implements
+     delegate().cleanUp();
+   }
+ 
++  @Override
++  @Deprecated
++  public V get(K key) throws ExecutionException {
++    return delegate().get(key);
++  }
++
++  @Override
++  @Deprecated
++  public V getUnchecked(K key) {
++    return delegate().getUnchecked(key);
++  }
++
+   /**
+    * A simplified version of {@link ForwardingCache} where subclasses can pass in an already
+    * constructed {@link Cache} as the delegete.
+diff --git a/guava/src/com/google/common/cache/LoadingCache.java b/guava/src/com/google/common/cache/LoadingCache.java
+index da08448..0fa2ab2 100644
+--- a/guava/src/com/google/common/cache/LoadingCache.java
++++ b/guava/src/com/google/common/cache/LoadingCache.java
+@@ -73,6 +73,7 @@ public interface LoadingCache<K, V> extends Cache<K, V>, Function<K, V> {
+    *     value
+    * @throws ExecutionError if an error was thrown while loading the value
+    */
++  @Override
+   V get(K key) throws ExecutionException;
+ 
+   /**
+@@ -99,6 +100,7 @@ public interface LoadingCache<K, V> extends Cache<K, V>, Function<K, V> {
+    *     explained in the last paragraph above, this should be an unchecked exception only.)
+    * @throws ExecutionError if an error was thrown while loading the value
+    */
++  @Override
+   V getUnchecked(K key);
+ 
+   /**
+diff --git a/guava/src/com/google/common/cache/LocalCache.java b/guava/src/com/google/common/cache/LocalCache.java
+index 789e628..08d8ccd 100644
+--- a/guava/src/com/google/common/cache/LocalCache.java
++++ b/guava/src/com/google/common/cache/LocalCache.java
+@@ -4731,6 +4731,26 @@ class LocalCache<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V>
+     }
+ 
+     @Override
++    @Deprecated
++    public V get(K key) throws ExecutionException {
++      V value = getIfPresent(key);
++      if (value == null) {
++        throw new ExecutionException(new NullPointerException("No value for key " + key));
++      }
++      return value;
++    }
++
++    @Override
++    @Deprecated
++    public V getUnchecked(K key) {
++      try {
++        return get(key);
++      } catch (ExecutionException e) {
++        throw new UncheckedExecutionException(e.getCause());
++      }
++    }
++
++    @Override
+     public V get(K key, final Callable<? extends V> valueLoader) throws ExecutionException {
+       checkNotNull(valueLoader);
+       return localCache.get(key, new CacheLoader<Object, V>() {
+-- 
+1.9.1
+

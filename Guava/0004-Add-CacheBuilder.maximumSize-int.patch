@@ -1,0 +1,33 @@
+From df1074fbba713fed51d2d22065da17da20161155 Mon Sep 17 00:00:00 2001
+From: Marcos Vives Del Sol <socram8888@gmail.com>
+Date: Thu, 24 Apr 2014 13:25:52 +0200
+Subject: [PATCH] Add CacheBuilder.maximumSize(int)
+
+
+diff --git a/guava/maps.yml b/guava/maps.yml
+index 585cdef..6cb7ae2 100644
+--- a/guava/maps.yml
++++ b/guava/maps.yml
+@@ -1 +1,2 @@
+-members: { }
++members:
++  "com/google/common/cache/CacheBuilder _INVALID_maximumSize (I)Lcom/google/common/cache/CacheBuilder;": maximumSize
+diff --git a/guava/src/com/google/common/cache/CacheBuilder.java b/guava/src/com/google/common/cache/CacheBuilder.java
+index ea99856..f56c8f1 100644
+--- a/guava/src/com/google/common/cache/CacheBuilder.java
++++ b/guava/src/com/google/common/cache/CacheBuilder.java
+@@ -409,6 +409,11 @@ public final class CacheBuilder<K, V> {
+     return this;
+   }
+ 
++  @Deprecated
++  public CacheBuilder<K, V> _INVALID_maximumSize(int size) {
++    return maximumSize((long) size);
++  }
++
+   /**
+    * Specifies the maximum weight of entries the cache may contain. Weight is determined using the
+    * {@link Weigher} specified with {@link #weigher}, and use of this method requires a
+-- 
+1.9.1
+

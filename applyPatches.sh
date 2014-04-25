@@ -27,19 +27,23 @@ function applyPatches {
     echo "  Applying patches to $target..."
     git am --abort
 
-    if !(git am --3way ../../$patches/*.patch); then
-        echo "  Something did not apply cleanly to $target."
-        echo "  Please review above details and finish the apply then"
-        echo "  save the changes with rebuildPatches.sh"
-        cd "$ORIG_PWD"
-        exit $?
-    else
-        echo "  Patches applied cleanly to $target"
-    fi
+    ls ../../$patches/*.patch >/dev/null 2>&1
+    if [ $? == 0 ]; then
+		if !(git am --3way ../../$patches/*.patch); then
+			echo "  Something did not apply cleanly to $target."
+			echo "  Please review above details and finish the apply then"
+			echo "  save the changes with rebuildPatches.sh"
+			cd "$ORIG_PWD"
+			exit $?
+		else
+			echo "  Patches applied cleanly to $target"
+		fi
+	fi
 
     cd ../..
 }
 
+applyPatches Guava
 applyPatches Bukkit
 applyPatches CraftBukkit
 
