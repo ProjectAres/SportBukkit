@@ -1,0 +1,64 @@
+From 0f3b5b8b815c5f6626defcbe42d7097431cb3869 Mon Sep 17 00:00:00 2001
+From: Marcos Vives Del Sol <socram8888@gmail.com>
+Date: Mon, 23 Jun 2014 11:49:17 +0200
+Subject: [PATCH] Check waterproofness of blocks when using buckets
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockFlowing.java b/src/main/java/net/minecraft/server/BlockFlowing.java
+index f0661d5..b6b64ba 100644
+--- a/src/main/java/net/minecraft/server/BlockFlowing.java
++++ b/src/main/java/net/minecraft/server/BlockFlowing.java
+@@ -258,7 +258,10 @@ public class BlockFlowing extends BlockFluids {
+ 
+     private boolean p(World world, int i, int j, int k) {
+         Block block = world.getType(i, j, k);
++        return isWaterproof(block);
++    }
+ 
++    public static boolean isWaterproof(Block block) {
+         return block != Blocks.WOODEN_DOOR && block != Blocks.IRON_DOOR_BLOCK && block != Blocks.SIGN_POST && block != Blocks.LADDER && block != Blocks.SUGAR_CANE_BLOCK ? (block.material == Material.PORTAL ? true : block.material.isSolid()) : true;
+     }
+ 
+diff --git a/src/main/java/net/minecraft/server/DispenseBehaviorFilledBucket.java b/src/main/java/net/minecraft/server/DispenseBehaviorFilledBucket.java
+index 4a3691a..7200b60 100644
+--- a/src/main/java/net/minecraft/server/DispenseBehaviorFilledBucket.java
++++ b/src/main/java/net/minecraft/server/DispenseBehaviorFilledBucket.java
+@@ -23,7 +23,7 @@ final class DispenseBehaviorFilledBucket extends DispenseBehaviorItem {
+         int x = i + enumfacing.getAdjacentX();
+         int y = j + enumfacing.getAdjacentY();
+         int z = k + enumfacing.getAdjacentZ();
+-        if (world.isEmpty(x, y, z) || !world.getType(x, y, z).getMaterial().isBuildable()) {
++        if (world.isEmpty(x, y, z) || !BlockFlowing.isWaterproof(world.getType(x, y, z))) {
+             org.bukkit.block.Block block = world.getWorld().getBlockAt(i, j, k);
+             CraftItemStack craftItem = CraftItemStack.asCraftMirror(itemstack);
+ 
+diff --git a/src/main/java/net/minecraft/server/ItemBucket.java b/src/main/java/net/minecraft/server/ItemBucket.java
+index 402f9b1..0a5efdb 100644
+--- a/src/main/java/net/minecraft/server/ItemBucket.java
++++ b/src/main/java/net/minecraft/server/ItemBucket.java
+@@ -109,7 +109,8 @@ public class ItemBucket extends Item {
+ 
+                     // CraftBukkit start
+                     // Check that the bucket can be emptied before firing the event
+-                    if (world.isEmpty(i, j, k) || !world.getType(i, j, k).getMaterial().isBuildable()) {
++                    Block block = world.getType(i, j, k);
++                    if (world.isEmpty(i, j, k) || block == Blocks.PORTAL || !BlockFlowing.isWaterproof(block)) {
+                         PlayerBucketEmptyEvent event = CraftEventFactory.callPlayerBucketEmptyEvent(entityhuman, clickedX, clickedY, clickedZ, movingobjectposition.face, itemstack);
+                         if(event.isCancelled()) {
+                             return itemstack;
+@@ -146,8 +147,10 @@ public class ItemBucket extends Item {
+         if (this.a == Blocks.AIR) {
+             return false;
+         } else {
+-            Material material = world.getType(i, j, k).getMaterial();
+-            boolean flag = !material.isBuildable();
++            Block block = world.getType(i, j, k);
++            Material material = block.getMaterial();
++            // Special-case PORTAL, as some redstone circuits rely on water buckets to disable Nether Portals.
++            boolean flag = block == Blocks.PORTAL || !BlockFlowing.isWaterproof(block);
+ 
+             if (!world.isEmpty(i, j, k) && !flag) {
+                 return false;
+-- 
+1.7.9
+
