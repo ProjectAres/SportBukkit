@@ -1,14 +1,14 @@
-From 5e81515921092e47be8def93d499a7f0622fa315 Mon Sep 17 00:00:00 2001
+From 6099e328ef32f8138d08a8ca07a1cb41149e3eb8 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Sat, 28 Apr 2012 01:39:04 -0400
 Subject: [PATCH] Add API to control if a player can push other entities
 
 
 diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
-index 4d6722d..1fcbd0c 100644
+index 2fe8651..2e8631c 100644
 --- a/src/main/java/org/bukkit/entity/Player.java
 +++ b/src/main/java/org/bukkit/entity/Player.java
-@@ -884,6 +884,18 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+@@ -882,6 +882,18 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      public void setFlying(boolean value);
  
      /**
@@ -28,5 +28,5 @@ index 4d6722d..1fcbd0c 100644
       * reverse directions.
       *
 -- 
-1.8.5.1
+1.7.9
 

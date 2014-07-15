@@ -1,4 +1,4 @@
-From 565770777c9d085acd236bd2b1b9337f24c7ed88 Mon Sep 17 00:00:00 2001
+From b8df3e11f602e15560b3a0108c85dca919f7490b Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Sun, 9 Mar 2014 04:38:32 -0400
 Subject: [PATCH] Disable player list updates
@@ -47,10 +47,10 @@ index ed5a3f5..44c1838 100644
              } else {
                  entityplayer1.getBukkitEntity().removeDisconnectingPlayer(entityplayer.getBukkitEntity());
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index 1c3dff4..11d1ab4 100644
+index 344194f..a4298c1 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-@@ -80,6 +80,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -79,6 +79,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
      private double health = 20;
      private boolean scaledHealth = false;
      private double healthScale = 20;
@@ -58,7 +58,7 @@ index 1c3dff4..11d1ab4 100644
  
      private final Map<CommandSender, String> fakeNames = new WeakHashMap<CommandSender, String>();
      private final Map<CommandSender, String> fakeDisplayNames = new WeakHashMap<CommandSender, String>();
-@@ -247,7 +248,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -246,7 +247,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
              CraftPlayer craftViewer = (CraftPlayer) viewer;
              EntityPlayer viewerEntity  = craftViewer.getHandle();
              if(viewerEntity.playerConnection != null) {
@@ -67,7 +67,7 @@ index 1c3dff4..11d1ab4 100644
                      viewerEntity.playerConnection.sendPacket(new PacketPlayOutPlayerInfo(this.getName(), false, 9999));
                  }
  
-@@ -267,7 +268,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -266,7 +267,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
              CraftPlayer craftViewer = (CraftPlayer) viewer;
              EntityPlayer viewerEntity  = craftViewer.getHandle();
              if(viewerEntity.playerConnection != null) {
@@ -76,7 +76,7 @@ index 1c3dff4..11d1ab4 100644
                      viewerEntity.playerConnection.sendPacket(new PacketPlayOutPlayerInfo(this.getName(), true, this.getHandle().ping));
                  }
  
-@@ -402,7 +403,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -401,7 +402,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
              EntityPlayer entityplayer = (EntityPlayer) server.getHandle().players.get(i);
              if (entityplayer.playerConnection == null) continue;
  
@@ -85,7 +85,7 @@ index 1c3dff4..11d1ab4 100644
                  entityplayer.playerConnection.sendPacket(oldpacket);
                  entityplayer.playerConnection.sendPacket(packet);
              }
-@@ -1119,7 +1120,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -1086,7 +1087,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
          }
  
          //remove the hidden player from this player user list
@@ -94,7 +94,7 @@ index 1c3dff4..11d1ab4 100644
              getHandle().playerConnection.sendPacket(new PacketPlayOutPlayerInfo(((CraftPlayer) entity).getPlayerListName(), false, 9999));
          }
      }
-@@ -1142,8 +1143,8 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -1109,8 +1110,8 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
              entry.updatePlayer(getHandle());
          }
  
@@ -105,7 +105,7 @@ index 1c3dff4..11d1ab4 100644
          }
      }
  
-@@ -1445,6 +1446,33 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -1412,6 +1413,33 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
      }
  
      @Override
@@ -140,5 +140,5 @@ index 1c3dff4..11d1ab4 100644
          super.setMaxHealth(amount);
          this.health = Math.min(this.health, health);
 -- 
-1.8.5.2 (Apple Git-48)
+1.7.9
 
