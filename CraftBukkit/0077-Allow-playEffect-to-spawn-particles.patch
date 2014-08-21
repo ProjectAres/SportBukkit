@@ -1,0 +1,137 @@
+From f057277e40dbb100d46c864566d62998b002cf28 Mon Sep 17 00:00:00 2001
+From: Marcos Vives Del Sol <socram8888@gmail.com>
+Date: Fri, 13 Jun 2014 21:53:06 +0200
+Subject: [PATCH] Allow playEffect to spawn particles
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftEffect.java b/src/main/java/org/bukkit/craftbukkit/CraftEffect.java
+index c610812..eaf6f9e 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftEffect.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftEffect.java
+@@ -4,6 +4,7 @@ import org.apache.commons.lang.Validate;
+ import org.bukkit.Effect;
+ import org.bukkit.Material;
+ import org.bukkit.block.BlockFace;
++import org.bukkit.material.MaterialData;
+ import org.bukkit.potion.Potion;
+ 
+ public class CraftEffect {
+@@ -63,4 +64,14 @@ public class CraftEffect {
+         }
+         return datavalue;
+     }
++
++    public static <T> String getParticleName(Effect effect, T data) {
++        if (effect.getData() == MaterialData.class) {
++            return effect.getName() + "_" + ((MaterialData) data).getItemTypeId() + "_" + ((MaterialData) data).getData();
++        }
++        if (effect.getData() == Material.class) {
++            return effect.getName() + "_" + ((Material) data).getId();
++        }
++        return effect.getName();
++    }
+ }
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+index e8351c8..4db58f9 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+@@ -54,6 +54,7 @@ import org.bukkit.util.Vector;
+ 
+ public class CraftWorld implements World {
+     public static final int CUSTOM_DIMENSION_OFFSET = 10;
++    private static final Vector ZERO_VECTOR = new Vector();
+ 
+     private final WorldServer world;
+     private Environment environment;
+@@ -790,6 +791,10 @@ public class CraftWorld implements World {
+         playEffect(player.getLocation(), effect, data, 0);
+     }
+ 
++    public void playEffect(Location location, Effect effect) {
++        playEffect(location, effect, 0);
++    }
++
+     public void playEffect(Location location, Effect effect, int data) {
+         playEffect(location, effect, data, 64);
+     }
+@@ -798,23 +803,75 @@ public class CraftWorld implements World {
+         playEffect(loc, effect, data, 64);
+     }
+ 
+-    public <T> void playEffect(Location loc, Effect effect, T data, int radius) {
++    private void validateEffectData(Effect effect, Object data) {
+         if (data != null) {
+             Validate.isTrue(data.getClass().equals(effect.getData()), "Wrong kind of data for this effect!");
+         } else {
+             Validate.isTrue(effect.getData() == null, "Wrong kind of data for this effect!");
+         }
++    }
++
++    public <T> void playEffect(Location loc, Effect effect, T data, int radius) {
++        validateEffectParams(loc, effect);
++
++        if (effect.getType() == Effect.Type.PARTICLE) {
++            playParticlesEffect(loc, effect, data, ZERO_VECTOR, radius, 1);
++            return;
++        }
++
++        playWorldEventEffect(loc, effect, data, radius);
++    }
++
++    private <T> void playWorldEventEffect(Location loc, Effect effect, T data, int radius) {
++        validateEffectData(effect, data);
+ 
+         int datavalue = data == null ? 0 : CraftEffect.getDataValue(effect, data);
+-        playEffect(loc, effect, datavalue, radius);
++        playWorldEventEffect(loc, effect, datavalue, radius);
+     }
+ 
+     public void playEffect(Location location, Effect effect, int data, int radius) {
++        validateEffectParams(location, effect);
++
++        if (effect.getType() == Effect.Type.PARTICLE) {
++            playParticlesEffect(location, effect, null, ZERO_VECTOR, radius, 1);
++            return;
++        }
++
++        playWorldEventEffect(location, effect, data, radius);
++    }
++
++    private void validateEffectParams(Location location, Effect effect) {
+         Validate.notNull(location, "Location cannot be null");
+         Validate.notNull(effect, "Effect cannot be null");
+         Validate.notNull(location.getWorld(), "World cannot be null");
++    }
++
++    private void playWorldEventEffect(Location location, Effect effect, int data, int radius) {
+         int packetData = effect.getId();
+         PacketPlayOutWorldEvent packet = new PacketPlayOutWorldEvent(packetData, location.getBlockX(), location.getBlockY(), location.getBlockZ(), data, false);
++        sendPacketToNearbyPlayers(packet, location, radius);
++    }
++
++    public <T> void playEffect(Location location, Effect effect, T data, Vector offset, int radius, int count) {
++        validateEffectParams(location, effect);
++
++        if (effect.getType() == Effect.Type.VISUAL || effect.getType() == Effect.Type.SOUND) {
++            playWorldEventEffect(location, effect, data, radius);
++            return;
++        }
++
++        playParticlesEffect(location, effect, data, offset, radius, count);
++    }
++
++    private <T> void playParticlesEffect(Location location, Effect effect, T data, Vector offset, int radius, int count) {
++        validateEffectData(effect, data);
++
++        String particleName = CraftEffect.getParticleName(effect, data);
++        Packet packet = new PacketPlayOutWorldParticles(particleName, (float) location.getX(), (float) location.getY(), (float) location.getZ(), (float) offset.getX(), (float) offset.getY(), (float) offset.getZ(), count, radius);
++        sendPacketToNearbyPlayers(packet, location, radius);
++    }
++
++    private void sendPacketToNearbyPlayers(Packet packet, Location location, int radius) {
+         int distance;
+         radius *= radius;
+ 
+-- 
+1.7.9
+

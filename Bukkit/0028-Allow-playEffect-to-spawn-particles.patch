@@ -1,0 +1,331 @@
+From 8787a380dc150d4a7b640b96f76cf002fe8ae69f Mon Sep 17 00:00:00 2001
+From: Marcos Vives Del Sol <socram8888@gmail.com>
+Date: Fri, 13 Jun 2014 21:51:01 +0200
+Subject: [PATCH] Allow playEffect to spawn particles
+
+
+diff --git a/src/main/java/org/bukkit/Effect.java b/src/main/java/org/bukkit/Effect.java
+index 6cd2df8..d77d4c9 100644
+--- a/src/main/java/org/bukkit/Effect.java
++++ b/src/main/java/org/bukkit/Effect.java
+@@ -5,6 +5,7 @@ import java.util.Map;
+ import com.google.common.collect.Maps;
+ 
+ import org.bukkit.block.BlockFace;
++import org.bukkit.material.MaterialData;
+ import org.bukkit.potion.Potion;
+ 
+ /**
+@@ -129,25 +130,189 @@ public enum Effect {
+      * and is used to choose the appropiate texture based on the block
+      * material. The particles are rendered on top of that.
+      */
+-    LAND_DUST(2006, Type.VISUAL, Integer.class);
++    LAND_DUST(2006, Type.VISUAL, Integer.class),
++    /**
++     * The spark that comes off a fireworks
++     */
++    FIREWORKS_SPARK("fireworksSpark", Type.PARTICLE),
++    /**
++     * Critical hit particles
++     */
++    CRITICAL("crit", Type.PARTICLE),
++    /**
++     * Blue critical hit particles
++     */
++    CRITICAL_MAGIC("magicCrit", Type.PARTICLE),
++    /**
++     * Multicolored potion effect particles
++     */
++    POTION_SWIRL("mobSpell", Type.PARTICLE),
++    /**
++     * Multicolored potion effect particles that are slightly transparent
++     */
++    POTION_SWIRL_TRANSPARENT("mobSpellAmbient", Type.PARTICLE),
++    /**
++     * A puff of white potion swirls
++     */
++    SPELL("spell", Type.PARTICLE),
++    /**
++     * A puff of white stars
++     */
++    SPELL_INSTANT("instantSpell", Type.PARTICLE),
++    /**
++     * A puff of purple particles
++     */
++    WITCH_MAGIC("witchMagic", Type.PARTICLE),
++    /**
++     * The note that appears above note blocks
++     */
++    NOTE("note", Type.PARTICLE),
++    /**
++     * The particles shown at nether portals
++     */
++    PORTAL("portal", Type.PARTICLE),
++    /**
++     * The symbols that fly towards the enchantment table
++     */
++    FLYING_GLYPH("enchantmenttable", Type.PARTICLE),
++    /**
++     * Fire particles
++     */
++    FLAME("flame", Type.PARTICLE),
++    /**
++     * The particles that pop out of lava
++     */
++    LAVA_POP("lava", Type.PARTICLE),
++    /**
++     * A small gray square
++     */
++    FOOTSTEP("footstep", Type.PARTICLE),
++    /**
++     * Water particles
++     */
++    SPLASH("splash", Type.PARTICLE),
++    /**
++     * Smoke particles
++     */
++    PARTICLE_SMOKE("smoke", Type.PARTICLE),
++    /**
++     * The biggest explosion particle effect
++     */
++    EXPLOSION_HUGE("hugeexplosion", Type.PARTICLE),
++    /**
++     * A larger version of the explode particle
++     */
++    EXPLOSION_LARGE("largeexplode", Type.PARTICLE),
++    /**
++     * Explosion particles
++     */
++    EXPLOSION("explode", Type.PARTICLE),
++    /**
++     * Small gray particles
++     */
++    VOID_FOG("depthsuspend", Type.PARTICLE),
++    /**
++     * Small gray particles
++     */
++    SMALL_SMOKE("townaura", Type.PARTICLE),
++    /**
++     * A puff of white smoke
++     */
++    CLOUD("cloud", Type.PARTICLE),
++    /**
++     * Red particles, used on active redstone
++     */
++    REDSTONE_DUST("reddust", Type.PARTICLE),
++    /**
++     * Snowball breaking
++     */
++    SNOWBALL_BREAK("snowballpoof", Type.PARTICLE),
++    /**
++     * The water drip particle that appears on blocks under water
++     */
++    DRIP_WATER("dripWater", Type.PARTICLE),
++    /**
++     * The lava drip particle that appears on blocks under lava
++     */
++    DRIP_LAVA("dripLava", Type.PARTICLE),
++    /**
++     * White particles
++     */
++    SNOW_SHOVEL("snowshovel", Type.PARTICLE),
++    /**
++     * The particle shown when a slime jumps
++     */
++    SLIME("slime", Type.PARTICLE),
++    /**
++     * The particle that appears when breading animals
++     */
++    HEART("heart", Type.PARTICLE),
++    /**
++     * The particle that appears when hitting a villager
++     */
++    VILLAGER_THUNDERCLOUD("angryVillager", Type.PARTICLE),
++    /**
++     * The particle that appears when trading with a villager
++     */
++    VILLAGER_HAPPY("happyVillager", Type.PARTICLE),
++    /**
++     * The particles generated when a tool breaks.
++     * This particle requires a Material and a data value so that the client
++     * can select the correct texture.
++     */
++    ITEM_BREAK("iconcrack", Type.PARTICLE, MaterialData.class),
++    /**
++     * The particles generated while breaking a block.
++     * This particle requires a Material and data value so that the client
++     * can select the correct texture.
++     */
++    BLOCK_BREAK("blockcrack", Type.PARTICLE, MaterialData.class),
++    /**
++     * Dust that appears over a block when falling from a high altitude.
++     * This particle requires a Material and data value so that the client
++     * can select the correct texture.
++     */
++    BLOCK_DUST("blockdust", Type.PARTICLE, MaterialData.class),
++    /**
++     * A bubble. Used when entering water. Apparently the client only renders
++     * it if the block on the specified location is water.
++     */
++    BUBBLE("bubble", Type.PARTICLE);
+ 
+     private final int id;
+     private final Type type;
+     private final Class<?> data;
++    private final String name;
+     private static final Map<Integer, Effect> BY_ID = Maps.newHashMap();
++    private static final Map<String, Effect> BY_NAME = Maps.newHashMap();
+ 
+     Effect(int id, Type type) {
+         this(id,type,null);
+     }
+ 
+     Effect(int id, Type type, Class<?> data) {
++        this(id, null, type, data);
++    }
++
++    Effect(String name, Type type) {
++        this(name, type, null);
++    }
++
++    Effect(String name, Type type, Class<?> data) {
++        this(0, name, type, data);
++    }
++
++    Effect(int id, String name, Type type, Class<?> data) {
+         this.id = id;
++        this.name = name;
+         this.type = type;
+         this.data = data;
+     }
+ 
+     /**
+      * Gets the ID for this effect.
++     * Works only for effect whose type is SOUND or VISUAL. Returns zero
++     * otherwise.
+      *
+      * @return ID of this effect
+      * @deprecated Magic value
+@@ -158,6 +323,16 @@ public enum Effect {
+     }
+ 
+     /**
++     * Gets the name of this effect.
++     * Works only for effect whose type is PARTICLE. Returns null otherwise.
++     *
++     * @return Name of this effect
++     */
++    public String getName() {
++        return this.name;
++    }
++
++    /**
+      * @return The type of the effect.
+      */
+     public Type getType() {
+@@ -174,6 +349,7 @@ public enum Effect {
+ 
+     /**
+      * Gets the Effect associated with the given ID.
++     * Works only for effect whose type is SOUND or VISUAL.
+      *
+      * @param id ID of the Effect to return
+      * @return Effect with the given ID
+@@ -184,14 +360,30 @@ public enum Effect {
+         return BY_ID.get(id);
+     }
+ 
++    /**
++     * Gets the Effect associated with the given name.
++     * Works only for effect whose type is PARTICLE.
++     *
++     * @param name Name of the effect
++     * @return Effect with the given name
++     */
++    public static Effect getByName(String name) {
++        return BY_NAME.get(name);
++    }
++
+     static {
+         for (Effect effect : values()) {
+-            BY_ID.put(effect.id, effect);
++            if (effect.name != null) {
++                BY_NAME.put(effect.name, effect);
++            }
++            if (effect.id != 0) {
++                BY_ID.put(effect.id, effect);
++            }
+         }
+     }
+ 
+     /**
+      * Represents the type of an effect.
+      */
+-    public enum Type {SOUND, VISUAL}
++    public enum Type {SOUND, VISUAL, PARTICLE}
+ }
+diff --git a/src/main/java/org/bukkit/World.java b/src/main/java/org/bukkit/World.java
+index 9bf2c41..a94e4e2 100644
+--- a/src/main/java/org/bukkit/World.java
++++ b/src/main/java/org/bukkit/World.java
+@@ -722,6 +722,16 @@ public interface World extends PluginMessageRecipient, Metadatable {
+ 
+     /**
+      * Plays an effect to all players within a default radius around a given
++     * location. Data, if any, is set to zero or null.
++     *
++     * @param location the {@link Location} around which players must be to
++     *     view or hear the effect
++     * @param effect the {@link Effect}
++     */
++    public void playEffect(Location location, Effect effect);
++
++    /**
++     * Plays an effect to all players within a default radius around a given
+      * location.
+      *
+      * @param location the {@link Location} around which players must be to
+@@ -765,6 +775,19 @@ public interface World extends PluginMessageRecipient, Metadatable {
+     public <T> void playEffect(Location location, Effect effect, T data, int radius);
+ 
+     /**
++     * Plays an effect to all players within a given radius around a location.
++     *
++     * @param location the {@link Location} around which players must be to
++     *     hear the effect
++     * @param effect the {@link Effect}
++     * @param data a data bit needed for some effects
++     * @param vector the {@link Vector} indicating the offset
++     * @param radius the radius around the location
++     * @param count number of particles to spawn
++     */
++    public <T> void playEffect(Location location, Effect effect, T data, Vector offset, int radius, int count);
++
++    /**
+      * Get empty chunk snapshot (equivalent to all air blocks), optionally
+      * including valid biome data. Used for representing an ungenerated chunk,
+      * or for fetching only biome data without loading a chunk.
+diff --git a/src/test/java/org/bukkit/EffectTest.java b/src/test/java/org/bukkit/EffectTest.java
+index 08aa71d..d0e693c 100644
+--- a/src/test/java/org/bukkit/EffectTest.java
++++ b/src/test/java/org/bukkit/EffectTest.java
+@@ -1,5 +1,6 @@
+ package org.bukkit;
+ 
++import static org.hamcrest.CoreMatchers.anyOf;
+ import static org.hamcrest.CoreMatchers.is;
+ import static org.junit.Assert.assertThat;
+ 
+@@ -9,7 +10,7 @@ public class EffectTest {
+     @Test
+     public void getById() {
+         for (Effect effect : Effect.values()) {
+-            assertThat(Effect.getById(effect.getId()), is(effect));
++            assertThat(effect, anyOf(is(Effect.getById(effect.getId())), is(Effect.getByName(effect.getName()))));
+         }
+     }
+ }
+-- 
+1.7.9
+
