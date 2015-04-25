@@ -12,7 +12,7 @@ function requireCleanWorkTree {
     # Disallow unstaged changes in the working tree
     if ! git diff-files --quiet --ignore-submodules --
     then
-        echo >&2 "cannot apply patches to $1: you have unstaged changes."
+        echo >&2 "Cannot apply patches to $1: You have unstaged changes."
         git diff-files --name-status -r --ignore-submodules -- >&2
         err=1
     fi
@@ -20,7 +20,7 @@ function requireCleanWorkTree {
     # Disallow uncommitted changes in the index
     if ! git diff-index --cached --quiet HEAD --ignore-submodules --
     then
-        echo >&2 "cannot apply patches to $1: your index contains uncommitted changes."
+        echo >&2 "Cannot apply patches to $1: Your index contains uncommitted changes."
         git diff-index --cached --name-status -r --ignore-submodules HEAD -- >&2
         err=1
     fi
@@ -60,7 +60,7 @@ function applyPatches {
     if !(git am --3way ../../$patches/*.patch); then
         echo "  Something did not apply cleanly to $target."
         echo "  Please review above details and finish the apply then"
-        echo "  save the changes with rebuildPatches.sh"
+        echo "   save the changes with rebuildPatches.sh."
         cd "$ORIG_PWD"
         exit 1
     else
