@@ -1,3 +1,6 @@
 [submodule "base/Bukkit"]
 	path = base/Bukkit
 	url = https://hub.spigotmc.org/stash/scm/spigot/bukkit.git
+[submodule "shellbuilder"]
+	path = shellbuilder
+	url = https://github.com/socram8888/ShellBuildTools
