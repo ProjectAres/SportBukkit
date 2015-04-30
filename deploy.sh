@@ -1,26 +1,27 @@
 #!/bin/bash
 
-ORIG_PWD="$(pwd)"
-cd "$(dirname "$0")"
+pushd "$(dirname "$0")" >/dev/null
+. util.sh
 
 function deploy {
     target=build/$1
 
-    echo "  $1 deploying..."
-    cd $target
+    log_info "$1 deploying..."
+    pushd $target >/dev/null
 
     if !(MAVEN_OPTS="$MAVEN_OPTS -Xmx1G" mvn deploy); then
-        echo "  $1 failed to deploy"
-        cd "$ORIG_PWD"
+        log_error "$1 failed to deploy"
+        popd >/dev/null
+        popd >/dev/null
         exit 1
     else
-        echo "  $1 deployed"
+        log_info "$1 deployed"
     fi
 
-    cd ../..
+    popd >/dev/null
 }
 
 deploy Bukkit
 deploy CraftBukkit
 
-cd "$ORIG_PWD"
+popd >/dev/null
