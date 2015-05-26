@@ -1,0 +1,68 @@
+From d16baea641c129325cf8547f0de387718bbc2214 Mon Sep 17 00:00:00 2001
+From: ShinyDialga45 <shinydialga45@gmail.com>
+Date: Sun, 17 May 2015 20:05:31 -0500
+Subject: [PATCH] Fix skull items not displaying skins
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaSkull.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaSkull.java
+index 89912bc..bdde9aa 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaSkull.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaSkull.java
+@@ -5,6 +5,7 @@ import java.util.Map;
+ import net.minecraft.server.GameProfileSerializer;
+ import net.minecraft.server.NBTTagCompound;
+ 
++import net.minecraft.server.TileEntitySkull;
+ import org.bukkit.Material;
+ import org.bukkit.configuration.serialization.DelegateDeserialization;
+ import org.bukkit.craftbukkit.inventory.CraftMetaItem.SerializableMeta;
+@@ -26,7 +27,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
+             return;
+         }
+         CraftMetaSkull skullMeta = (CraftMetaSkull) meta;
+-        this.profile = skullMeta.profile;
++        profile = TileEntitySkull.b(skullMeta.profile);
+     }
+ 
+     CraftMetaSkull(NBTTagCompound tag) {
+@@ -37,6 +38,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
+         } else if (tag.hasKeyOfType(SKULL_OWNER.NBT, 8) && !tag.getString(SKULL_OWNER.NBT).isEmpty()) {
+             profile = new GameProfile(null, tag.getString(SKULL_OWNER.NBT));
+         }
++        profile = TileEntitySkull.b(profile);
+     }
+ 
+     CraftMetaSkull(Map<String, Object> map) {
+@@ -95,7 +97,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
+         if (name == null) {
+             profile = null;
+         } else {
+-            profile = new GameProfile(null, name);
++            profile = TileEntitySkull.b(new GameProfile(null, name));
+         }
+ 
+         return true;
+@@ -119,7 +121,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
+         if (meta instanceof CraftMetaSkull) {
+             CraftMetaSkull that = (CraftMetaSkull) meta;
+ 
+-            return (this.hasOwner() ? that.hasOwner() && this.profile.equals(that.profile) : !that.hasOwner());
++            return (this.hasOwner() ? that.hasOwner() && profile.equals(that.profile) : !that.hasOwner());
+         }
+         return true;
+     }
+@@ -133,8 +135,8 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
+     Builder<String, Object> serialize(Builder<String, Object> builder) {
+         super.serialize(builder);
+         if (hasOwner()) {
+-            return builder.put(SKULL_OWNER.BUKKIT, this.profile.getName());
++            return builder.put(SKULL_OWNER.BUKKIT, profile.getName());
+         }
+         return builder;
+     }
+-}
++}
+\ No newline at end of file
+-- 
+1.9.4.msysgit.2
+
