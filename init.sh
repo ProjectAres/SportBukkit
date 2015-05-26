@@ -1,7 +1,6 @@
 #!/bin/bash
 
-pushd "$(dirname "$0")"
-
+pushd "$(dirname "$0")" >/dev/null
 . util.sh
 
 log_info "Preparing folder layout"
@@ -18,12 +17,13 @@ git init
 git submodule update --init
 
 log_info "Resetting upstream repositories"
-pushd base/Bukkit
+pushd base/Bukkit >/dev/null
 git branch -f upstream
-popd
-pushd base/CraftBukkit
+popd >/dev/null
+pushd base/CraftBukkit >/dev/null
 git branch -f upstream
-popd
+popd >/dev/null
 
+popd >/dev/null
 log_info "Done. Now you should run ./remap-nms.sh to proceed."
-popd
+

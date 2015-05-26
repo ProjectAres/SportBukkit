@@ -24,11 +24,11 @@ log_info() {
 }
 
 log_warning() {
-	echo -e "\033[33m!!!\033[0m $1"
+	echo -e "\033[33m!!!\033[0m $1" >&2
 }
 
 log_error() {
-	echo -e "\033[31m###\033[0m $1"
+	echo -e "\033[31m###\033[0m $1" >&2
 }
 
 if hash md5sum 2> /dev/null; then
@@ -58,7 +58,11 @@ downloadfile() {
 	fi
 
 	log_info "Downloading ${FILE}"
-	curl -o "${FILE}" "${URL}"
+	if which curl; then
+		curl -o "${FILE}" "${URL}"
+	else
+		wget -O "${FILE}" "${URL}"
+	fi
 
 	CALCMD5=$(filemd5 "${FILE}")
 	if [ $CALCMD5 == $NMS_MD5 ]; then

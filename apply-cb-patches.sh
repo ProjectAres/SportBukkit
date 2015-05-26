@@ -14,7 +14,7 @@ if [ ! -d work/CraftBukkit ]; then
     git clone base/CraftBukkit work/CraftBukkit
 fi
 
-pushd work/CraftBukkit
+pushd work/CraftBukkit >/dev/null
 git checkout upstream
 git reset --hard origin/upstream
 
@@ -23,8 +23,8 @@ log_info "Applying CraftBukkit patches"
 
 log_info "Committing branch"
 git add src/main/java/net/minecraft/server/*
-git commit -m "CraftBukkit \$$(date +%s)"
+git commit -m "CraftBukkit \$ $(date +%s)"
 
-popd
+popd >/dev/null
 log_info "Done. Now you should run ./apply-sb-patches.sh to proceed."
 
