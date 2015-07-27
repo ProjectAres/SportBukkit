@@ -1,0 +1,109 @@
+From e846c184c804c36006e0a879dbc1be9768f74a1e Mon Sep 17 00:00:00 2001
+From: Electroid <ashcon.partovi@me.com>
+Date: Mon, 27 Jul 2015 13:52:36 -0700
+Subject: [PATCH] Armor stand markers
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityArmorStand.java b/src/main/java/net/minecraft/server/EntityArmorStand.java
+index a0ad85b..dd0bdf2 100644
+--- a/src/main/java/net/minecraft/server/EntityArmorStand.java
++++ b/src/main/java/net/minecraft/server/EntityArmorStand.java
+@@ -126,8 +126,8 @@ public class EntityArmorStand extends EntityLiving {
+         nbttagcompound.setInt("DisabledSlots", this.bi);
+         nbttagcompound.setBoolean("NoGravity", this.hasGravity());
+         nbttagcompound.setBoolean("NoBasePlate", this.hasBasePlate());
+-        if (this.s()) {
+-            nbttagcompound.setBoolean("Marker", this.s());
++        if (this.isMarker()) {
++            nbttagcompound.setBoolean("Marker", this.isMarker());
+         }
+ 
+         nbttagcompound.set("Pose", this.z());
+@@ -149,8 +149,8 @@ public class EntityArmorStand extends EntityLiving {
+         this.bi = nbttagcompound.getInt("DisabledSlots");
+         this.setGravity(nbttagcompound.getBoolean("NoGravity"));
+         this.setBasePlate(nbttagcompound.getBoolean("NoBasePlate"));
+-        this.n(nbttagcompound.getBoolean("Marker"));
+-        this.bj = !this.s();
++        this.setMarker(nbttagcompound.getBoolean("Marker"));
++        this.bj = !this.isMarker();
+         this.noclip = this.hasGravity();
+         NBTTagCompound nbttagcompound1 = nbttagcompound.getCompound("Pose");
+ 
+@@ -260,7 +260,7 @@ public class EntityArmorStand extends EntityLiving {
+     }
+ 
+     public boolean a(EntityHuman entityhuman, Vec3D vec3d) {
+-        if (this.s()) {
++        if (this.isMarker()) {
+             return false;
+         } else if (!this.world.isClientSide && !entityhuman.isSpectator()) {
+             byte b0 = 0;
+@@ -387,7 +387,7 @@ public class EntityArmorStand extends EntityLiving {
+         } else if (DamageSource.OUT_OF_WORLD.equals(damagesource)) {
+             this.die();
+             return false;
+-        } else if (!this.isInvulnerable(damagesource) && !this.h && !this.s()) {
++        } else if (!this.isInvulnerable(damagesource) && !this.h && !this.isMarker()) {
+             if (damagesource.isExplosion()) {
+                 this.D();
+                 this.die();
+@@ -532,7 +532,7 @@ public class EntityArmorStand extends EntityLiving {
+             this.setRightLegPose(vector3f5);
+         }
+ 
+-        boolean flag = this.s();
++        boolean flag = this.isMarker();
+ 
+         if (!this.bj && flag) {
+             this.a(false);
+@@ -646,7 +646,7 @@ public class EntityArmorStand extends EntityLiving {
+         return (this.datawatcher.getByte(10) & 8) != 0;
+     }
+ 
+-    private void n(boolean flag) {
++    public void setMarker(boolean flag) {
+         byte b0 = this.datawatcher.getByte(10);
+ 
+         if (flag) {
+@@ -658,7 +658,7 @@ public class EntityArmorStand extends EntityLiving {
+         this.datawatcher.watch(10, Byte.valueOf(b0));
+     }
+ 
+-    public boolean s() {
++    public boolean isMarker() {
+         return (this.datawatcher.getByte(10) & 16) != 0;
+     }
+ 
+@@ -701,6 +701,6 @@ public class EntityArmorStand extends EntityLiving {
+     }
+ 
+     public boolean ad() {
+-        return super.ad() && !this.s();
++        return super.ad() && !this.isMarker();
+     }
+ }
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftArmorStand.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftArmorStand.java
+index 741b765..3c729c6 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftArmorStand.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftArmorStand.java
+@@ -189,6 +189,16 @@ public class CraftArmorStand extends CraftLivingEntity implements ArmorStand {
+         getHandle().setSmall(small);
+     }
+ 
++    @Override
++    public boolean isMarker() {
++        return getHandle().isMarker();
++    }
++
++    @Override
++    public void setMarker(boolean marker) {
++        getHandle().setMarker(marker);
++    }
++
+     private static EulerAngle fromNMS(Vector3f old) {
+         return new EulerAngle(
+             Math.toRadians(old.getX()),
+-- 
+1.9.3 (Apple Git-50)
+

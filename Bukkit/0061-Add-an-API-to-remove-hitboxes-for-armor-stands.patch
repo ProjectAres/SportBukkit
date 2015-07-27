@@ -1,0 +1,34 @@
+From fcea832dc0fdb4305f4efd7bc951396a6d9064e9 Mon Sep 17 00:00:00 2001
+From: Electroid <ashcon.partovi@me.com>
+Date: Mon, 27 Jul 2015 14:15:07 -0700
+Subject: [PATCH] Add an API to remove hitboxes for armor stands
+
+
+diff --git a/src/main/java/org/bukkit/entity/ArmorStand.java b/src/main/java/org/bukkit/entity/ArmorStand.java
+index b323e73..db1c88a 100644
+--- a/src/main/java/org/bukkit/entity/ArmorStand.java
++++ b/src/main/java/org/bukkit/entity/ArmorStand.java
+@@ -258,4 +258,20 @@ public interface ArmorStand extends LivingEntity {
+      * @param small whether this is scaled down
+      */
+     void setSmall(boolean small);
++
++    /**
++     * Returns whether this armor stand has a
++     * negligible hitbox
++     *
++     * @return whether this has a negligible hitbox
++     */
++    boolean isMarker();
++
++    /**
++     * Sets whether this armor stand has a
++     * negligible hitbox
++     *
++     * @param marker whether this has a negligible hitbox
++     */
++    void setMarker(boolean marker);
+ }
+-- 
+1.9.3 (Apple Git-50)
+
