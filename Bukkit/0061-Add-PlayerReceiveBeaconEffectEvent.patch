@@ -1,0 +1,79 @@
+From 79035b05beb6af1e963b3b3b8ff6544b1ad2af9f Mon Sep 17 00:00:00 2001
+From: Electroid <electroidfilms@gmail.com>
+Date: Tue, 28 Jul 2015 21:35:49 -0700
+Subject: [PATCH] Add PlayerReceiveBeaconEffectEvent
+
+
+diff --git a/src/main/java/org/bukkit/event/player/PlayerReceiveBeaconEffectEvent.java b/src/main/java/org/bukkit/event/player/PlayerReceiveBeaconEffectEvent.java
+new file mode 100644
+index 0000000..aabe274
+--- /dev/null
++++ b/src/main/java/org/bukkit/event/player/PlayerReceiveBeaconEffectEvent.java
+@@ -0,0 +1,64 @@
++package org.bukkit.event.player;
++
++import com.google.common.base.Preconditions;
++import org.bukkit.block.Beacon;
++import org.bukkit.entity.Player;
++import org.bukkit.event.Cancellable;
++import org.bukkit.event.HandlerList;
++import org.bukkit.potion.PotionEffect;
++
++/**
++ * Called when a player receives a potion effect from a beacon.
++ */
++public class PlayerReceiveBeaconEffectEvent extends PlayerEvent implements Cancellable {
++
++    private static final HandlerList handlers = new HandlerList();
++    private final Beacon beacon;
++    private PotionEffect effect;
++    private boolean cancelled;
++
++    public PlayerReceiveBeaconEffectEvent(Player player, Beacon beacon, PotionEffect effect) {
++        super(player);
++        this.beacon = beacon;
++        this.effect = effect;
++    }
++
++    /**
++     * Get the beacon that gave the potion effect to the player.
++     */
++    public Beacon getBeacon() {
++        return beacon;
++    }
++
++    /**
++     * Get the potion effect that the player received from the beacon.
++     */
++    public PotionEffect getEffect() {
++        return effect;
++    }
++
++    /**
++     * Sets the new potion effect to be applied to the player.
++     */
++    public void setEffect(PotionEffect newEffect) {
++        effect = Preconditions.checkNotNull(newEffect, "new effect cannot be null");
++    }
++
++    public boolean isCancelled() {
++        return cancelled;
++    }
++
++    public void setCancelled(boolean cancel) {
++        this.cancelled = cancel;
++    }
++
++    @Override
++    public HandlerList getHandlers() {
++        return handlers;
++    }
++
++    public static HandlerList getHandlerList() {
++        return handlers;
++    }
++
++}
+-- 
+1.9.3 (Apple Git-50)
+
