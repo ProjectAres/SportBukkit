@@ -1,0 +1,12 @@
+language: java
+dist: trusty #Older versions don't provide openjdk8
+git:
+    submodules: false #Rakefile already handles downloading submodules
+jdk:
+    - openjdk8
+    - oraclejdk8
+env:
+    - _JAVA_OPTIONS='-Xmx2048M' #Prevent fernflower from getting killed because it allocates to much memory
+script:
+    - rake apply
+    - rake compile
