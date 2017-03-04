@@ -1,9 +1,30 @@
 # Mac OSX generated files
 .DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Other OSX Files
+.Spotlight-V100
+.Trashes
+._*
+
+# Sublime Text
+*.sublime-workspace
 
 # Vim generated files
 *~
 *.swp
+*.un~
+Session.vim
+.netrwhist
+*~
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
 # IntelliJ IDEA
 .idea
