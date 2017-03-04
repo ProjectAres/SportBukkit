@@ -1,0 +1,48 @@
+From 100eb731e5b803c14349d0890e8f895452df31cb Mon Sep 17 00:00:00 2001
+From: bookofnathan <bookofnathan@gmail.com>
+Date: Mon, 6 Jan 2014 09:59:38 -0600
+Subject: [PATCH] Reset velocity on death
+
+---
+ src/main/java/net/minecraft/server/EntityPlayer.java | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
+index 04d709d..7e61df5 100644
+--- a/src/main/java/net/minecraft/server/EntityPlayer.java
++++ b/src/main/java/net/minecraft/server/EntityPlayer.java
+@@ -3,12 +3,8 @@ package net.minecraft.server;
+ import java.io.ByteArrayOutputStream;
+ import java.io.DataOutputStream;
+ import java.io.IOException;
+-import java.util.ArrayList;
+-import java.util.Arrays;
+-import java.util.Collection;
+-import java.util.Iterator;
+-import java.util.LinkedList;
+-import java.util.List;
++import java.util.*;
++import java.util.Vector;
+ 
+ // CraftBukkit start
+ import org.bukkit.Bukkit;
+@@ -19,6 +15,7 @@ import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack;
+ import org.bukkit.event.inventory.InventoryType;
+ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
++import org.bukkit.util.*;
+ // CraftBukkit end
+ 
+ public class EntityPlayer extends EntityHuman implements ICrafting {
+@@ -981,6 +978,8 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+             this.giveExp(this.newExp);
+         }
+         this.keepLevel = false;
++        org.bukkit.util.Vector vel = new org.bukkit.util.Vector(0, 0, 0);
++        this.getBukkitEntity().setVelocity(vel);
+     }
+ 
+     @Override
+-- 
+1.8.3.4 (Apple Git-47)
+
