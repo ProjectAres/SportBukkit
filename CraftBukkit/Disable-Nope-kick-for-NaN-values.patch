@@ -1,0 +1,28 @@
+From f74c11fe97f318f7986588c140d24fec13f84cfc Mon Sep 17 00:00:00 2001
+From: YukonAppleGeek <yukonvinecki@gmail.com>
+Date: Fri, 31 May 2013 18:49:38 -0700
+Subject: [PATCH] Disable "Nope!" kick for NaN values
+
+---
+ src/main/java/net/minecraft/server/PlayerConnection.java |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 5d10382..45b1fe0 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -239,9 +239,9 @@ public class PlayerConnection extends Connection {
+             }
+ 
+             if (Double.isNaN(packet10flying.x) || Double.isNaN(packet10flying.y) || Double.isNaN(packet10flying.z) || Double.isNaN(packet10flying.stance)) {
+                 player.teleport(player.getWorld().getSpawnLocation(), PlayerTeleportEvent.TeleportCause.UNKNOWN);
+-                System.err.println(player.getName() + " was caught trying to crash the server with an invalid position.");
+-                player.kickPlayer("Nope!");
++                // System.err.println(player.getName() + " was caught trying to crash the server with an invalid position.");
++                // player.kickPlayer("Nope!");
+                 return;
+             }
+ 
+-- 
+1.7.10.2 (Apple Git-33)
+
