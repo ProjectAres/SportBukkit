@@ -1,0 +1,287 @@
+From 7c0aa97c6af5f38879e02615b01ff4a1613cac87 Mon Sep 17 00:00:00 2001
+From: Jedediah Smith <jedediah@silencegreys.com>
+Date: Sun, 20 Apr 2014 19:20:33 -0400
+Subject: [PATCH] Skin API
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityTrackerEntry.java b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+index 7515540..bf61332 100644
+--- a/src/main/java/net/minecraft/server/EntityTrackerEntry.java
++++ b/src/main/java/net/minecraft/server/EntityTrackerEntry.java
+@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+ // CraftBukkit start
++import org.bukkit.craftbukkit.CraftSkin;
+ import org.bukkit.entity.Player;
+ import org.bukkit.event.player.PlayerVelocityEvent;
+ import net.minecraft.util.com.mojang.authlib.GameProfile;
+@@ -374,6 +375,11 @@ public class EntityTrackerEntry {
+                         GameProfile newProfile = new GameProfile(tracked.getProfile().getId(), tracked.getBukkitEntity().getName(entityplayer.getBukkitEntity()));
+                         newProfile.getProperties().putAll(tracked.getProfile().getProperties());
+                         ((PacketPlayOutNamedEntitySpawn) packet).b = newProfile;
++
++                        CraftSkin fakeSkin = tracked.getBukkitEntity().getFakeSkin(entityplayer.getBukkitEntity());
++                        if(fakeSkin != null) {
++                            newProfile.getProperties().put("textures", fakeSkin.getNmsProperty());
++                        }
+                     }
+ 
+                     // CraftBukkit end
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index a9b7944..63d2d95 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -110,6 +110,7 @@ import org.bukkit.ChatColor;
+ import org.bukkit.GameMode;
+ import org.bukkit.OfflinePlayer;
+ import org.bukkit.Server;
++import org.bukkit.Skin;
+ import org.bukkit.UnsafeValues;
+ import org.bukkit.Warning.WarningState;
+ import org.bukkit.World;
+@@ -1715,6 +1716,11 @@ public final class CraftServer implements Server {
+         return console.getIdleTimeout();
+     }
+ 
++    @Override
++    public Skin createSkin(String value, String signature) {
++        return CraftSkin.fromBase64Data(value, signature);
++    }
++
+     @Deprecated
+     @Override
+     public UnsafeValues getUnsafe() {
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftSkin.java b/src/main/java/org/bukkit/craftbukkit/CraftSkin.java
+new file mode 100644
+index 0000000..51a421f
+--- /dev/null
++++ b/src/main/java/org/bukkit/craftbukkit/CraftSkin.java
+@@ -0,0 +1,39 @@
++package org.bukkit.craftbukkit;
++
++import net.minecraft.util.com.mojang.authlib.GameProfile;
++import net.minecraft.util.com.mojang.authlib.properties.Property;
++import org.bukkit.Skin;
++
++public class CraftSkin implements Skin {
++    private final Property nmsProperty;
++
++    public CraftSkin(Property nmsProperty) {
++        this.nmsProperty = nmsProperty;
++    }
++
++    public Property getNmsProperty() {
++        return this.nmsProperty;
++    }
++
++    @Override
++    public boolean equals(Object o) {
++        return this == o || (o instanceof CraftSkin &&
++                             this.nmsProperty.getValue().equals(((CraftSkin) o).nmsProperty.getValue()));
++    }
++
++    @Override
++    public int hashCode() {
++        return this.nmsProperty.getValue().hashCode();
++    }
++
++    public static CraftSkin fromProfile(GameProfile profile) {
++        for(Property property : profile.getProperties().get("textures")) {
++            return new CraftSkin(property);
++        }
++        return null;
++    }
++
++    public static CraftSkin fromBase64Data(String value, String signature) {
++        return new CraftSkin(new Property("textures", value, signature));
++    }
++}
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+index 681c51e..e6891e6 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+@@ -2,7 +2,6 @@ package org.bukkit.craftbukkit.entity;
+ 
+ import com.google.common.base.Objects;
+ import com.google.common.collect.ImmutableSet;
+-import com.google.common.collect.MapMaker;
+ 
+ import java.io.ByteArrayOutputStream;
+ import java.io.IOException;
+@@ -38,6 +37,7 @@ import org.bukkit.configuration.serialization.DelegateDeserialization;
+ import org.bukkit.conversations.Conversation;
+ import org.bukkit.conversations.ConversationAbandonedEvent;
+ import org.bukkit.conversations.ManuallyAbandonedConversationCanceller;
++import org.bukkit.craftbukkit.CraftSkin;
+ import org.bukkit.craftbukkit.block.CraftSign;
+ import org.bukkit.craftbukkit.conversations.ConversationTracker;
+ import org.bukkit.craftbukkit.CraftEffect;
+@@ -84,6 +84,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+ 
+     private final Map<CommandSender, String> fakeNames = new WeakHashMap<CommandSender, String>();
+     private final Map<CommandSender, String> fakeDisplayNames = new WeakHashMap<CommandSender, String>();
++    private final Map<CommandSender, CraftSkin> fakeSkins = new WeakHashMap<CommandSender, CraftSkin>();
+ 
+     public CraftPlayer(CraftServer server, EntityPlayer entity) {
+         super(server, entity);
+@@ -202,42 +203,133 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+     }
+ 
+     @Override
+-    public void setFakeName(CommandSender viewer, String newName) {
+-        String oldName = this.fakeNames.get(viewer);
+-        if(Objects.equal(oldName, newName)) {
++    public void setFakeName(CommandSender viewer, String name) {
++        this.setFakeNameAndSkin(viewer, name, null, true, false);
++    }
++
++    @Override
++    public boolean hasFakeSkin(CommandSender viewer) {
++        return viewer != null && this.fakeSkins.containsKey(viewer);
++    }
++
++    @Override
++    public CraftSkin getFakeSkin(CommandSender viewer) {
++        return viewer == null ? null : this.fakeSkins.get(viewer);
++    }
++
++    @Override
++    public CraftSkin getSkin() {
++        return CraftSkin.fromProfile(this.getProfile());
++    }
++
++    @Override
++    public CraftSkin getSkin(CommandSender viewer) {
++        CraftSkin skin = this.getFakeSkin(viewer);
++        if(skin != null) {
++            return skin;
++        } else {
++            return this.getSkin();
++        }
++    }
++
++    @Override
++    public void setFakeSkin(CommandSender viewer, Skin newSkin) {
++        this.setFakeNameAndSkin(viewer, null, (CraftSkin) newSkin, false, true);
++    }
++
++    @Override
++    public void clearFakeSkins() {
++        for(CommandSender viewer : this.fakeSkins.keySet()) {
++            this.setFakeSkin(viewer, null);
++        }
++    }
++
++    @Override
++    public void setSkin(Skin newSkin) {
++        CraftSkin oldSkin = this.getSkin();
++        if(Objects.equal(oldSkin, newSkin)) {
+             return;
+         }
+ 
+-        String realName = this.getName();
++        this.getProfile().getProperties().put("textures", ((CraftSkin)newSkin).getNmsProperty());
+ 
+-        if(newName != null) {
+-            if(!realName.equals(this.getPlayerListName())) {
+-                throw new IllegalArgumentException("Cannot set a fake name if player list name has been changed");
+-            }
++        Set<Player> viewers = new HashSet<Player>(Arrays.asList(this.getServer().getOnlinePlayers()));
++        viewers.removeAll(this.fakeSkins.keySet());
++        for(Player viewer : viewers) {
++            this.refreshEntityOnClient(viewer);
++        }
++    }
+ 
+-            if (newName.length() > 16) {
+-                throw new IllegalArgumentException("Fake player names are limited to 16 characters in length");
++    @Override
++    public void clearFakeNamesAndSkins() {
++        Set<CommandSender> nameViewers = new HashSet<CommandSender>(this.fakeNames.keySet());
++        Set<CommandSender> allViewers = new HashSet<CommandSender>(this.fakeSkins.keySet());
++        allViewers.addAll(nameViewers);
++
++        for(CommandSender viewer : nameViewers) {
++            this.removeNameOnClient(viewer);
++        }
++
++        this.fakeNames.clear();
++        this.fakeSkins.clear();
++
++        for(CommandSender viewer : allViewers) {
++            if(nameViewers.contains(viewer)) {
++                this.addNameOnClient(viewer);
+             }
++            this.refreshEntityOnClient(viewer);
++        }
++    }
++
++    @Override
++    public void setFakeNameAndSkin(CommandSender viewer, String name, Skin skin) {
++        this.setFakeNameAndSkin(viewer, name, (CraftSkin) skin, true, true);
++    }
+ 
+-            // Do not let the fake name collide with any other player's real name,
+-            // or any other fake name set for the same viewer.
+-            for(Player other : this.getServer().getOnlinePlayers()) {
+-                if(!other.equals(this) && (newName.equals(other.getName()) || newName.equals(other.getName(viewer)))) {
+-                    throw new IllegalArgumentException(newName + " is already in use by another player");
++    private void setFakeNameAndSkin(CommandSender viewer, String newName, CraftSkin newSkin, boolean nameChanged, boolean skinChanged) {
++        String oldName = this.fakeNames.get(viewer);
++        nameChanged = nameChanged && !Objects.equal(oldName, newName);
++        if(nameChanged) {
++            String realName = this.getName();
++
++            if(newName != null) {
++                if(!realName.equals(this.getPlayerListName())) {
++                    throw new IllegalArgumentException("Cannot set a fake name if player list name has been changed");
++                }
++
++                if (newName.length() > 16) {
++                    throw new IllegalArgumentException("Fake player names are limited to 16 characters in length");
++                }
++
++                // Do not let the fake name collide with any other player's real name,
++                // or any other fake name set for the same viewer.
++                for(Player other : this.getServer().getOnlinePlayers()) {
++                    if(!other.equals(this) && (newName.equals(other.getName()) || newName.equals(other.getName(viewer)))) {
++                        throw new IllegalArgumentException(newName + " is already in use by another player");
++                    }
+                 }
+             }
+-        }
+ 
+-        this.removeNameOnClient(viewer);
++            this.removeNameOnClient(viewer);
+ 
+-        if(newName == null) {
+-            this.fakeNames.remove(viewer);
+-        } else {
+-            this.fakeNames.put(viewer, newName);
++            if(newName == null) {
++                this.fakeNames.remove(viewer);
++            } else {
++                this.fakeNames.put(viewer, newName);
++            }
++
++            this.addNameOnClient(viewer);
+         }
+ 
+-        this.refreshEntityOnClient(viewer);
+-        this.addNameOnClient(viewer);
++        CraftSkin oldSkin = this.fakeSkins.get(viewer);
++        skinChanged = skinChanged && !Objects.equal(oldSkin, newSkin);
++        if(skinChanged) {
++            this.fakeSkins.put(viewer, newSkin);
++        }
++
++        if(nameChanged || skinChanged) {
++            this.refreshEntityOnClient(viewer);
++        }
+     }
+ 
+     /**
+-- 
+1.8.5.2 (Apple Git-48)
+
