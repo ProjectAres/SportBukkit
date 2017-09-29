@@ -1,13 +1,15 @@
+From 4b73f1700afe3cd9446ce417d2fb68dec1c4a330 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Sat, 24 Dec 2016 19:58:54 -0500
 Subject: [PATCH] Chest lid API
 
 
 diff --git a/src/main/java/org/bukkit/block/Chest.java b/src/main/java/org/bukkit/block/Chest.java
+index 97dc7813..e68ab8ee 100644
 --- a/src/main/java/org/bukkit/block/Chest.java
 +++ b/src/main/java/org/bukkit/block/Chest.java
-@@ -16,4 +16,10 @@ public interface Chest extends BlockState, InventoryHolder, Lockable, Nameable {
-      * @return The inventory.
+@@ -23,4 +23,10 @@ public interface Chest extends Container, Nameable {
+      * @return the inventory
       */
      Inventory getBlockInventory();
 +

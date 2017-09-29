@@ -1,9 +1,11 @@
+From 3f2a1184fe543fb07144c5a34a0ffe85389394c1 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Tue, 26 May 2015 04:00:58 -0400
 Subject: [PATCH] Accurate block hit checking
 
 
 diff --git a/src/main/java/org/bukkit/World.java b/src/main/java/org/bukkit/World.java
+index 753703d3..8a46f37f 100644
 --- a/src/main/java/org/bukkit/World.java
 +++ b/src/main/java/org/bukkit/World.java
 @@ -17,6 +17,7 @@ import org.bukkit.material.MaterialData;
@@ -42,6 +44,7 @@ diff --git a/src/main/java/org/bukkit/World.java b/src/main/java/org/bukkit/Worl
       *
       * @param x X-coordinate of the chunk
 diff --git a/src/main/java/org/bukkit/block/Block.java b/src/main/java/org/bukkit/block/Block.java
+index 235c15bd..fe325374 100644
 --- a/src/main/java/org/bukkit/block/Block.java
 +++ b/src/main/java/org/bukkit/block/Block.java
 @@ -8,6 +8,8 @@ import org.bukkit.World;
@@ -74,9 +77,10 @@ diff --git a/src/main/java/org/bukkit/block/Block.java b/src/main/java/org/bukki
 +    RayBlockIntersection rayTrace(Location start, double distance);
  }
 diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
+index adbba6c6..3c2c2bab 100644
 --- a/src/main/java/org/bukkit/entity/Player.java
 +++ b/src/main/java/org/bukkit/entity/Player.java
-@@ -24,6 +24,7 @@ import org.bukkit.event.player.PlayerResourcePackStatusEvent;
+@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerResourcePackStatusEvent;
  import org.bukkit.map.MapView;
  import org.bukkit.plugin.messaging.PluginMessageRecipient;
  import org.bukkit.scoreboard.Scoreboard;
@@ -84,7 +88,7 @@ diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/buk
  
  /**
   * Represents a player, connected or not
-@@ -1619,4 +1620,29 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+@@ -1667,4 +1668,29 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
       * or null if they are not digging any block.
       */
      public org.bukkit.block.Block getDiggingBlock();
@@ -116,7 +120,7 @@ diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/buk
  }
 diff --git a/src/main/java/org/bukkit/util/RayBlockIntersection.java b/src/main/java/org/bukkit/util/RayBlockIntersection.java
 new file mode 100644
-index 0000000..b1ba1d8
+index 00000000..b1ba1d8d
 --- /dev/null
 +++ b/src/main/java/org/bukkit/util/RayBlockIntersection.java
 @@ -0,0 +1,40 @@

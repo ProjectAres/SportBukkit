@@ -1,9 +1,11 @@
+From 9888f38ed9f9440ba63b2e5ff7db38b0257dfed6 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Wed, 18 Feb 2015 05:18:37 -0500
 Subject: [PATCH] Cancel piston retraction without creating client ghost blocks
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockPiston.java b/src/main/java/net/minecraft/server/BlockPiston.java
+index 0f90172f..596d5f3f 100644
 --- a/src/main/java/net/minecraft/server/BlockPiston.java
 +++ b/src/main/java/net/minecraft/server/BlockPiston.java
 @@ -183,6 +183,11 @@ public class BlockPiston extends BlockDirectional {
@@ -31,7 +33,7 @@ diff --git a/src/main/java/net/minecraft/server/BlockPiston.java b/src/main/java
              if (this.sticky) {
                  BlockPosition blockposition1 = blockposition.a(enumdirection.getAdjacentX() * 2, enumdirection.getAdjacentY() * 2, enumdirection.getAdjacentZ() * 2);
                  IBlockData iblockdata1 = world.getType(blockposition1);
-@@ -298,6 +309,7 @@ public class BlockPiston extends BlockDirectional {
+@@ -301,6 +312,7 @@ public class BlockPiston extends BlockDirectional {
              int j = list.size() + list1.size();
              IBlockData[] aiblockdata = new IBlockData[j];
              EnumDirection enumdirection1 = flag ? enumdirection : enumdirection.opposite();
@@ -39,7 +41,7 @@ diff --git a/src/main/java/net/minecraft/server/BlockPiston.java b/src/main/java
              // CraftBukkit start
              final org.bukkit.block.Block bblock = world.getWorld().getBlockAt(blockposition.getX(), blockposition.getY(), blockposition.getZ());
  
-@@ -340,6 +352,7 @@ public class BlockPiston extends BlockDirectional {
+@@ -343,6 +355,7 @@ public class BlockPiston extends BlockDirectional {
                  return false;
              }
              // CraftBukkit end
@@ -48,6 +50,7 @@ diff --git a/src/main/java/net/minecraft/server/BlockPiston.java b/src/main/java
              int k;
              BlockPosition blockposition2;
 diff --git a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
+index 33803a53..51888e0b 100644
 --- a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 +++ b/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java
 @@ -1,6 +1,7 @@
@@ -58,7 +61,7 @@ diff --git a/src/main/java/org/bukkit/craftbukkit/event/CraftEventFactory.java b
  import java.util.ArrayList;
  import java.util.EnumMap;
  import java.util.List;
-@@ -1057,4 +1058,59 @@ public class CraftEventFactory {
+@@ -1071,4 +1072,59 @@ public class CraftEventFactory {
          Bukkit.getPluginManager().callEvent(event);
          return event;
      }

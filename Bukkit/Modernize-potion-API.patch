@@ -1,9 +1,11 @@
+From 7f41b18af8f8c41a0d7b129b93407ce6b3253777 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Thu, 10 Mar 2016 15:08:23 -0500
 Subject: [PATCH] Modernize potion API
 
 
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index 0b162c65..de1fe566 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
 @@ -37,6 +37,8 @@ import org.bukkit.permissions.Permissible;
@@ -15,7 +17,7 @@ diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Buk
  import org.bukkit.registry.Key;
  import org.bukkit.scheduler.BukkitScheduler;
  import org.bukkit.scoreboard.ScoreboardManager;
-@@ -1253,4 +1255,12 @@ public final class Bukkit {
+@@ -1266,4 +1268,12 @@ public final class Bukkit {
      public static Key key(String id) {
          return runtime().key(id);
      }
@@ -29,6 +31,7 @@ diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Buk
 +    }
  }
 diff --git a/src/main/java/org/bukkit/BukkitRuntime.java b/src/main/java/org/bukkit/BukkitRuntime.java
+index 1ed31cba..b452cd30 100644
 --- a/src/main/java/org/bukkit/BukkitRuntime.java
 +++ b/src/main/java/org/bukkit/BukkitRuntime.java
 @@ -2,6 +2,8 @@ package org.bukkit;
@@ -50,6 +53,7 @@ diff --git a/src/main/java/org/bukkit/BukkitRuntime.java b/src/main/java/org/buk
 +    PotionEffectRegistry potionEffectRegistry();
  }
 diff --git a/src/main/java/org/bukkit/inventory/meta/PotionMeta.java b/src/main/java/org/bukkit/inventory/meta/PotionMeta.java
+index d9151259..2160d643 100644
 --- a/src/main/java/org/bukkit/inventory/meta/PotionMeta.java
 +++ b/src/main/java/org/bukkit/inventory/meta/PotionMeta.java
 @@ -1,6 +1,7 @@
@@ -73,7 +77,7 @@ diff --git a/src/main/java/org/bukkit/inventory/meta/PotionMeta.java b/src/main/
       *
 diff --git a/src/main/java/org/bukkit/potion/PotionBrew.java b/src/main/java/org/bukkit/potion/PotionBrew.java
 new file mode 100644
-index 0000000..f5fcc3a
+index 00000000..f5fcc3a9
 --- /dev/null
 +++ b/src/main/java/org/bukkit/potion/PotionBrew.java
 @@ -0,0 +1,9 @@
@@ -88,7 +92,7 @@ index 0000000..f5fcc3a
 +}
 diff --git a/src/main/java/org/bukkit/potion/PotionBrewRegistry.java b/src/main/java/org/bukkit/potion/PotionBrewRegistry.java
 new file mode 100644
-index 0000000..11ae697
+index 00000000..11ae697b
 --- /dev/null
 +++ b/src/main/java/org/bukkit/potion/PotionBrewRegistry.java
 @@ -0,0 +1,5 @@
@@ -99,7 +103,7 @@ index 0000000..11ae697
 +public interface PotionBrewRegistry extends Registry<PotionBrew> {}
 diff --git a/src/main/java/org/bukkit/potion/PotionEffectRegistry.java b/src/main/java/org/bukkit/potion/PotionEffectRegistry.java
 new file mode 100644
-index 0000000..724b62f
+index 00000000..724b62f7
 --- /dev/null
 +++ b/src/main/java/org/bukkit/potion/PotionEffectRegistry.java
 @@ -0,0 +1,11 @@
@@ -115,6 +119,7 @@ index 0000000..724b62f
 +    PotionEffectType forLegacyName(String legacyName);
 +}
 diff --git a/src/main/java/org/bukkit/potion/PotionEffectType.java b/src/main/java/org/bukkit/potion/PotionEffectType.java
+index b7c068b5..416faee5 100644
 --- a/src/main/java/org/bukkit/potion/PotionEffectType.java
 +++ b/src/main/java/org/bukkit/potion/PotionEffectType.java
 @@ -1,163 +1,158 @@
@@ -448,6 +453,7 @@ diff --git a/src/main/java/org/bukkit/potion/PotionEffectType.java b/src/main/ja
      }
  }
 diff --git a/src/main/java/org/bukkit/potion/PotionEffectTypeWrapper.java b/src/main/java/org/bukkit/potion/PotionEffectTypeWrapper.java
+index 356a866f..02ea7a18 100644
 --- a/src/main/java/org/bukkit/potion/PotionEffectTypeWrapper.java
 +++ b/src/main/java/org/bukkit/potion/PotionEffectTypeWrapper.java
 @@ -1,10 +1,15 @@
@@ -495,6 +501,7 @@ diff --git a/src/main/java/org/bukkit/potion/PotionEffectTypeWrapper.java b/src/
  
      @Override
 diff --git a/src/main/java/org/bukkit/potion/PotionType.java b/src/main/java/org/bukkit/potion/PotionType.java
+index 60470b88..f68c1274 100644
 --- a/src/main/java/org/bukkit/potion/PotionType.java
 +++ b/src/main/java/org/bukkit/potion/PotionType.java
 @@ -1,41 +1,60 @@

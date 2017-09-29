@@ -1,15 +1,17 @@
+From 9cc8e80d40bad5ff57e9bbd79eb0c041dadc7f56 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Fri, 23 Dec 2016 13:36:50 -0500
 Subject: [PATCH] Fix NPE riding non-vehicle entity
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index d5bda027..7cc7bd8f 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
-@@ -2698,7 +2698,10 @@ public abstract class Entity implements ICommandListener {
+@@ -2766,7 +2766,10 @@ public abstract class Entity implements ICommandListener {
  
      @Nullable
-     public Entity bw() {
+     public Entity bE() {
 -        return null;
 +        // SportBukkit start
 +        final List<Entity> passengers = getPassengers();
@@ -17,4 +19,4 @@ diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/
 +        // SportBukkit end
      }
  
-     public List<Entity> getPassengers() { return bx(); } // SportBukkit - alias
+     public List<Entity> getPassengers() { return bF(); } // SportBukkit - alias

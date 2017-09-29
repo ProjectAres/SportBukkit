@@ -1,9 +1,11 @@
+From 7027f723739917a088d1c2bddd588e3dc82838b2 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Wed, 3 Jun 2015 19:09:27 -0400
 Subject: [PATCH] Mutable ChunkSnapshots
 
 
 diff --git a/src/main/java/org/bukkit/ChunkSnapshot.java b/src/main/java/org/bukkit/ChunkSnapshot.java
+index 6b0f14bf..38a0a54f 100644
 --- a/src/main/java/org/bukkit/ChunkSnapshot.java
 +++ b/src/main/java/org/bukkit/ChunkSnapshot.java
 @@ -1,6 +1,9 @@
@@ -33,7 +35,7 @@ diff --git a/src/main/java/org/bukkit/ChunkSnapshot.java b/src/main/java/org/buk
       * Get sky light level for block at corresponding coordinate in the chunk
       *
       * @param x 0-15
-@@ -126,4 +139,38 @@ public interface ChunkSnapshot {
+@@ -128,4 +141,38 @@ public interface ChunkSnapshot {
       * @return true if empty, false if not
       */
      boolean isSectionEmpty(int sy);

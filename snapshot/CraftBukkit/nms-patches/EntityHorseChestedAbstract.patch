@@ -1,22 +1,19 @@
 --- a/net/minecraft/server/EntityHorseChestedAbstract.java
 +++ b/net/minecraft/server/EntityHorseChestedAbstract.java
-@@ -1,8 +1,18 @@
- package net.minecraft.server;
+@@ -43,7 +43,7 @@
+     }
  
-+// SportBukkit start
-+import com.google.common.collect.Range;
-+import org.bukkit.craftbukkit.protocol.MetadataKey;
-+// SportBukkit end
-+
- public abstract class EntityHorseChestedAbstract extends EntityHorseAbstract {
+     public void die(DamageSource damagesource) {
+-        super.die(damagesource);
++        // super.die(damagesource); // CraftBukkit - moved down
+         if (this.isCarryingChest()) {
+             if (!this.world.isClientSide) {
+                 this.a(Item.getItemOf(Blocks.CHEST), 1);
+@@ -51,6 +51,7 @@
  
--    private static final DataWatcherObject<Boolean> bG = DataWatcher.a(EntityHorseChestedAbstract.class, DataWatcherRegistry.h);
-+    // SportBukkit start
-+    private static final DataWatcherObject<Boolean> bG = MetadataKey
-+        .builder(EntityHorseChestedAbstract.class, DataWatcherRegistry.h)
-+        .id(Range.atLeast(301), 15)
-+        .build();
-+    // SportBukkit end
+             this.setCarryingChest(false);
+         }
++        super.die(damagesource); // CraftBukkit
  
-     public EntityHorseChestedAbstract(World world) {
-         super(world);
+     }
+ 

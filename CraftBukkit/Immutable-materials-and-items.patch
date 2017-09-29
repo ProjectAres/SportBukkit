@@ -1,9 +1,11 @@
+From b61e8e088e80952d703cd6b14360633f0089283f Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Wed, 4 Jan 2017 13:57:10 -0500
 Subject: [PATCH] Immutable materials and items
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
+index f22d51e1..bca6dfe5 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java
 @@ -21,6 +21,7 @@ import org.bukkit.inventory.meta.ItemMeta;
@@ -14,7 +16,7 @@ diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java 
  
  @DelegateDeserialization(ItemStack.class)
  public final class CraftItemStack extends ItemStack {
-@@ -171,6 +172,20 @@ public final class CraftItemStack extends ItemStack {
+@@ -175,6 +176,20 @@ public final class CraftItemStack extends ItemStack {
      }
  
      @Override
@@ -36,9 +38,10 @@ diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftItemStack.java 
          return (handle == null) ? Material.AIR.getMaxStackSize() : handle.getItem().getMaxStackSize();
      }
 diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaItem.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaItem.java
+index af9ab5c4..b1e327bc 100644
 --- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaItem.java
 +++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaItem.java
-@@ -79,7 +79,7 @@ import org.apache.commons.codec.binary.Base64;
+@@ -61,7 +61,7 @@ import org.bukkit.util.ImmutableMaterialSet;
   * <li> SerializableMeta.Deserializers deserializer()
   */
  @DelegateDeserialization(CraftMetaItem.SerializableMeta.class)
@@ -47,7 +50,7 @@ diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaItem.java b
  
      static class ItemMetaKey {
  
-@@ -807,6 +807,20 @@ class CraftMetaItem implements ItemMeta, Repairable {
+@@ -832,6 +832,20 @@ class CraftMetaItem implements ItemMeta, Repairable {
          canPlaceOn = ImmutableMaterialSet.of(materials);
      }
  
@@ -70,7 +73,7 @@ diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaItem.java b
          if (object == null) {
 diff --git a/src/test/java/org/bukkit/craftbukkit/inventory/ImItemStackTest.java b/src/test/java/org/bukkit/craftbukkit/inventory/ImItemStackTest.java
 new file mode 100644
-index 0000000..0dd64b3
+index 00000000..0dd64b3a
 --- /dev/null
 +++ b/src/test/java/org/bukkit/craftbukkit/inventory/ImItemStackTest.java
 @@ -0,0 +1,98 @@
@@ -173,6 +176,7 @@ index 0000000..0dd64b3
 +    }
 +}
 diff --git a/src/test/java/org/bukkit/craftbukkit/inventory/ItemStackTest.java b/src/test/java/org/bukkit/craftbukkit/inventory/ItemStackTest.java
+index 6140edee..8935fccf 100644
 --- a/src/test/java/org/bukkit/craftbukkit/inventory/ItemStackTest.java
 +++ b/src/test/java/org/bukkit/craftbukkit/inventory/ItemStackTest.java
 @@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.inventory;
@@ -249,6 +253,7 @@ diff --git a/src/test/java/org/bukkit/craftbukkit/inventory/ItemStackTest.java b
 +    }
  }
 diff --git a/src/test/java/org/bukkit/craftbukkit/inventory/NMSCraftItemStackTest.java b/src/test/java/org/bukkit/craftbukkit/inventory/NMSCraftItemStackTest.java
+index 1f5a6a32..44ac9db3 100644
 --- a/src/test/java/org/bukkit/craftbukkit/inventory/NMSCraftItemStackTest.java
 +++ b/src/test/java/org/bukkit/craftbukkit/inventory/NMSCraftItemStackTest.java
 @@ -1,14 +1,20 @@

@@ -13,14 +13,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.ProxiedCommandSender;
 import org.bukkit.command.RemoteConsoleCommandSender;
-import org.bukkit.command.defaults.*;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftMinecartCommand;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.minecart.CommandMinecart;
 
-public final class VanillaCommandWrapper extends VanillaCommand {
+public final class VanillaCommandWrapper extends BukkitCommand {
     protected final CommandAbstract vanillaCommand;
 
     public VanillaCommandWrapper(CommandAbstract vanillaCommand, String usage) {
@@ -114,6 +114,7 @@ public final class VanillaCommandWrapper extends VanillaCommand {
                 chatmessage.getChatModifier().setColor(EnumChatFormat.RED);
                 icommandlistener.sendMessage(chatmessage);
             }
+            icommandlistener.a(CommandObjectiveExecutor.EnumCommandResult.SUCCESS_COUNT, j);
         } catch (ExceptionUsage exceptionusage) {
             ChatMessage chatmessage1 = new ChatMessage("commands.generic.usage", new Object[] { new ChatMessage(exceptionusage.getMessage(), exceptionusage.getArgs()) });
             chatmessage1.getChatModifier().setColor(EnumChatFormat.RED);
@@ -135,7 +136,6 @@ public final class VanillaCommandWrapper extends VanillaCommand {
         } finally {
             MinecraftServer.getServer().worldServer = prev;
         }
-        icommandlistener.a(CommandObjectiveExecutor.EnumCommandResult.SUCCESS_COUNT, j);
         return j;
     }
 
@@ -157,6 +157,9 @@ public final class VanillaCommandWrapper extends VanillaCommand {
         }
         if (sender instanceof ProxiedCommandSender) {
             return ((ProxiedNativeCommandSender) sender).getHandle();
+        }
+        if (sender instanceof CraftFunctionCommandSender) {
+            return ((CraftFunctionCommandSender) sender).getHandle();
         }
         throw new IllegalArgumentException("Cannot make " + sender + " a vanilla command listener");
     }

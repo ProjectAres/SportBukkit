@@ -1,12 +1,14 @@
+From 744a89717c77f659a19b8dbe1c6c4f34b8c46325 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Wed, 16 Mar 2016 21:24:15 -0400
 Subject: [PATCH] Velocity API
 
 
 diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index b4aca63a..47a5ea72 100644
 --- a/src/main/java/org/bukkit/Bukkit.java
 +++ b/src/main/java/org/bukkit/Bukkit.java
-@@ -366,6 +366,13 @@ public final class Bukkit {
+@@ -351,6 +351,13 @@ public final class Bukkit {
      }
  
      /**
@@ -21,9 +23,10 @@ diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Buk
       * <p>
       * <b>Example Usage:</b>
 diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index e443dddb..ffc84c54 100644
 --- a/src/main/java/org/bukkit/Server.java
 +++ b/src/main/java/org/bukkit/Server.java
-@@ -279,6 +279,11 @@ public interface Server extends PluginMessageRecipient, BukkitRuntime, tc.oc.min
+@@ -266,6 +266,11 @@ public interface Server extends PluginMessageRecipient, BukkitRuntime, tc.oc.min
      public boolean getWaterPushesTNT();
  
      /**
@@ -36,9 +39,10 @@ diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Ser
       * <p>
       * <b>Example Usage:</b>
 diff --git a/src/main/java/org/bukkit/entity/Entity.java b/src/main/java/org/bukkit/entity/Entity.java
+index 9b7b828a..cdd832c7 100644
 --- a/src/main/java/org/bukkit/entity/Entity.java
 +++ b/src/main/java/org/bukkit/entity/Entity.java
-@@ -54,6 +54,48 @@ public interface Entity extends Metadatable, CommandSender, Nameable, Locatable
+@@ -55,6 +55,48 @@ public interface Entity extends Metadatable, CommandSender, Nameable, Locatable
      public Vector getVelocity();
  
      /**
@@ -84,13 +88,14 @@ diff --git a/src/main/java/org/bukkit/entity/Entity.java b/src/main/java/org/buk
 +    Vector getPredictedVelocity();
 +
 +    /**
-      * Returns true if the entity is supported by a block. This value is a
-      * state updated by the server and is not recalculated unless the entity
-      * moves.
+      * Gets the entity's height
+      *
+      * @return height of entity
 diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
+index 50c498b2..7fc6494f 100644
 --- a/src/main/java/org/bukkit/entity/Player.java
 +++ b/src/main/java/org/bukkit/entity/Player.java
-@@ -25,6 +25,7 @@ import org.bukkit.map.MapView;
+@@ -13,6 +13,7 @@ import org.bukkit.map.MapView;
  import org.bukkit.plugin.messaging.PluginMessageRecipient;
  import org.bukkit.scoreboard.Scoreboard;
  import org.bukkit.util.RayBlockIntersection;
@@ -98,7 +103,7 @@ diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/buk
  
  /**
   * Represents a player, connected or not
-@@ -1657,4 +1658,12 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+@@ -1705,4 +1706,10 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
       * @return Information about the targeted block, or null if no blocks were found
       */
      RayBlockIntersection getTargetedBlock(boolean nonSolids, boolean liquids);
@@ -108,12 +113,10 @@ diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/buk
 +    Vector getUnackedImpulse();
 +
 +    boolean hasUnackedVelocity();
-+
-+
  }
 diff --git a/src/main/java/org/bukkit/event/player/PlayerKnockbackEvent.java b/src/main/java/org/bukkit/event/player/PlayerKnockbackEvent.java
 new file mode 100644
-index 0000000..7411633
+index 00000000..74116330
 --- /dev/null
 +++ b/src/main/java/org/bukkit/event/player/PlayerKnockbackEvent.java
 @@ -0,0 +1,26 @@
@@ -144,15 +147,10 @@ index 0000000..7411633
 +    }
 +}
 diff --git a/src/main/java/org/bukkit/event/player/PlayerVelocityEvent.java b/src/main/java/org/bukkit/event/player/PlayerVelocityEvent.java
+index 69d2fce4..4afa8377 100644
 --- a/src/main/java/org/bukkit/event/player/PlayerVelocityEvent.java
 +++ b/src/main/java/org/bukkit/event/player/PlayerVelocityEvent.java
-@@ -6,16 +6,18 @@ import org.bukkit.event.HandlerList;
- import org.bukkit.util.Vector;
- 
- /**
-- * Called when the velocity of a player changes.
-+ * Called when an impulse is applied to a player.
-  */
+@@ -11,11 +11,13 @@ import org.bukkit.util.Vector;
  public class PlayerVelocityEvent extends PlayerEvent implements Cancellable {
      private static final HandlerList handlers = new HandlerList();
      private boolean cancel = false;
@@ -161,7 +159,7 @@ diff --git a/src/main/java/org/bukkit/event/player/PlayerVelocityEvent.java b/sr
 +    private final boolean impulse;
  
 -    public PlayerVelocityEvent(final Player player, final Vector velocity) {
-+    public PlayerVelocityEvent(final Player player, Vector velocity, boolean impulse) {
++    public PlayerVelocityEvent(final Player player, final Vector velocity, boolean impulse) {
          super(player);
          this.velocity = velocity;
 +        this.impulse = impulse;
