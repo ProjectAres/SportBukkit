@@ -1,0 +1,72 @@
+From 3b31036fabf80c63853398df44d2bff2b2d6bf72 Mon Sep 17 00:00:00 2001
+From: Electroid <electroidfilms@gmail.com>
+Date: Tue, 28 Jul 2015 21:31:58 -0700
+Subject: [PATCH] Add PlayerReceiveBeaconEffectEvent
+
+
+diff --git a/src/main/java/net/minecraft/server/TileEntityBeacon.java b/src/main/java/net/minecraft/server/TileEntityBeacon.java
+index 4f280dd..473692a 100644
+--- a/src/main/java/net/minecraft/server/TileEntityBeacon.java
++++ b/src/main/java/net/minecraft/server/TileEntityBeacon.java
+@@ -1,13 +1,20 @@
+ package net.minecraft.server;
+ 
+ import com.google.common.collect.Lists;
++
++import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.Iterator;
+ import java.util.List;
+ 
+ // CraftBukkit start
++import org.bukkit.Bukkit;
++import org.bukkit.block.Beacon;
+ import org.bukkit.craftbukkit.entity.CraftHumanEntity;
++import org.bukkit.craftbukkit.potion.CraftPotionUtils;
+ import org.bukkit.entity.HumanEntity;
++import org.bukkit.entity.Player;
++import org.bukkit.event.player.PlayerReceiveBeaconEffectEvent;
+ // CraftBukkit end
+ 
+ public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlayerListBox, IInventory {
+@@ -79,17 +86,28 @@ public class TileEntityBeacon extends TileEntityContainer implements IUpdatePlay
+ 
+             while (iterator.hasNext()) {
+                 entityhuman = (EntityHuman) iterator.next();
+-                entityhuman.addEffect(new MobEffect(this.k, 180, b0, true, true));
+-            }
+-
+-            if (this.j >= 4 && this.k != this.l && this.l > 0) {
+-                iterator = list.iterator();
+-
+-                while (iterator.hasNext()) {
+-                    entityhuman = (EntityHuman) iterator.next();
+-                    entityhuman.addEffect(new MobEffect(this.l, 180, 0, true, true));
++                // SportBukkit start - fire PlayerReceiveBeaconEffectEvent
++                List<MobEffect> effects = new ArrayList<MobEffect>();
++                effects.add(new MobEffect(this.k, 180, b0, true, true));
++                // Add the secondary effect if it exists
++                if (this.j >= 4 && this.k != this.l && this.l > 0) {
++                    effects.add(new MobEffect(this.l, 180, 0, true, true));
+                 }
++                // Fire an event for each effect in the list
++                for (MobEffect effect : effects) {
++                    PlayerReceiveBeaconEffectEvent event = new PlayerReceiveBeaconEffectEvent(
++                            (Player) entityhuman.getBukkitEntity(),
++                            (Beacon) entityhuman.getBukkitEntity().getWorld().getBlockAt(getPosition().getX(), getPosition().getY(), getPosition().getZ()).getState(),
++                            CraftPotionUtils.toBukkit(effect));
++                    Bukkit.getPluginManager().callEvent(event);
++                    if (!event.isCancelled()) {
++                        // Finally apply the potion effect to the player
++                        entityhuman.addEffect(CraftPotionUtils.toNMS(event.getEffect()));
++                    }
++                }
++                // SportBukkit end
+             }
++
+         }
+ 
+     }
+-- 
+1.9.3 (Apple Git-50)
+
