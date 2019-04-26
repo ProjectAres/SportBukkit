@@ -1,0 +1,10 @@
+---
+# Create the Docker image for SportBukkit
+
+version: '2'
+
+services:
+  sportbukkit:
+    container_name: "sportbukkit"
+    build: .
+    image: ewized/sportbukkit
