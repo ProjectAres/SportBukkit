@@ -226,7 +226,7 @@ public class CraftInventory implements Inventory {
     }
 
     public int firstEmpty() {
-        return ListUtils.indexOf(storage(), Objects::isNull);
+        return ListUtils.indexOf(storage(), item -> item == null || Material.AIR.equals(item.getType()));
     }
 
     public int firstPartial(int materialId) {
