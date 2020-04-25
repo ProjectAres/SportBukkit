@@ -1,0 +1,43 @@
+From af2eddf6ef44cbce89014ecbe07387ed944c055c Mon Sep 17 00:00:00 2001
+From: ShinyDialga45 <shinydialga45@gmail.com>
+Date: Tue, 18 Aug 2015 09:40:44 -0500
+Subject: [PATCH] Allow custom underwater arrow distances
+
+
+diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index 37918e4..d0fae2c 100644
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -339,6 +339,13 @@ public final class Bukkit {
+     }
+ 
+     /**
++     * @see Server#getArrowWaterDistance()
++     */
++    public static float getArrowWaterDistance() {
++        return server.getArrowWaterDistance();
++    }
++
++    /**
+      * Gets default ticks per animal spawns value.
+      * <p>
+      * <b>Example Usage:</b>
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 4e64c28..d599d23 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -275,6 +275,11 @@ public interface Server extends PluginMessageRecipient {
+     public boolean getWaterPushesTNT();
+ 
+     /**
++     * How far should arrows go in water?
++     */
++    public float getArrowWaterDistance();
++
++    /**
+      * Gets default ticks per animal spawns value.
+      * <p>
+      * <b>Example Usage:</b>
+-- 
+1.9.4.msysgit.2
+
